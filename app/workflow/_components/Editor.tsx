@@ -13,6 +13,14 @@ import { defaultPolitenessConfig } from "@/types/politeness";
 interface Props {
   workflow: Workflow;
 }
+/**
+ * Renders the Editor component for workflow management.
+ *
+ * This function initializes the politeness configuration based on the provided workflow definition. It attempts to parse the workflow's settings and overrides the default configuration if specific settings are present. The component then renders a structured layout including a top bar and a flow editor, wrapped in necessary context providers for state management.
+ *
+ * @param Props - An object containing the workflow data.
+ * @returns A JSX element representing the workflow editor interface.
+ */
 export default function Editor({ workflow }: Props) {
   let initialCfg = defaultPolitenessConfig();
   try {

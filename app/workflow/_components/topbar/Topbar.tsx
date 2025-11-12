@@ -18,6 +18,21 @@ interface Props {
   hideButtons?: boolean;
   isPublished?: boolean;
 }
+/**
+ * Renders the Topbar component with navigation and action buttons.
+ *
+ * This component displays a header with a title, optional subtitle, and navigation buttons.
+ * It utilizes the `useRouter` hook for navigation and conditionally renders buttons based on
+ * the `hideButtons` and `isPublished` props. The `NavigationTabs` component is included to
+ * manage workflow navigation.
+ *
+ * @param {Object} props - The properties for the Topbar component.
+ * @param {string} props.title - The title to display in the Topbar.
+ * @param {string} [props.subtitle] - An optional subtitle to display below the title.
+ * @param {string} props.workflowId - The ID of the workflow for navigation and actions.
+ * @param {boolean} [props.hideButtons=false] - Flag to hide action buttons.
+ * @param {boolean} [props.isPublished=false] - Flag indicating if the workflow is published.
+ */
 function Topbar({
   title,
   subtitle,

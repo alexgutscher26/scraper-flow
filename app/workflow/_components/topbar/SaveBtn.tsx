@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { useContext } from "react";
 import { PolitenessSettingsContext } from "@/components/context/PolitenessSettingsContext";
 
+/**
+ * Renders a button to save a workflow with the given workflowId.
+ */
 function SaveBtn({ workflowId }: { workflowId: string }) {
   const { toObject } = useReactFlow();
   const settingsCtx = useContext(PolitenessSettingsContext);
