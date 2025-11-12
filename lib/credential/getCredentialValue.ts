@@ -6,7 +6,15 @@ import {
 import { CredentialAccessContext, logCredentialAccess } from "./audit";
 
 /**
- * Gets a credential by ID and returns the formatted value for use in executors
+ * Gets a credential by ID and returns the formatted value for use in executors.
+ *
+ * This function checks for the presence of credentialId and userId, retrieves the credential from the database, and logs the access attempt. If the credential is found, it decrypts the credential and formats it for executor use. If the credential is not found, it logs the failure and throws an error.
+ *
+ * @param credentialId - The ID of the credential to retrieve.
+ * @param userId - The ID of the user requesting the credential.
+ * @param context - Optional context for credential access, including requester information and method.
+ * @returns A promise that resolves to the formatted credential value.
+ * @throws Error If the credential ID or user ID is missing, or if the credential is not found.
  */
 export async function getCredentialValue(
   credentialId: string,
