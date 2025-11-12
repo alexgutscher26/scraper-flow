@@ -54,7 +54,7 @@ Data & Export
 Workflow Features
 
 - [ ] Templates for common scraping flows: list→detail, pagination, login + extract
-- [ ] Politeness features: robots.txt awareness, randomized delays, user-agent rotation
+- [x] Politeness features: robots.txt awareness, randomized delays, user-agent rotation
 - [ ] Form interaction executors: type, select, upload; captcha handling strategy
 - [ ] Dynamic page handling: infinite scroll, intercept network responses
 - [ ] AI-assisted selector generation and validation feedback loop

@@ -18,6 +18,8 @@ import { Edge } from "@xyflow/react";
 import { LogCollector } from "@/types/log";
 import { createLogCollector } from "../log";
 import { createLogger } from "@/lib/log";
+import { defaultPolitenessConfig, PolitenessConfig, PolitenessState } from "@/types/politeness";
+import { computeDelayMs, sleep } from "@/lib/politeness/delay";
 
 import { checkAndReserveWorkflowCredits } from "./creditCheck";
 import { getCredentialValue } from "../credential/getCredentialValue";
@@ -34,6 +36,8 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   const environment: Environment = {
     phases: {},
   };
+  environment.politenessConfig = resolvePolitenessConfig(execution.workflow.definition);
+  environment.politenessState = { robotsCache: new Map(), uaPerDomain: new Map() } as PolitenessState;
 
   await initializeWorkflowExecution(executionId, execution.workflowId, nextRun);
   await initializePhaseStatused(execution);
@@ -199,7 +203,8 @@ async function execitopnWorkflowPhase(
   let logCollector = createLogCollector();
   const startedAt = new Date();
   const node = JSON.parse(phase.node) as AppNode;
-  await setupEnvironmentForPhase(node, environment, edges, userId);
+  await setupEnvironmentForPhase(node, environment, edges, userId, logCollector);
+  await maybePoliteDelay(node.data.type, environment, logCollector);
   await prisma.executionPhase.update({
     where: { id: phase.id },
     data: {
@@ -210,7 +215,7 @@ async function execitopnWorkflowPhase(
   });
 
   const creditsRequired = TaskRegistry[node.data.type].credits;
-  logger.info(`Running task ${node.data.type} with ${creditsRequired} credits`);
+  logCollector.info(`Running task ${node.data.type} with ${creditsRequired} credits`);
   // TODO
   let success = await decrementCredits(userId, creditsRequired, logCollector);
   const creditsConsumed = success ? creditsRequired : 0;
@@ -318,7 +323,8 @@ async function setupEnvironmentForPhase(
   node: AppNode,
   environment: Environment,
   edges: Edge[],
-  userId: string
+  userId: string,
+  logCollector: LogCollector
 ) {
   environment.phases[node.id] = {
     inputs: {},
@@ -335,7 +341,7 @@ async function setupEnvironmentForPhase(
           const credentialValue = await getCredentialValue(inputVal, userId);
           environment.phases[node.id].inputs[input.name] = credentialValue;
         } catch (error) {
-          logger.error(
+          logCollector.error(
             `Failed to resolve credential ${inputVal}: ${error instanceof Error ? error.message : String(error)}`
           );
           // Continue execution but with undefined credential - executor will handle the error
@@ -351,7 +357,7 @@ async function setupEnvironmentForPhase(
       (edge) => edge.target === node.id && edge.targetHandle === input.name
     );
     if (!connectedEdge) {
-      logger.error(`Input not found for ${node.id} ${input.name}`);
+      logCollector.error(`Input not found for ${node.id} ${input.name}`);
       continue;
     }
     const outputValue =
@@ -378,6 +384,8 @@ function createExecutionEnvironment(
     getPage: () => environment.page,
     setPage: (page: Page | PageCore) => (environment.page = page),
     log: logCollector,
+    getPolitenessConfig: () => environment.politenessConfig,
+    getPolitenessState: () => environment.politenessState,
   };
 }
 
@@ -442,4 +450,53 @@ async function decrementCredits(
     );
     return false;
   }
+}
+
+function resolvePolitenessConfig(definitionJson: string): PolitenessConfig {
+  const base = defaultPolitenessConfig();
+  try {
+    const def = JSON.parse(definitionJson);
+    const override = def?.settings?.politeness;
+    if (override && typeof override === "object") {
+      return {
+        robots: {
+          enabled: override.robots?.enabled ?? base.robots.enabled,
+          enforcement: override.robots?.enforcement ?? base.robots.enforcement,
+          userAgentOverride: override.robots?.userAgentOverride ?? base.robots.userAgentOverride,
+        },
+        delays: {
+          enabled: override.delays?.enabled ?? base.delays.enabled,
+          minMs: override.delays?.minMs ?? base.delays.minMs,
+          maxMs: override.delays?.maxMs ?? base.delays.maxMs,
+          jitterPct: override.delays?.jitterPct ?? base.delays.jitterPct,
+          strategy: override.delays?.strategy ?? base.delays.strategy,
+        },
+        userAgent: {
+          enabled: override.userAgent?.enabled ?? base.userAgent.enabled,
+          rotateStrategy: override.userAgent?.rotateStrategy ?? base.userAgent.rotateStrategy,
+          pool: override.userAgent?.pool ?? base.userAgent.pool,
+          headers: override.userAgent?.headers ?? base.userAgent.headers,
+          acceptLanguageRandomization: override.userAgent?.acceptLanguageRandomization ?? base.userAgent.acceptLanguageRandomization,
+        },
+      } as PolitenessConfig;
+    }
+  } catch {}
+  return base;
+}
+
+function requiresNetwork(type: TaskType) {
+  return (
+    type === TaskType.LAUNCH_BROWSER ||
+    type === TaskType.NAVIGATE_URL ||
+    type === TaskType.CLICK_ELEMENT
+  );
+}
+
+async function maybePoliteDelay(type: TaskType, environment: Environment, collector: LogCollector) {
+  const cfg = environment.politenessConfig;
+  if (!cfg || !cfg.delays.enabled) return;
+  if (!requiresNetwork(type)) return;
+  const ms = computeDelayMs(cfg);
+  collector.info(`Politeness delay: ${ms}ms`);
+  await sleep(ms);
 }

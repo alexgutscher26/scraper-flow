@@ -6,6 +6,8 @@ import chromium from "@sparticuz/chromium-min";
 import { ExecutionEnvironment } from "@/types/executor";
 import { LaunchBrowserTask } from "../task/LaunchBrowser";
 import { createLogger } from "@/lib/log";
+import { applyHeaders } from "@/lib/politeness/userAgent";
+import { isAllowed } from "@/lib/politeness/robots";
 
 export async function LaunchBrowserExecutor(
   environment: ExecutionEnvironment<typeof LaunchBrowserTask>
@@ -59,6 +61,19 @@ export async function LaunchBrowserExecutor(
     environment.setBrowser(browser);
     const page = await browser.newPage();
     await page.setViewport({ width: 1080, height: 1024 });
+    const cfg = environment.getPolitenessConfig?.();
+    const st = environment.getPolitenessState?.();
+    if (cfg && st) {
+      const ua = await applyHeaders(page as any, cfg, st, websiteUrl);
+      const usedUA = ua || cfg.robots.userAgentOverride || "*";
+      const allowed = await isAllowed(websiteUrl, cfg, st, usedUA);
+      if (!allowed) {
+        environment.log.error(`Blocked by robots.txt: ${websiteUrl}`);
+        if (cfg.robots.enforcement === "strict") {
+          return false;
+        }
+      }
+    }
     await page.goto(websiteUrl, { waitUntil: "domcontentloaded" });
     environment.setPage(page);
     environment.log.info(`Opened the website successfully. URL:${websiteUrl}`);

@@ -9,6 +9,7 @@ import ExecuteBtn from "./ExecuteBtn";
 import NavigationTabs from "./NavigationTabs";
 import PublishBtn from "./PublishBtn";
 import UnpublishBtn from "./UnpublishBtn";
+import PolitenessSettingsDialog from "./PolitenessSettingsDialog";
 
 interface Props {
   title: string;
@@ -50,6 +51,7 @@ function Topbar({
             {isPublished && <UnpublishBtn workflowId={workflowId} />}
             {!isPublished && (
               <>
+                <PolitenessSettingsDialog />
                 <SaveBtn workflowId={workflowId} />
                 <PublishBtn workflowId={workflowId} />
               </>
