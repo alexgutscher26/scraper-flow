@@ -17,6 +17,7 @@ import { revalidatePath } from "next/cache";
 import { Edge } from "@xyflow/react";
 import { LogCollector } from "@/types/log";
 import { createLogCollector } from "../log";
+import { sanitizeObject } from "@/lib/logSecure/sanitizer";
 import { createLogger } from "@/lib/log";
 import { defaultPolitenessConfig, PolitenessConfig, PolitenessState } from "@/types/politeness";
 import { computeDelayMs, sleep } from "@/lib/politeness/delay";
@@ -257,7 +258,7 @@ async function finalizePhase(
     data: {
       status,
       completedAt: new Date(),
-      outputs: JSON.stringify(serializableOutputs),
+      outputs: JSON.stringify(sanitizeObject(serializableOutputs)),
       creditsConsumed,
       logs: {
         createMany: {
@@ -338,7 +339,11 @@ async function setupEnvironmentForPhase(
       // Handle credential inputs by resolving them to formatted values
       if (input.type === TaskParamType.CREDENTIAL) {
         try {
-          const credentialValue = await getCredentialValue(inputVal, userId);
+          const credentialValue = await getCredentialValue(inputVal, userId, {
+            requester: `workflow/${node.data.type}`,
+            method: "db",
+            correlationId: phase.id,
+          });
           environment.phases[node.id].inputs[input.name] = credentialValue;
         } catch (error) {
           logCollector.error(

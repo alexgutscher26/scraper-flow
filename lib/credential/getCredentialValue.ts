@@ -1,16 +1,17 @@
-import { symmetricDecrypt } from "@/lib/encryption";
 import prisma from "@/lib/prisma";
 import {
   formatCredentialForExecutor,
   decryptCredential,
 } from "./credentialHelper";
+import { CredentialAccessContext, logCredentialAccess } from "./audit";
 
 /**
  * Gets a credential by ID and returns the formatted value for use in executors
  */
 export async function getCredentialValue(
   credentialId: string,
-  userId: string
+  userId: string,
+  context?: CredentialAccessContext
 ): Promise<string> {
   if (!credentialId || !userId) {
     throw new Error("Credential ID and User ID are required");
@@ -23,6 +24,17 @@ export async function getCredentialValue(
   });
 
   if (!credential) {
+    await logCredentialAccess({
+      userId,
+      credentialId,
+      credentialName: "",
+      credentialType: "",
+      requester: context?.requester || "workflow/executor",
+      method: context?.method || "db",
+      outcome: "failure",
+      correlationId: context?.correlationId,
+      errorMessage: "Credential not found",
+    });
     throw new Error("Credential not found");
   }
 
@@ -30,7 +42,19 @@ export async function getCredentialValue(
     ...credential,
     description: credential.description ?? undefined,
   });
-  return formatCredentialForExecutor(decryptedCredential);
+  const formatted = formatCredentialForExecutor(decryptedCredential);
+  await logCredentialAccess({
+    userId,
+    credentialId,
+    credentialName: credential.name,
+    credentialType: credential.type,
+    requester: context?.requester || "workflow/executor",
+    method: context?.method || "db",
+    outcome: "success",
+    correlationId: context?.correlationId,
+    accessedValue: formatted,
+  });
+  return formatted;
 }
 
 /**
@@ -38,7 +62,8 @@ export async function getCredentialValue(
  */
 export async function getCredentialValueByName(
   credentialName: string,
-  userId: string
+  userId: string,
+  context?: CredentialAccessContext
 ): Promise<string> {
   if (!credentialName || !userId) {
     throw new Error("Credential name and User ID are required");
@@ -51,6 +76,17 @@ export async function getCredentialValueByName(
   });
 
   if (!credential) {
+    await logCredentialAccess({
+      userId,
+      credentialId: "",
+      credentialName: credentialName,
+      credentialType: "",
+      requester: context?.requester || "workflow/executor",
+      method: context?.method || "db",
+      outcome: "failure",
+      correlationId: context?.correlationId,
+      errorMessage: "Credential not found",
+    });
     throw new Error("Credential not found");
   }
 
@@ -58,6 +94,17 @@ export async function getCredentialValueByName(
     ...credential,
     description: credential.description ?? undefined,
   });
-  return formatCredentialForExecutor(decryptedCredential);
-  return formatCredentialForExecutor(decryptedCredential);
+  const formatted = formatCredentialForExecutor(decryptedCredential);
+  await logCredentialAccess({
+    userId,
+    credentialId: credential.id,
+    credentialName: credential.name,
+    credentialType: credential.type,
+    requester: context?.requester || "workflow/executor",
+    method: context?.method || "db",
+    outcome: "success",
+    correlationId: context?.correlationId,
+    accessedValue: formatted,
+  });
+  return formatted;
 }

@@ -1,10 +1,10 @@
-import {
-  Log,
-  LogCollector,
-  LogFunction,
-  LogLevel,
-  LogLevels,
-} from "@/types/log";
+import { Log, LogCollector, LogFunction, LogLevel, LogLevels } from "@/types/log";
+import { sanitizeString } from "./logSecure/sanitizer";
+import { initSecureConsole } from "./logSecure/console";
+
+try {
+  if (process.env.LOG_SECURE_ENABLED !== "false") initSecureConsole();
+} catch {}
 
 export function createLogCollector(): LogCollector {
   const logs: Log[] = [];
@@ -14,11 +14,8 @@ export function createLogCollector(): LogCollector {
   const logFunctions = {} as Record<LogLevel, LogFunction>;
   LogLevels.forEach((level) => {
     logFunctions[level] = (message: string) => {
-      logs.push({
-        message,
-        level,
-        timestamp: new Date(),
-      });
+      const sanitized = sanitizeString(message);
+      logs.push({ message: sanitized, level, timestamp: new Date() });
     };
   });
   return {
@@ -62,9 +59,10 @@ export function createLogger(scope?: string, collector?: LogCollector) {
   const log = (level: LogLevel, message: string) => {
     if (!shouldLog(level, currentLevel)) return;
     const fn = consoleMethod(level);
-    fn(format(level, message));
+    const sanitized = sanitizeString(message);
+    fn(format(level, sanitized));
     if (collector && typeof collector[level] === "function") {
-      collector[level](message);
+      collector[level](sanitized);
     }
   };
 

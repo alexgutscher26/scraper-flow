@@ -99,6 +99,25 @@ model Credential {
   @@unique([userId, name])
 }
 
+model CredentialAudit {
+  id               String   @id @default(cuid())
+  timestamp        DateTime @default(now())
+  userId           String
+  credentialId     String
+  credentialName   String
+  credentialType   String
+  requester        String
+  method           String
+  outcome          String
+  correlationId    String?
+  fingerprint      String
+  errorMessage     String?
+
+  @@index([userId, timestamp])
+  @@index([credentialId])
+  @@index([outcome])
+}
+
 model UserPurchase {
   id          String   @id @default(cuid())
   userId      String

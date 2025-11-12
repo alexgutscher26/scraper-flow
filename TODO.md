@@ -23,7 +23,7 @@ Security & Compliance
 - [ ] Verify Stripe API version is valid and pinned in client initialization
 - [ ] Narrow public route scope in `middleware.ts` and confirm required endpoints
 - [ ] Add request validation and input sanitization to API routes
-- [ ] Mask/redact sensitive data in logs; audit credential access
+- [x] Mask/redact sensitive data in logs; audit credential access
 - [ ] Add per-user and per-endpoint rate limiting; consider IP-based throttling
 - [ ] Secret management checklist for local and Vercel environments
 
