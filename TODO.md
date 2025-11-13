@@ -92,7 +92,7 @@ Security & Compliance
 
 Performance & DX
 
-- [ ] Audit client components for memoization and re-renders [P2]
+- [x] Audit client components for memoization and re-renders [P2]
   - Linked files: `components/Sidebar.tsx:1`, `components/ui/**`
 - [ ] Code-splitting for workflow editor modules and inspector panels [P2]
   - Linked files: `app/workflow/**`

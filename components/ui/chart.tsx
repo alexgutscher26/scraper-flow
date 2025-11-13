@@ -102,7 +102,7 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
-const ChartTooltipContent = React.forwardRef<
+const ChartTooltipContent = React.memo(React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
     React.ComponentProps<"div"> & {
@@ -253,12 +253,12 @@ const ChartTooltipContent = React.forwardRef<
       </div>
     )
   }
-)
+))
 ChartTooltipContent.displayName = "ChartTooltip"
 
 const ChartLegend = RechartsPrimitive.Legend
 
-const ChartLegendContent = React.forwardRef<
+const ChartLegendContent = React.memo(React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
     Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
@@ -313,7 +313,7 @@ const ChartLegendContent = React.forwardRef<
       </div>
     )
   }
-)
+))
 ChartLegendContent.displayName = "ChartLegend"
 
 // Helper to extract item config from a payload.

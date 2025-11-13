@@ -39,10 +39,13 @@ const routes = [
 
 function DesktopSidebar() {
   const pathname = usePathname();
-  const activeRoute =
-    routes.find(
-      (route) => route.href.length > 0 && pathname.includes(route.href)
-    ) || routes[0];
+  const activeRoute = React.useMemo(() => {
+    return (
+      routes.find(
+        (route) => route.href.length > 0 && pathname.includes(route.href)
+      ) || routes[0]
+    );
+  }, [pathname]);
   return (
     <div className="hidden relative md:block min-w-[280px] max-w-[280px] h-screen overflow-hidden w-full bg-primary/5 dark:bg-secondary/30 dark:text-foreground text-muted-foreground border-r-2 border-separate">
       <div className="flex items-center justify-center gap-2 border-b-[1px] border-separate p-4">
@@ -72,15 +75,21 @@ function DesktopSidebar() {
   );
 }
 
-export default DesktopSidebar;
+export default React.memo(DesktopSidebar);
 
-export function MobileSidebar() {
+export const MobileSidebar = React.memo(function MobileSidebar() {
   const [open, setOpen] = React.useState(false);
   const pathname = usePathname();
-  const activeRoute =
-    routes.find(
-      (route) => route.href.length > 0 && pathname.includes(route.href)
-    ) || routes[0];
+  const activeRoute = React.useMemo(() => {
+    return (
+      routes.find(
+        (route) => route.href.length > 0 && pathname.includes(route.href)
+      ) || routes[0]
+    );
+  }, [pathname]);
+  const handleRouteClick = React.useCallback(() => {
+    setOpen(false);
+  }, []);
   return (
     <div className="block border-separate bg-background md:hidden">
       <nav className="container flex items-center justify-between px-8">
@@ -107,7 +116,7 @@ export function MobileSidebar() {
                         ? "sidebarActiveItem"
                         : "sidebarIcon",
                   })}
-                  onClick={() => setOpen((prev) => !prev)}
+                  onClick={handleRouteClick}
                 >
                   <route.icon size={20} />
                   <span>{route.label}</span>
@@ -119,4 +128,4 @@ export function MobileSidebar() {
       </nav>
     </div>
   );
-}
+});
