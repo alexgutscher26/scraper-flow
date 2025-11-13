@@ -25,6 +25,7 @@ import {
   createCredentialSchemaType,
   CredentialType,
   CredentialTypeValue,
+  twoFactorMethod,
 } from "@/schema/credential";
 import {
   Select,
@@ -122,6 +123,15 @@ export default function CreateCredentialDialog(props: Props) {
           headers: {},
         });
         break;
+      case CredentialType.TWO_FACTOR:
+        form.setValue("credentialData.data", {
+          method: twoFactorMethod.TOTP,
+          secret: "",
+          period: 30,
+          digits: 6,
+          recoveryCodes: [],
+        });
+        break;
       case CredentialType.CUSTOM:
         form.setValue("credentialData.data", {
           value: "",
@@ -147,6 +157,12 @@ export default function CreateCredentialDialog(props: Props) {
       label: "Captcha Provider",
       description: "2Captcha, AntiCaptcha or similar service API key",
       icon: Key,
+    },
+    {
+      value: CredentialType.TWO_FACTOR,
+      label: "Two-Factor Authentication",
+      description: "TOTP (authenticator), SMS or Email",
+      icon: ShieldEllipsis,
     },
     {
       value: CredentialType.CUSTOM,
@@ -295,6 +311,142 @@ export default function CreateCredentialDialog(props: Props) {
                 </FormItem>
               )}
             />
+          </div>
+        );
+
+      case CredentialType.TWO_FACTOR:
+        return (
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
+              name="credentialData.data.method"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Method *</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(v) => field.onChange(v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={twoFactorMethod.TOTP}>Authenticator App (TOTP)</SelectItem>
+                      <SelectItem value={twoFactorMethod.SMS}>SMS</SelectItem>
+                      <SelectItem value={twoFactorMethod.EMAIL}>Email</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* TOTP fields */}
+            {form.watch("credentialData.data.method") === twoFactorMethod.TOTP && (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="credentialData.data.secret"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>TOTP Secret *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Base32 secret" {...field} />
+                      </FormControl>
+                      <FormDescription>Enter the Base32 TOTP secret from your authenticator</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="credentialData.data.period"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Period (sec)</FormLabel>
+                        <FormControl>
+                          <Input type="number" min={15} max={60} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="credentialData.data.digits"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Digits</FormLabel>
+                        <FormControl>
+                          <Input type="number" min={6} max={8} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+            {/* SMS fields */}
+            {form.watch("credentialData.data.method") === twoFactorMethod.SMS && (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="credentialData.data.phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+15551234567" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="credentialData.data.provider"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Provider</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Twilio or provider name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="credentialData.data.apiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>API Key</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Provider API key" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+            {/* Email fields */}
+            {form.watch("credentialData.data.method") === twoFactorMethod.EMAIL && (
+              <FormField
+                control={form.control}
+                name="credentialData.data.email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email *</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="user@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
         );
 

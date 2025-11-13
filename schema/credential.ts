@@ -5,6 +5,7 @@ export const CredentialType = {
   SMTP_EMAIL: "smtp_email",
   API_KEY: "api_key",
   CUSTOM: "custom",
+  TWO_FACTOR: "two_factor",
 } as const;
 
 export type CredentialTypeValue =
@@ -37,6 +38,38 @@ export const customCredentialSchema = z.object({
   value: z.string().max(2000, "Value is too long"),
 });
 
+// Two-Factor Authentication credential schema
+export const twoFactorMethod = {
+  TOTP: "totp",
+  SMS: "sms",
+  EMAIL: "email",
+} as const;
+
+export type TwoFactorMethodValue = (typeof twoFactorMethod)[keyof typeof twoFactorMethod];
+
+export const totpCredentialSchema = z.object({
+  method: z.literal(twoFactorMethod.TOTP),
+  secret: z.string().min(16, "TOTP secret is required"),
+  issuer: z.string().optional(),
+  period: z.number().int().min(15).max(60).default(30).optional(),
+  digits: z.number().int().min(6).max(8).default(6).optional(),
+  recoveryCodes: z.array(z.string()).min(5).optional(),
+});
+
+export const smsCredentialSchema = z.object({
+  method: z.literal(twoFactorMethod.SMS),
+  phoneNumber: z.string().min(8, "Phone number is required"),
+  provider: z.string().optional(),
+  apiKey: z.string().optional(),
+  recoveryCodes: z.array(z.string()).min(5).optional(),
+});
+
+export const email2faCredentialSchema = z.object({
+  method: z.literal(twoFactorMethod.EMAIL),
+  email: z.string().email("Valid email required"),
+  recoveryCodes: z.array(z.string()).min(5).optional(),
+});
+
 // Union schema for all credential types
 export const credentialValueSchema = z.discriminatedUnion("type", [
   z.object({
@@ -51,6 +84,10 @@ export const credentialValueSchema = z.discriminatedUnion("type", [
     type: z.literal(CredentialType.CUSTOM),
     data: customCredentialSchema,
   }),
+  z.object({
+    type: z.literal(CredentialType.TWO_FACTOR),
+    data: z.union([totpCredentialSchema, smsCredentialSchema, email2faCredentialSchema]),
+  }),
 ]);
 
 // Main credential creation schema
@@ -64,3 +101,6 @@ export type createCredentialSchemaType = z.infer<typeof createCredentialSchema>;
 export type SmtpEmailCredentialType = z.infer<typeof smtpEmailCredentialSchema>;
 export type ApiKeyCredentialType = z.infer<typeof apiKeyCredentialSchema>;
 export type CustomCredentialType = z.infer<typeof customCredentialSchema>;
+export type TotpCredentialType = z.infer<typeof totpCredentialSchema>;
+export type SmsCredentialType = z.infer<typeof smsCredentialSchema>;
+export type Email2faCredentialType = z.infer<typeof email2faCredentialSchema>;

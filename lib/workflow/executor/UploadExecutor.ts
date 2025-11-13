@@ -23,6 +23,7 @@ export async function UploadExecutor(
     const maxSizeMb = maxSizeMbRaw ? Number(maxSizeMbRaw) : undefined;
     const useDnD = Boolean(environment.getInput("UseDragAndDrop"));
     const dropTargetSelector = environment.getInput("DropTargetSelector") || selector;
+    const strictMode = Boolean(environment.getInput("StrictMode"));
     if (!selector) {
       environment.log.error("Input Selector is required");
       return false;
@@ -38,26 +39,53 @@ export async function UploadExecutor(
     }
     await page.waitForSelector(selector, { visible: true });
 
-    const accepted = [] as string[];
+    const accepted: string[] = [];
+    const errors: string[] = [];
+    const total = files.length;
     for (const f of files) {
       const p = path.resolve(f);
       if (!fs.existsSync(p)) {
-        environment.log.error(`File not found: ${p}`);
-        return false;
+        const msg = `File not found: ${p}`;
+        environment.log.error(msg);
+        errors.push(msg);
+        if (strictMode) {
+          environment.setOutput("ErrorMessage", errors.join("\n"));
+          environment.setOutput("UploadProgress", Math.floor((accepted.length / total) * 100));
+          environment.setOutput("Success", false);
+          return false;
+        }
+        continue;
       }
       const stat = fs.statSync(p);
       if (maxSizeMb && bytesToMb(stat.size) > maxSizeMb) {
-        environment.log.error(`File too large: ${p}`);
-        return false;
+        const msg = `File too large: ${p}`;
+        environment.log.error(msg);
+        errors.push(msg);
+        if (strictMode) {
+          environment.setOutput("ErrorMessage", errors.join("\n"));
+          environment.setOutput("UploadProgress", Math.floor((accepted.length / total) * 100));
+          environment.setOutput("Success", false);
+          return false;
+        }
+        continue;
       }
       if (acceptTypes) {
         const ok = new RegExp(String(acceptTypes)).test(p);
         if (!ok) {
-          environment.log.error(`File type not accepted: ${p}`);
-          return false;
+          const msg = `File type not accepted: ${p}`;
+          environment.log.error(msg);
+          errors.push(msg);
+          if (strictMode) {
+            environment.setOutput("ErrorMessage", errors.join("\n"));
+            environment.setOutput("UploadProgress", Math.floor((accepted.length / total) * 100));
+            environment.setOutput("Success", false);
+            return false;
+          }
+          continue;
         }
       }
       accepted.push(p);
+      environment.setOutput("UploadProgress", Math.floor((accepted.length / total) * 100));
     }
 
     if (useDnD) {
@@ -99,17 +127,26 @@ export async function UploadExecutor(
           await (handle as any).setInputFiles(accepted);
         }
       } catch (err2) {
-        environment.log.error(String((err2 as any)?.message || err2));
+        const msg = String((err2 as any)?.message || err2);
+        environment.log.error(msg);
+        errors.push(msg);
+        environment.setOutput("ErrorMessage", errors.join("\n"));
+        environment.setOutput("UploadProgress", Math.floor((accepted.length / total) * 100));
+        environment.setOutput("Success", false);
         return false;
       }
     }
 
     environment.setOutput("UploadedFiles", accepted.join(","));
+    environment.setOutput("UploadedCount", accepted.length);
     environment.setOutput("Web page", page);
+    environment.setOutput("ErrorMessage", errors.join("\n"));
+    environment.setOutput("UploadProgress", 100);
     environment.setOutput("Success", true);
     return true;
   } catch (e: any) {
     environment.log.error(e.message);
+    environment.setOutput("ErrorMessage", String(e?.message || e));
     environment.setOutput("Success", false);
     return false;
   }

@@ -1,5 +1,6 @@
 import { symmetricDecrypt } from "@/lib/encryption";
 import { CredentialType, CredentialTypeValue } from "@/schema/credential";
+import { generateTOTP } from "./totp";
 
 export interface DecryptedCredential {
   id: string;
@@ -86,6 +87,19 @@ export function formatCredentialForExecutor(
       // Return the raw value for custom credentials
       return credential.data.value;
 
+    case CredentialType.TWO_FACTOR:
+      // Provide method details; executors can generate codes for TOTP
+      if (credential.data.method === "totp") {
+        // Include a freshly generated code for convenience
+        const code = generateTOTP(credential.data.secret, {
+          period: credential.data.period || 30,
+          digits: credential.data.digits || 6,
+        });
+        return JSON.stringify({ method: "totp", code });
+      }
+      // SMS/EMAIL carry meta; generation/verification handled by executor or external service
+      return JSON.stringify({ method: credential.data.method });
+
     default:
       // Fallback for unknown types
       return JSON.stringify(credential.data);
@@ -116,6 +130,13 @@ export function getCredentialDisplayInfo(credential: DecryptedCredential) {
         icon: "Settings",
         subtitle: "Custom Format",
         fields: ["Custom Value"],
+      };
+
+    case CredentialType.TWO_FACTOR:
+      return {
+        icon: "Shield",
+        subtitle: `2FA (${credential.data.method.toUpperCase()})`,
+        fields: ["Method"],
       };
 
     default:

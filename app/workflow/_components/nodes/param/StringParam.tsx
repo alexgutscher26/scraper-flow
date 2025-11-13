@@ -12,6 +12,7 @@ function StringParam({
   disabled,
 }: ParamProps) {
   const [internalValue, setInternalValue] = useState(value);
+  const [error, setError] = useState<string | null>(null);
   const id = useId();
 
   useEffect(() => {
@@ -32,15 +33,31 @@ function StringParam({
       <Component
         id={id}
         disabled={disabled}
-        className="text-xs"
+        className={`text-xs ${error ? "border-red-400" : ""}`}
         value={internalValue}
         placeholder="Enter value here"
         onChange={(e: any) => setInternalValue(e.target.value)}
-        onBlur={(e: any) => updateNodeParamValue(e.target.value)}
+        onBlur={(e: any) => {
+          const v = e.target.value;
+          // Simple client-side validation for AcceptTypes regex
+          if (param.name === "AcceptTypes" && v) {
+            try {
+              // eslint-disable-next-line no-new
+              new RegExp(String(v));
+              setError(null);
+            } catch {
+              setError("Invalid regex pattern");
+            }
+          } else {
+            setError(null);
+          }
+          updateNodeParamValue(v);
+        }}
       />
       {param.helperText && (
         <p className="text-muted-foreground px-2">{param.helperText}</p>
       )}
+      {error && <p className="text-red-500 text-xs px-2">{error}</p>}
     </div>
   );
 }

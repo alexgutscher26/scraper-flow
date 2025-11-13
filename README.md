@@ -14,6 +14,7 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 - [Security & Credentials](#security--credentials)
 - [Analytics & Monitoring](#analytics--monitoring)
 - [Environment Variables](#environment-variables)
+- [Form Automation](#form-automation)
 - [Screenshots](#screenshots)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
@@ -492,3 +493,6 @@ npm run start          # Start production server
 **License**: MIT License  
 **Maintainer**: Harmik Lathiya
 **Support**: [Create an issue](https://github.com/Lathiya50/scrape-flow/issues)
+## Form Automation
+
+See docs/form-automation.md for file upload validation and progress, captcha provider verification, and 2FA credential support.

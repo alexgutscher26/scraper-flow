@@ -173,7 +173,7 @@ Workflow Features
 - [x] Advanced extraction: XPath/CSS, network intercept, GraphQL [P2]
   - Linked files: `lib/workflow/executor/**`
 
-- [ ] Form automation improvements: file upload, 2FA, captcha providers [P2]
+- [x] Form automation improvements: file upload, 2FA, captcha providers [P2]
   - Linked files: `lib/workflow/executor/**`, `actions/credentials/**`
 
 UI/UX Enhancements

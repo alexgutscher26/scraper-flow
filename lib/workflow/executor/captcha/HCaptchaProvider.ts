@@ -2,7 +2,7 @@ import { CaptchaProvider, CaptchaDetection, CaptchaSolution } from "./CaptchaStr
 
 export class HCaptchaProvider implements CaptchaProvider {
   detect(html: string): CaptchaDetection {
-    const hasDiv = /hcaptcha/.test(html);
+    const hasDiv = /hcaptcha|h-captcha/.test(html);
     const sitekeyMatch = html.match(/data-sitekey\s*=\s*"([^"]+)"/);
     return { type: hasDiv ? "hcaptcha" : "unknown", sitekey: sitekeyMatch?.[1] };
   }
@@ -10,4 +10,3 @@ export class HCaptchaProvider implements CaptchaProvider {
     return { token: "", provider: "none" };
   }
 }
-
