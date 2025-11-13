@@ -14,6 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { CoinsIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import TooltipWrapper from "@/components/TooltipWrapper";
 
+/**
+ * Renders a collapsible task menu with various task options.
+ */
 function TaskMenu() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
