@@ -29,16 +29,31 @@ export class ProxyManager {
     return next;
   }
 
+  /**
+   * Retrieves a flat array of all proxies from the providers.
+   */
   private allProxies(): string[] {
     return this.providers.flatMap(p => p.proxies);
   }
 
+  /**
+   * Selects a random proxy from the available proxies, excluding specified ones.
+   */
   private pickNext(exclude: Set<string> = new Set()): string | undefined {
     const pool = this.allProxies().filter(p => !exclude.has(p));
     if (!pool.length) return undefined;
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
+  /**
+   * Retrieves authentication credentials for a specified proxy.
+   *
+   * The function iterates through the available providers and checks if
+   * authentication information exists for the given proxy. If found, it
+   * returns the corresponding credentials; otherwise, it returns undefined.
+   *
+   * @param proxy - The identifier for the proxy to retrieve authentication for.
+   */
   private getAuth(proxy: string): { username: string; password: string } | undefined {
     for (const p of this.providers) {
       const a = p.auth?.[proxy];
@@ -47,6 +62,17 @@ export class ProxyManager {
     return undefined;
   }
 
+  /**
+   * Selects a proxy based on the provided URL and rotation strategy.
+   *
+   * This function constructs a URL object to extract the domain and then attempts to select a proxy
+   * based on the defined rotation strategy. It first checks if a proxy is already selected for the domain,
+   * then checks for a session-specific proxy, and finally picks the next available proxy if none are found.
+   * The selected proxy is stored according to the rotation strategy, and authentication details are retrieved
+   * before returning the result.
+   *
+   * @param url - The URL for which a proxy needs to be selected.
+   */
   async select(url: string): Promise<ProxySelection> {
     const u = new URL(url);
     const domain = u.hostname;
@@ -68,6 +94,16 @@ export class ProxyManager {
     return new ProxyAgent(selection.proxy);
   }
 
+  /**
+   * Records a successful request for a given proxy selection.
+   *
+   * This function updates the statistics for the specified proxy by incrementing the total request count and the success count.
+   * It also calculates the average latency, applying a weighted average with a factor of 0.9 for the previous average and 0.1 for the new latency.
+   * If the proxy is not defined in the selection, the function exits early without making any updates.
+   *
+   * @param selection - The proxy selection object containing the proxy to be updated.
+   * @param latencyMs - The latency in milliseconds for the successful request.
+   */
   recordSuccess(selection: ProxySelection, latencyMs: number): void {
     if (!selection.proxy) return;
     const s = this.stats.get(selection.proxy) || { totalRequests: 0, successes: 0, failures: 0 };
@@ -77,6 +113,9 @@ export class ProxyManager {
     this.stats.set(selection.proxy, s);
   }
 
+  /**
+   * Records a failure for the given proxy selection and error message.
+   */
   recordFailure(selection: ProxySelection, error: string): void {
     if (!selection.proxy) return;
     const s = this.stats.get(selection.proxy) || { totalRequests: 0, successes: 0, failures: 0 };
@@ -92,6 +131,15 @@ export class ProxyManager {
     return out;
   }
 
+  /**
+   * Validates the given proxy selection by checking its health status.
+   *
+   * This function first checks if the selection has a proxy. If not, it returns true immediately.
+   * If a proxy is present, it attempts to fetch the health check URL using a HEAD request with the appropriate dispatcher.
+   * The function returns true if the response is successful (res.ok), and false if any error occurs during the fetch operation.
+   *
+   * @param selection - The ProxySelection object containing the proxy information to validate.
+   */
   async validate(selection: ProxySelection): Promise<boolean> {
     if (!selection.proxy) return true;
     try {
