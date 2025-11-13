@@ -36,6 +36,16 @@ export class ProxyManager {
     return this.providers.flatMap(p => p.proxies);
   }
 
+  /**
+   * Selects the next available proxy from the pool, excluding specified proxies.
+   *
+   * This function retrieves all proxies and filters them based on the provided
+   * `exclude` set and the failover conditions. If no proxies are available after
+   * filtering, it returns undefined. Otherwise, it randomly selects and returns
+   * one of the available proxies.
+   *
+   * @param exclude - A set of proxy identifiers to exclude from selection.
+   */
   private pickNext(exclude: Set<string> = new Set()): string | undefined {
     const now = Date.now();
     const pool = this.allProxies().filter(p => !exclude.has(p) && (!this.failoverEnabled || ((this.unavailable.get(p) || 0) < now)));
@@ -116,6 +126,16 @@ export class ProxyManager {
     return out;
   }
 
+  /**
+   * Validates the given selection by checking the health of the associated proxy.
+   *
+   * This function first checks if the selection has a proxy; if not, it returns true.
+   * If a proxy exists, it attempts to fetch the health check URL using a HEAD request,
+   * with a timeout of 1 second. The dispatcher is obtained from the selection, and
+   * if the fetch operation fails or times out, it returns false.
+   *
+   * @param selection - The ProxySelection object containing the proxy information.
+   */
   async validate(selection: ProxySelection): Promise<boolean> {
     if (!selection.proxy) return true;
     try {
