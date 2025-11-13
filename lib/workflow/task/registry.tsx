@@ -30,6 +30,26 @@ import { ExtractXPathFromPageTask } from "./ExtractXPathFromPage";
 import { InterceptNetworkTask } from "./InterceptNetwork";
 import { GraphQLQueryTask } from "./GraphQLQuery";
 import { GenerateSelectorTask } from "./GenerateSelector";
+import { InfiniteScrollTask } from "./InfiniteScroll";
+import { ExtractLinksFromPageTask } from "./ExtractLinksFromPage";
+import { SetUserAgentTask } from "./SetUserAgent";
+import { WaitForNetworkIdleTask } from "./WaitForNetworkIdle";
+import { RestRequestTask } from "./RestRequest";
+import { ExtractAttributeFromElementTask } from "./ExtractAttributeFromElement";
+import { HoverElementTask } from "./HoverElement";
+import { DoubleClickElementTask } from "./DoubleClickElement";
+import { DragAndDropTask } from "./DragAndDrop";
+import { PressKeyTask } from "./PressKey";
+import { SubmitFormTask } from "./SubmitForm";
+import { WaitForNavigationTask } from "./WaitForNavigation";
+import { WaitForSelectorHiddenTask } from "./WaitForSelectorHidden";
+import { ExtractHtmlFromElementTask } from "./ExtractHtmlFromElement";
+import { ExtractJsonLdTask } from "./ExtractJsonLd";
+import { RegexExtractTask } from "./RegexExtract";
+import { SetExtraHeadersTask } from "./SetExtraHeaders";
+import { SetViewportSizeTask } from "./SetViewportSize";
+import { PaginateNextButtonTask } from "./PaginateNextButton";
+import { EvaluateScriptTask } from "./EvaluateScript";
 
 type Registry = {
   [K in TaskType]: WorkflowTask & { type: K };
@@ -61,9 +81,29 @@ export const TaskRegistry: Registry = {
   SELECT_OPTION: SelectOptionTask,
   UPLOAD_FILES: UploadFilesTask,
   SOLVE_CAPTCHA: SolveCaptchaTask,
+  HOVER_ELEMENT: HoverElementTask,
+  DOUBLE_CLICK_ELEMENT: DoubleClickElementTask,
+  DRAG_AND_DROP: DragAndDropTask,
+  PRESS_KEY: PressKeyTask,
+  SUBMIT_FORM: SubmitFormTask,
   EXTRACT_CSS_FROM_PAGE: ExtractCssFromPageTask,
   EXTRACT_XPATH_FROM_PAGE: ExtractXPathFromPageTask,
+  EXTRACT_LINKS_FROM_PAGE: ExtractLinksFromPageTask,
   INTERCEPT_NETWORK: InterceptNetworkTask,
   GRAPHQL_QUERY: GraphQLQueryTask,
   GENERATE_SELECTOR_AI: GenerateSelectorTask,
+  INFINITE_SCROLL: InfiniteScrollTask,
+  SET_USER_AGENT: SetUserAgentTask,
+  WAIT_NETWORK_IDLE: WaitForNetworkIdleTask,
+  WAIT_FOR_NAVIGATION: WaitForNavigationTask,
+  WAIT_FOR_SELECTOR_HIDDEN: WaitForSelectorHiddenTask,
+  REST_REQUEST: RestRequestTask,
+  EXTRACT_ATTRIBUTE_FROM_ELEMENT: ExtractAttributeFromElementTask,
+  EXTRACT_HTML_FROM_ELEMENT: ExtractHtmlFromElementTask,
+  EXTRACT_JSONLD: ExtractJsonLdTask,
+  REGEX_EXTRACT: RegexExtractTask,
+  SET_EXTRA_HEADERS: SetExtraHeadersTask,
+  SET_VIEWPORT_SIZE: SetViewportSizeTask,
+  PAGINATE_NEXT_BUTTON: PaginateNextButtonTask,
+  EVALUATE_SCRIPT: EvaluateScriptTask,
 };

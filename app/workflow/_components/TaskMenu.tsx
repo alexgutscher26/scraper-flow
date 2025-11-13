@@ -71,6 +71,9 @@ function TaskMenu() {
             <AccordionTrigger className="font-bold">Browser</AccordionTrigger>
             <AccordionContent className="flex flex-col gap-1">
               <TaskMenuBtn taskType={TaskType.LAUNCH_BROWSER} />
+              <TaskMenuBtn taskType={TaskType.SET_USER_AGENT} />
+              <TaskMenuBtn taskType={TaskType.SET_EXTRA_HEADERS} />
+              <TaskMenuBtn taskType={TaskType.SET_VIEWPORT_SIZE} />
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="interactions">
@@ -82,9 +85,14 @@ function TaskMenu() {
               <TaskMenuBtn taskType={TaskType.FILL_INPUT} />
               <TaskMenuBtn taskType={TaskType.TYPE_INPUT} />
               <TaskMenuBtn taskType={TaskType.CLICK_ELEMENT} />
+              <TaskMenuBtn taskType={TaskType.DOUBLE_CLICK_ELEMENT} />
+              <TaskMenuBtn taskType={TaskType.HOVER_ELEMENT} />
               <TaskMenuBtn taskType={TaskType.SCROLL_TO_ELEMENT} />
               <TaskMenuBtn taskType={TaskType.SELECT_OPTION} />
               <TaskMenuBtn taskType={TaskType.UPLOAD_FILES} />
+              <TaskMenuBtn taskType={TaskType.DRAG_AND_DROP} />
+              <TaskMenuBtn taskType={TaskType.PRESS_KEY} />
+              <TaskMenuBtn taskType={TaskType.SUBMIT_FORM} />
               <TaskMenuBtn taskType={TaskType.SOLVE_CAPTCHA} />
             </AccordionContent>
           </AccordionItem>{" "}
@@ -95,12 +103,17 @@ function TaskMenu() {
             <AccordionContent className="flex flex-col gap-1">
               <TaskMenuBtn taskType={TaskType.PAGE_TO_HTML} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_TEXT_FROM_ELEMENT} />
+              <TaskMenuBtn taskType={TaskType.EXTRACT_ATTRIBUTE_FROM_ELEMENT} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_DATA_WITH_AI} />
               <TaskMenuBtn taskType={TaskType.GENERATE_SELECTOR_AI} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_TABLE_DATA} />
               <TaskMenuBtn taskType={TaskType.TAKE_SCREENSHOT} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_CSS_FROM_PAGE} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_XPATH_FROM_PAGE} />
+              <TaskMenuBtn taskType={TaskType.EXTRACT_LINKS_FROM_PAGE} />
+              <TaskMenuBtn taskType={TaskType.EXTRACT_HTML_FROM_ELEMENT} />
+              <TaskMenuBtn taskType={TaskType.EXTRACT_JSONLD} />
+              <TaskMenuBtn taskType={TaskType.REGEX_EXTRACT} />
             </AccordionContent>
           </AccordionItem>{" "}
           <AccordionItem value="storage">
@@ -120,6 +133,9 @@ function TaskMenu() {
             <AccordionContent className="flex flex-col gap-1">
               <TaskMenuBtn taskType={TaskType.WAIT_FOR_ELEMENT} />
               <TaskMenuBtn taskType={TaskType.WAIT_DELAY} />
+              <TaskMenuBtn taskType={TaskType.WAIT_NETWORK_IDLE} />
+              <TaskMenuBtn taskType={TaskType.WAIT_FOR_NAVIGATION} />
+              <TaskMenuBtn taskType={TaskType.WAIT_FOR_SELECTOR_HIDDEN} />
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="results">
@@ -141,6 +157,9 @@ function TaskMenu() {
               <TaskMenuBtn taskType={TaskType.FILTER_DATA} />
               <TaskMenuBtn taskType={TaskType.INTERCEPT_NETWORK} />
               <TaskMenuBtn taskType={TaskType.GRAPHQL_QUERY} />
+              <TaskMenuBtn taskType={TaskType.INFINITE_SCROLL} />
+              <TaskMenuBtn taskType={TaskType.PAGINATE_NEXT_BUTTON} />
+              <TaskMenuBtn taskType={TaskType.EVALUATE_SCRIPT} />
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="communication">
@@ -148,6 +167,7 @@ function TaskMenu() {
               Communication
             </AccordionTrigger>{" "}
             <AccordionContent className="flex flex-col gap-1">
+              <TaskMenuBtn taskType={TaskType.REST_REQUEST} />
               <TaskMenuBtn taskType={TaskType.SEND_EMAIL} />
             </AccordionContent>
           </AccordionItem>

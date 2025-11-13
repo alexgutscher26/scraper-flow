@@ -33,6 +33,26 @@ import { ExtractXPathFromPageExecutor } from "./ExtractXPathFromPageExecutor";
 import { InterceptNetworkExecutor } from "./InterceptNetworkExecutor";
 import { GraphQLQueryExecutor } from "./GraphQLQueryExecutor";
 import { GenerateSelectorExecutor } from "./GenerateSelectorExecutor";
+import { InfiniteScrollExecutor } from "./InfiniteScrollExecutor";
+import { ExtractLinksFromPageExecutor } from "./ExtractLinksFromPageExecutor";
+import { SetUserAgentExecutor } from "./SetUserAgentExecutor";
+import { WaitForNetworkIdleExecutor } from "./WaitForNetworkIdleExecutor";
+import { RestRequestExecutor } from "./RestRequestExecutor";
+import { ExtractAttributeFromElementExecutor } from "./ExtractAttributeFromElementExecutor";
+import { HoverElementExecutor } from "./HoverElementExecutor";
+import { DoubleClickElementExecutor } from "./DoubleClickElementExecutor";
+import { DragAndDropExecutor } from "./DragAndDropExecutor";
+import { PressKeyExecutor } from "./PressKeyExecutor";
+import { SubmitFormExecutor } from "./SubmitFormExecutor";
+import { WaitForNavigationExecutor } from "./WaitForNavigationExecutor";
+import { WaitForSelectorHiddenExecutor } from "./WaitForSelectorHiddenExecutor";
+import { ExtractHtmlFromElementExecutor } from "./ExtractHtmlFromElementExecutor";
+import { ExtractJsonLdExecutor } from "./ExtractJsonLdExecutor";
+import { RegexExtractExecutor } from "./RegexExtractExecutor";
+import { SetExtraHeadersExecutor } from "./SetExtraHeadersExecutor";
+import { SetViewportSizeExecutor } from "./SetViewportSizeExecutor";
+import { PaginateNextButtonExecutor } from "./PaginateNextButtonExecutor";
+import { EvaluateScriptExecutor } from "./EvaluateScriptExecutor";
 
 type ExecutorFn<T extends WorkflowTask> = (
   environment: ExecutionEnvironment<T>
@@ -70,7 +90,27 @@ export const ExecutorRegistry: RegistryType = {
   SOLVE_CAPTCHA: CaptchaExecutor,
   EXTRACT_CSS_FROM_PAGE: ExtractCssFromPageExecutor,
   EXTRACT_XPATH_FROM_PAGE: ExtractXPathFromPageExecutor,
+  EXTRACT_LINKS_FROM_PAGE: ExtractLinksFromPageExecutor,
   INTERCEPT_NETWORK: InterceptNetworkExecutor,
   GRAPHQL_QUERY: GraphQLQueryExecutor,
   GENERATE_SELECTOR_AI: GenerateSelectorExecutor,
+  INFINITE_SCROLL: InfiniteScrollExecutor,
+  SET_USER_AGENT: SetUserAgentExecutor,
+  WAIT_NETWORK_IDLE: WaitForNetworkIdleExecutor,
+  REST_REQUEST: RestRequestExecutor,
+  EXTRACT_ATTRIBUTE_FROM_ELEMENT: ExtractAttributeFromElementExecutor,
+  HOVER_ELEMENT: HoverElementExecutor,
+  DOUBLE_CLICK_ELEMENT: DoubleClickElementExecutor,
+  DRAG_AND_DROP: DragAndDropExecutor,
+  PRESS_KEY: PressKeyExecutor,
+  SUBMIT_FORM: SubmitFormExecutor,
+  WAIT_FOR_NAVIGATION: WaitForNavigationExecutor,
+  WAIT_FOR_SELECTOR_HIDDEN: WaitForSelectorHiddenExecutor,
+  EXTRACT_HTML_FROM_ELEMENT: ExtractHtmlFromElementExecutor,
+  EXTRACT_JSONLD: ExtractJsonLdExecutor,
+  REGEX_EXTRACT: RegexExtractExecutor,
+  SET_EXTRA_HEADERS: SetExtraHeadersExecutor,
+  SET_VIEWPORT_SIZE: SetViewportSizeExecutor,
+  PAGINATE_NEXT_BUTTON: PaginateNextButtonExecutor,
+  EVALUATE_SCRIPT: EvaluateScriptExecutor,
 };
