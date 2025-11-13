@@ -1,10 +1,11 @@
 import { PolitenessConfig, PolitenessState, RobotsRules } from "@/types/politeness";
+import { http } from "@/lib/http";
 
 async function fetchRobots(domain: string, ua?: string) {
   try {
-    const res = await fetch(`https://${domain}/robots.txt`, { headers: ua ? { "user-agent": ua } : undefined });
-    if (!res.ok) return "";
-    return await res.text();
+    const text = await http.request<string>(`https://${domain}/robots.txt`, { headers: ua ? { "user-agent": ua } : undefined });
+    if (!text) return "";
+    return text;
   } catch {
     return "";
   }

@@ -4,6 +4,7 @@ import { checkWorkflowCredits } from "@/lib/workflow/creditCheck";
 import { WorkflowExecutionStatus, WorkflowStatus } from "@/types/workflow";
 import { parseWorkflowSchedule } from "@/lib/cron/scheduleParser";
 import { createLogger } from "@/lib/log";
+import { http } from "@/lib/http";
 
 export async function GET(req: Request, res: Response) {
   const logger = createLogger("api/workflows/cron");
@@ -142,21 +143,15 @@ async function triggerWorkflow(workflowId: string) {
   try {
     const logger = createLogger("api/workflows/cron");
     logger.info(`Triggering workflow ${workflowId} (credit check passed)`);
-    const response = await fetch(triggerApiUrl, {
+    await http.request(triggerApiUrl, {
       headers: {
         Authorization: `Bearer ${process.env.API_SECRET!}`,
         "Content-Type": "application/json",
       },
       cache: "no-store",
-    });
-
-    if (!response.ok) {
-      logger.error(
-        `Failed to trigger workflow ${workflowId}: HTTP ${response.status}`
-      );
-    } else {
-      logger.info(`Successfully triggered workflow ${workflowId}`);
-    }
+      method: "GET",
+    })
+    logger.info(`Successfully triggered workflow ${workflowId}`);
   } catch (err: any) {
     const logger = createLogger("api/workflows/cron");
     logger.error(

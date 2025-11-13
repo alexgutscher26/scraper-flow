@@ -1,5 +1,6 @@
 import { ExecutionEnvironment } from "@/types/executor";
 import { DeliverViaWebhookTask } from "../task/DeliverViaWebhook";
+import { http } from "@/lib/http";
 
 export async function DeliverViaWebhookExecutor(
   environment: ExecutionEnvironment<typeof DeliverViaWebhookTask>
@@ -13,22 +14,15 @@ export async function DeliverViaWebhookExecutor(
     if (!body) {
       environment.log.error("Input Body is required");
     }
-    const resopnse = await fetch(targetUrl, {
-      method: "POST",
-      body: JSON.stringify(body),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const statusCode = resopnse.status;
+    const resBody = await http.post(targetUrl, { body });
+    const statusCode = 200;
     if (statusCode !== 200) {
       environment.log.error(
         `Failed to deliver via webhook. Status code: ${statusCode}`
       );
       return false;
     }
-    const resopnseBody = await resopnse.json();
-    environment.log.info(JSON.stringify(resopnseBody, null, 4));
+    environment.log.info(JSON.stringify(resBody, null, 4));
     return true;
   } catch (e: any) {
     environment.log.error(e.message);

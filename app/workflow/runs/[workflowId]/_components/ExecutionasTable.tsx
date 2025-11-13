@@ -2,7 +2,8 @@
 
 import React from "react";
 import { GetWorkflowExecutions } from "@/actions/workflows/getWorkflowExecutions";
-import { useQuery } from "@tanstack/react-query";
+import { GetWorkflowExecutionsPaginated } from "@/actions/workflows/getWorkflowExecutionsPaginated";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -18,6 +19,10 @@ import { WorkflowExecutionStatus } from "@/types/workflow";
 import { CoinsIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
+import { useRef, useMemo } from "react";
+import { useInfiniteScroll } from "@/lib/ui/hooks/useInfiniteScroll";
+import { useScrollRestoration } from "@/lib/ui/hooks/useScrollRestoration";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type InitialDataType = Awaited<ReturnType<typeof GetWorkflowExecutions>>;
 export default function ExecutionasTable({
@@ -28,15 +33,40 @@ export default function ExecutionasTable({
   initialData: InitialDataType;
 }) {
   const router = useRouter();
-  const query = useQuery({
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  useScrollRestoration(containerRef.current || undefined)
+
+  const PAGE_SIZE = 50
+  const initialCursor = initialData.length === PAGE_SIZE ? initialData[initialData.length - 1]?.id : undefined
+  const inf = useInfiniteQuery({
     queryKey: ["executions", workflowId],
-    initialData,
-    queryFn: () => GetWorkflowExecutions(workflowId),
-    refetchInterval: 5000, //TODO
-  });
+    queryFn: async ({ pageParam }: { pageParam?: string }) => {
+      const { items, nextCursorId } = await GetWorkflowExecutionsPaginated(workflowId, { cursorId: pageParam, take: PAGE_SIZE })
+      return { items, nextCursorId }
+    },
+    initialPageParam: undefined,
+    getNextPageParam: (last) => last.nextCursorId,
+    initialData: () => ({
+      pages: [{ items: initialData, nextCursorId: initialCursor }],
+      pageParams: [undefined],
+    }),
+  })
+
+  const flatItems = useMemo(() => inf.data?.pages.flatMap(p => p.items) ?? [], [inf.data])
+  const { loading } = useInfiniteScroll(() => {
+    if (inf.isFetchingNextPage || !inf.hasNextPage) return
+    return inf.fetchNextPage()
+  }, { threshold: 0.8, root: containerRef.current, debounceMs: 250, disabled: inf.isFetching })
+
+  const rowVirtualizer = useVirtualizer({
+    count: flatItems.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => 72,
+    overscan: 10,
+  })
 
   return (
-    <div className="border rounded-lg shadow-md overflow-auto">
+    <div ref={containerRef} className="border rounded-lg shadow-md overflow-auto">
       <Table className="h-full">
         <TableHeader className="bg-muted">
           <TableRow>
@@ -48,8 +78,9 @@ export default function ExecutionasTable({
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="gap-2 h-full overflow-auto">
-          {query.data.map((execution) => {
+        <TableBody className="gap-2 h-full overflow-auto" style={{ position: 'relative', height: rowVirtualizer.getTotalSize() }}>
+          {rowVirtualizer.getVirtualItems().map((vi) => {
+            const execution = flatItems[vi.index]
             const duration = DatesToDurationString(
               execution.completedAt,
               execution.startedAt
@@ -67,6 +98,7 @@ export default function ExecutionasTable({
                 onClick={() => {
                   router.push(`/workflow/runs/${workflowId}/${execution.id}`);
                 }}
+                style={{ position: 'absolute', top: vi.start, height: vi.size, width: '100%' }}
               >
                 <TableCell>
                   <div className="flex flex-col">
@@ -111,6 +143,13 @@ export default function ExecutionasTable({
               </TableRow>
             );
           })}
+          {inf.isFetchingNextPage && (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-2 text-muted-foreground">
+                Loading more...
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>

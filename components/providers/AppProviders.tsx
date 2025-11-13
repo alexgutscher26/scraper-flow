@@ -7,7 +7,16 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LocalCronRunner } from "../LocalCronRunner";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 2,
+        staleTime: 30_000,
+        cacheTime: 300_000,
+        refetchOnWindowFocus: false,
+      },
+    },
+  }));
   return (
     <QueryClientProvider client={queryClient}>
       <NextTopLoader color="#10b981" showSpinner={false} />

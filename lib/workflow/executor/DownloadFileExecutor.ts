@@ -2,6 +2,7 @@ import { ExecutionEnvironment } from "@/types/executor";
 import { DownloadFileTask } from "../task/DownloadFile";
 import * as fs from "fs";
 import * as path from "path";
+import { http } from "@/lib/http";
 
 // Helper function to download files using browser page (for cases requiring authentication/cookies)
 async function downloadWithBrowser(
@@ -161,9 +162,9 @@ export async function DownloadFileExecutor(
       environment.log.error("Download timed out after 30 seconds");
     }, 30000); // 30 second timeout
 
-    let response: Response;
+    let binaryData: ArrayBuffer | null = null
     try {
-      response = await fetch(downloadUrl, {
+      binaryData = await http.request<ArrayBuffer>(downloadUrl, {
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -174,7 +175,7 @@ export async function DownloadFileExecutor(
         },
         method: "GET",
         signal: controller.signal,
-      });
+      })
     } catch (error: any) {
       clearTimeout(timeoutId);
       if (error.name === "AbortError") {
@@ -186,21 +187,12 @@ export async function DownloadFileExecutor(
     }
     clearTimeout(timeoutId);
 
-    environment.log.info(
-      `Fetch response status: ${response.status} ${response.statusText}`
-    );
-    environment.log.info(
-      `Response headers: ${JSON.stringify(
-        Object.fromEntries(response.headers.entries())
-      )}`
-    );
-
     // Initialize buffer variable
     let buffer: Buffer;
 
-    if (!response.ok) {
+    if (!binaryData) {
       environment.log.error(
-        `Direct fetch failed: ${response.status} ${response.statusText}`
+        `Direct fetch failed: no data`
       );
 
       // Try alternative method using browser page for downloads that require session/cookies
@@ -227,33 +219,20 @@ export async function DownloadFileExecutor(
         return false;
       }
     } else {
-      // Check content length if available
-      const contentLength = response.headers.get("content-length");
-      if (contentLength) {
-        environment.log.info(`Expected content length: ${contentLength} bytes`);
-      } else {
-        environment.log.info("Content length not provided by server");
-      }
-
-      // Convert response to buffer with error handling
       try {
-        const arrayBuffer = await response.arrayBuffer();
+        const arrayBuffer = binaryData as ArrayBuffer
         environment.log.info(
           `ArrayBuffer received, size: ${arrayBuffer.byteLength} bytes`
         );
-
         if (arrayBuffer.byteLength === 0) {
           environment.log.error("Response arrayBuffer is empty");
           return false;
         }
-
-        buffer = Buffer.from(arrayBuffer);
-        environment.log.info(`Buffer created, size: ${buffer.length} bytes`);
+        buffer = Buffer.from(arrayBuffer)
+        environment.log.info(`Buffer created, size: ${buffer.length} bytes`)
       } catch (error: any) {
-        environment.log.error(
-          `Failed to convert response to buffer: ${error.message}`
-        );
-        return false;
+        environment.log.error(`Failed to convert response to buffer: ${error.message}`)
+        return false
       }
     }
 

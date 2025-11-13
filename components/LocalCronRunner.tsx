@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { http } from "@/lib/http";
 
 /**
  * This component provides support for scheduled workflows in both development and production
@@ -32,17 +33,15 @@ export function LocalCronRunner() {
         try {
           // Add a unique timestamp to prevent any API route caching
           const timestamp = Date.now();
-          const response = await fetch(`/api/workflows/cron?ts=${timestamp}`, {
-            // Prevent caching to ensure fresh checks
+          const response = await http.get(`/api/workflows/cron?ts=${timestamp}`, {
             cache: "no-store",
             headers: {
               pragma: "no-cache",
               "cache-control": "no-cache",
             },
           });
-
-          if (response.ok) {
-            const data = await response.json();
+          if (response) {
+            const data = response as any;
             setWorkflowsTriggered((prev) => prev + (data.workflowsRun || 0));
             setLastRun(new Date());
             failedAttemptsRef.current = 0;
@@ -53,7 +52,7 @@ export function LocalCronRunner() {
             );
           } else {
             failedAttemptsRef.current += 1;
-            console.error(`Cron check failed with status ${response.status}`);
+            console.error(`Cron check failed`);
           }
         } catch (error) {
           failedAttemptsRef.current += 1;

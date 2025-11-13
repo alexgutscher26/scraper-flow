@@ -1,6 +1,7 @@
 import { ExecutionEnvironment } from "@/types/executor";
 import { GraphQLQueryTask } from "../task/GraphQLQuery";
 import { applyHeaders } from "@/lib/politeness/userAgent";
+import { http } from "@/lib/http";
 
 export async function GraphQLQueryExecutor(
   environment: ExecutionEnvironment<typeof GraphQLQueryTask>
@@ -49,13 +50,10 @@ export async function GraphQLQueryExecutor(
       environment.setOutput("Web page", page);
       return true;
     } else {
-      const res = await fetch(endpoint, {
-        method: "POST",
+      const data = await http.post(endpoint, {
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query, variables }),
-      } as any);
-      const ct = res.headers.get("content-type") || "";
-      const data = ct.includes("application/json") ? await res.json() : await res.text();
+        body: { query, variables },
+      });
       environment.setOutput("Response JSON", JSON.stringify(data));
       if (page) environment.setOutput("Web page", page);
       return true;
@@ -65,4 +63,3 @@ export async function GraphQLQueryExecutor(
     return false;
   }
 }
-
