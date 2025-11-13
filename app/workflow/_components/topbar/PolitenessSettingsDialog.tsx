@@ -9,6 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
+/**
+ * Renders a dialog for configuring politeness settings.
+ *
+ * This component utilizes the PolitenessSettingsContext to access and modify the configuration settings related to politeness features such as robots.txt enforcement, randomized delays, and user-agent rotation. It includes various input fields and switches to allow users to customize these settings, updating the context state accordingly.
+ *
+ * @returns A JSX element representing the politeness settings dialog, or null if the context is not available.
+ */
 export default function PolitenessSettingsDialog() {
   const ctx = useContext(PolitenessSettingsContext);
   const cfg = ctx?.config;

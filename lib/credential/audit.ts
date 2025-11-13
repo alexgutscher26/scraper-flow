@@ -7,6 +7,9 @@ export type CredentialAccessContext = {
   correlationId?: string;
 };
 
+/**
+ * Generates a fingerprint for the given value using SHA-256 hashing.
+ */
 function fingerprint(value: string): string {
   const key = process.env.LOG_HASH_KEY || "";
   return key
@@ -14,6 +17,9 @@ function fingerprint(value: string): string {
     : crypto.createHash("sha256").update(value).digest("hex").slice(0, 24);
 }
 
+/**
+ * Logs access to a credential with relevant details.
+ */
 export async function logCredentialAccess(args: {
   userId: string;
   credentialId: string;

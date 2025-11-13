@@ -6,6 +6,9 @@ try {
   if (process.env.LOG_SECURE_ENABLED !== "false") initSecureConsole();
 } catch {}
 
+/**
+ * Creates a log collector that stores log messages with their levels and timestamps.
+ */
 export function createLogCollector(): LogCollector {
   const logs: Log[] = [];
 
@@ -48,6 +51,16 @@ function consoleMethod(level: LogLevel): (...args: any[]) => void {
   return console.log;
 }
 
+/**
+ * Creates a logger function with specified logging levels.
+ *
+ * This function initializes a logger that formats messages with a timestamp and an optional scope.
+ * It checks the current logging level and determines whether to log messages based on that level.
+ * The logger supports three levels: info, error, and warning, and can also send logs to a provided LogCollector.
+ *
+ * @param {string} [scope] - An optional string to categorize log messages.
+ * @param {LogCollector} [collector] - An optional LogCollector to handle log messages.
+ */
 export function createLogger(scope?: string, collector?: LogCollector) {
   const currentLevel = getEnvLogLevel();
 
@@ -56,6 +69,17 @@ export function createLogger(scope?: string, collector?: LogCollector) {
     return scope ? `[${ts}] [${scope}] ${message}` : `[${ts}] ${message}`;
   };
 
+  /**
+   * Logs a message at the specified log level.
+   *
+   * This function checks if the message should be logged based on the current logging level.
+   * If logging is enabled, it retrieves the appropriate console method, sanitizes the message,
+   * and formats it before logging. Additionally, if a collector function exists for the log level,
+   * it invokes that function with the sanitized message.
+   *
+   * @param level - The log level at which to log the message.
+   * @param message - The message to be logged.
+   */
   const log = (level: LogLevel, message: string) => {
     if (!shouldLog(level, currentLevel)) return;
     const fn = consoleMethod(level);
