@@ -1,6 +1,16 @@
 import { ExecutionEnvironment } from "@/types/executor";
 import { DragAndDropTask } from "../task/DragAndDrop";
 
+/**
+ * Executes a drag-and-drop action on a web page.
+ *
+ * The function retrieves the source and target selectors from the environment, checks their validity,
+ * and performs the drag-and-drop operation using the mouse API. It logs errors for any missing elements
+ * or issues during the operation and returns a boolean indicating success or failure.
+ *
+ * @param environment - The execution environment containing methods to interact with the page and log errors.
+ * @returns A promise that resolves to a boolean indicating the success of the drag-and-drop operation.
+ */
 export async function DragAndDropExecutor(
   environment: ExecutionEnvironment<typeof DragAndDropTask>
 ): Promise<boolean> {
