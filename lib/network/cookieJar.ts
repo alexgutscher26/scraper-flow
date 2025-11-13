@@ -17,6 +17,8 @@ function parseSetCookie(header: string): Cookie | null {
   if (eqIdx < 0) return null;
   const name = nameValue.slice(0, eqIdx).trim();
   const value = nameValue.slice(eqIdx + 1);
+  if (!name || /[\s;\u0000-\u001f\u007f]/.test(name)) return null;
+  if (value.length > 4096) return null;
   const cookie: Cookie = { name, value };
   for (const a of attrs) {
     const [kRaw, vRaw] = a.split("=");
@@ -63,6 +65,7 @@ export class CookieJar {
     for (const h of setCookieHeaders) {
       const parsed = parseSetCookie(h);
       if (!parsed) continue;
+      if (parsed.secure && u.protocol !== "https:") continue;
       const domain = (parsed.domain || host).toLowerCase();
       const existingIdx = arr.findIndex(c => c.name === parsed.name && (c.domain || host) === domain);
       if (existingIdx >= 0) arr.splice(existingIdx, 1);

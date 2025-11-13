@@ -17,6 +17,7 @@ type RequestOptions = {
   body?: any
   dispatcher?: any
   cookieJar?: { attachToRequest(url: string, init: any): void; captureFromResponse(url: string, headers: Headers): void }
+  timeoutMs?: number
 }
 
 function stableKey(input: string, init?: RequestInit | RequestOptions): string {
@@ -71,14 +72,20 @@ export class HttpClient {
         const start = performance.now?.() ?? Date.now()
         let response: Response | null = null
         try {
-          // attach cookies if jar provided
+          let localController: AbortController | undefined
+          let localTimeout: any
+          if (!(init as any).signal && (init as any).timeoutMs && (init as any).timeoutMs! > 0) {
+            localController = new AbortController()
+            ;(init as any).signal = localController.signal
+            localTimeout = setTimeout(() => { localController?.abort() }, (init as any).timeoutMs)
+          }
           if ((init as any).cookieJar) {
             try { (init as any).cookieJar.attachToRequest(input, init) } catch {}
           }
-          // support undici dispatcher for proxying
           const reqInit: any = { ...init }
           if ((init as any).dispatcher) reqInit.dispatcher = (init as any).dispatcher
           response = await fetch(input, reqInit as RequestInit)
+          if (localTimeout) clearTimeout(localTimeout)
         } catch (err) {
           emitHttpMetric({ url: input, method, status: -1, durationMs: (performance.now?.() ?? Date.now()) - start, timestamp: Date.now() })
           if (attempt < this.retries) {

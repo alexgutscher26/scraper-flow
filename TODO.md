@@ -167,7 +167,7 @@ Workflow Features
 - [x] Stealth mode and anti-bot evasion options [P2]
   - Linked files: `lib/workflow/executor/LaunchBrowserExecutor.ts:1`
 
-- [ ] Proxy rotation and session/cookie jar management [P2]
+- [x] Proxy rotation and session/cookie jar management [P2]
   - Linked files: `lib/workflow/executionWorkflow.ts:1`
 
 - [x] Advanced extraction: XPath/CSS, network intercept, GraphQL [P2]

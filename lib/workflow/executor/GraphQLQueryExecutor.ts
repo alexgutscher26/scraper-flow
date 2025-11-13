@@ -50,26 +50,52 @@ export async function GraphQLQueryExecutor(
       environment.setOutput("Response JSON", JSON.stringify(data));
       environment.setOutput("Web page", page);
       return true;
-    } else {
+  } else {
       const net = environment.getNetwork?.();
       const proxyMgr = net?.proxy as ProxyManager | undefined;
       const session = net?.session as any | undefined;
       if (session?.isExpired?.()) session.renew?.();
       let selection = proxyMgr ? await proxyMgr.select(endpoint) : { url: endpoint };
-      const dispatcher = proxyMgr ? proxyMgr.dispatcherFor(selection) : undefined;
+      const failoverEnabled = !!net?.config?.proxy?.failoverEnabled;
+      const controller = new AbortController();
+      const start = performance.now?.() ?? Date.now();
       try {
+        const dispatcher = proxyMgr ? proxyMgr.dispatcherFor(selection) : undefined;
         const data = await http.post(endpoint, {
           headers: { "content-type": "application/json" },
           body: { query, variables },
           dispatcher: dispatcher as any,
           cookieJar: session,
+          signal: controller.signal,
+          timeoutMs: 30000,
         });
         environment.setOutput("Response JSON", JSON.stringify(data));
         if (page) environment.setOutput("Web page", page);
-        proxyMgr?.recordSuccess(selection, 0);
+        proxyMgr?.recordSuccess(selection, (performance.now?.() ?? Date.now()) - start);
         return true;
       } catch (e: any) {
         proxyMgr?.recordFailure(selection, e.message || String(e));
+        if (failoverEnabled && proxyMgr) {
+          try {
+            selection = await proxyMgr.select(endpoint);
+            const dispatcher = proxyMgr.dispatcherFor(selection);
+            const data = await http.post(endpoint, {
+              headers: { "content-type": "application/json" },
+              body: { query, variables },
+              dispatcher: dispatcher as any,
+              cookieJar: session,
+              timeoutMs: 30000,
+            });
+            environment.setOutput("Response JSON", JSON.stringify(data));
+            if (page) environment.setOutput("Web page", page);
+            proxyMgr.recordSuccess(selection, (performance.now?.() ?? Date.now()) - start);
+            return true;
+          } catch (err2: any) {
+            proxyMgr.recordFailure(selection, err2.message || String(err2));
+            environment.log.error(err2.message);
+            return false;
+          }
+        }
         environment.log.error(e.message);
         return false;
       }
