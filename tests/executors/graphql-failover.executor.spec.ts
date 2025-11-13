@@ -3,6 +3,9 @@ import { GraphQLQueryExecutor } from "@/lib/workflow/executor/GraphQLQueryExecut
 import { TaskRegistry } from "@/lib/workflow/task/registry"
 import { ProxyManager } from "@/lib/network/proxyManager"
 
+/**
+ * Creates a network environment configuration with logging and input/output methods.
+ */
 function env(endpoint: string) {
   const net: any = { config: { proxy: { failoverEnabled: true } } }
   net.proxy = new ProxyManager({ enabled: true, rotateStrategy: "perRequest", providers: [{ name: "p", proxies: ["http://p1", "http://p2"] }], healthCheckUrl: "https://example.com", failoverEnabled: true })
