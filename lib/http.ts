@@ -15,6 +15,8 @@ type RequestOptions = {
   signal?: AbortSignal
   cache?: RequestCache | undefined
   body?: any
+  dispatcher?: any
+  cookieJar?: { attachToRequest(url: string, init: any): void; captureFromResponse(url: string, headers: Headers): void }
 }
 
 function stableKey(input: string, init?: RequestInit | RequestOptions): string {
@@ -69,7 +71,14 @@ export class HttpClient {
         const start = performance.now?.() ?? Date.now()
         let response: Response | null = null
         try {
-          response = await fetch(input, init as RequestInit)
+          // attach cookies if jar provided
+          if ((init as any).cookieJar) {
+            try { (init as any).cookieJar.attachToRequest(input, init) } catch {}
+          }
+          // support undici dispatcher for proxying
+          const reqInit: any = { ...init }
+          if ((init as any).dispatcher) reqInit.dispatcher = (init as any).dispatcher
+          response = await fetch(input, reqInit as RequestInit)
         } catch (err) {
           emitHttpMetric({ url: input, method, status: -1, durationMs: (performance.now?.() ?? Date.now()) - start, timestamp: Date.now() })
           if (attempt < this.retries) {
@@ -105,6 +114,7 @@ export class HttpClient {
           throw error
         }
 
+        try { (init as any).cookieJar?.captureFromResponse(input, response.headers) } catch {}
         this.cache.set(key, { value: parsed, expiresAt: Date.now() + this.ttlMs })
         return parsed as T
       }

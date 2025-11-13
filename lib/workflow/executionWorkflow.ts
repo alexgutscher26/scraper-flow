@@ -20,6 +20,9 @@ import { createLogCollector } from "../log";
 import { sanitizeObject } from "@/lib/logSecure/sanitizer";
 import { createLogger } from "@/lib/log";
 import { defaultPolitenessConfig, PolitenessConfig, PolitenessState } from "@/types/politeness";
+import { defaultNetworkConfig, NetworkConfig, NetworkState } from "@/types/network";
+import { ProxyManager } from "@/lib/network/proxyManager";
+import { SessionManager } from "@/lib/network/cookieJar";
 import { computeDelayMs, sleep } from "@/lib/politeness/delay";
 
 import { checkAndReserveWorkflowCredits } from "./creditCheck";
@@ -39,6 +42,14 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   };
   environment.politenessConfig = resolvePolitenessConfig(execution.workflow.definition);
   environment.politenessState = { robotsCache: new Map(), uaPerDomain: new Map() } as PolitenessState;
+  environment.network = { config: resolveNetworkConfig(execution.workflow.definition) } as NetworkState;
+  if (environment.network?.config?.proxy?.enabled) {
+    environment.network.proxy = new ProxyManager(environment.network.config.proxy);
+  }
+  if (environment.network?.config?.cookies?.enabled) {
+    const ttl = environment.network.config.cookies?.sessionTtlMs || 30 * 60 * 1000;
+    environment.network.session = new SessionManager(ttl);
+  }
 
   await initializeWorkflowExecution(executionId, execution.workflowId, nextRun);
   await initializePhaseStatused(execution);
@@ -391,6 +402,7 @@ function createExecutionEnvironment(
     log: logCollector,
     getPolitenessConfig: () => environment.politenessConfig,
     getPolitenessState: () => environment.politenessState,
+    getNetwork: () => environment.network,
   };
 }
 
@@ -484,6 +496,34 @@ function resolvePolitenessConfig(definitionJson: string): PolitenessConfig {
           acceptLanguageRandomization: override.userAgent?.acceptLanguageRandomization ?? base.userAgent.acceptLanguageRandomization,
         },
       } as PolitenessConfig;
+    }
+  } catch {}
+  return base;
+}
+
+function resolveNetworkConfig(definitionJson: string): NetworkConfig {
+  const base = defaultNetworkConfig();
+  try {
+    const def = JSON.parse(definitionJson);
+    const override = def?.settings?.network;
+    if (override && typeof override === "object") {
+      return {
+        proxy: {
+          enabled: override.proxy?.enabled ?? base.proxy?.enabled ?? false,
+          rotateStrategy: override.proxy?.rotateStrategy ?? base.proxy?.rotateStrategy,
+          providers: override.proxy?.providers ?? base.proxy?.providers,
+          healthCheckUrl: override.proxy?.healthCheckUrl ?? base.proxy?.healthCheckUrl,
+          failoverEnabled: override.proxy?.failoverEnabled ?? base.proxy?.failoverEnabled,
+        },
+        cookies: {
+          enabled: override.cookies?.enabled ?? base.cookies?.enabled ?? true,
+          persist: override.cookies?.persist ?? base.cookies?.persist ?? true,
+          sessionTtlMs: override.cookies?.sessionTtlMs ?? base.cookies?.sessionTtlMs,
+        },
+        http: {
+          useCookieJar: override.http?.useCookieJar ?? base.http?.useCookieJar,
+        },
+      } as NetworkConfig;
     }
   } catch {}
   return base;

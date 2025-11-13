@@ -2,6 +2,7 @@ import { ExecutionEnvironment } from "@/types/executor";
 import { GraphQLQueryTask } from "../task/GraphQLQuery";
 import { applyHeaders } from "@/lib/politeness/userAgent";
 import { http } from "@/lib/http";
+import { ProxyManager } from "@/lib/network/proxyManager";
 
 export async function GraphQLQueryExecutor(
   environment: ExecutionEnvironment<typeof GraphQLQueryTask>
@@ -50,13 +51,28 @@ export async function GraphQLQueryExecutor(
       environment.setOutput("Web page", page);
       return true;
     } else {
-      const data = await http.post(endpoint, {
-        headers: { "content-type": "application/json" },
-        body: { query, variables },
-      });
-      environment.setOutput("Response JSON", JSON.stringify(data));
-      if (page) environment.setOutput("Web page", page);
-      return true;
+      const net = environment.getNetwork?.();
+      const proxyMgr = net?.proxy as ProxyManager | undefined;
+      const session = net?.session as any | undefined;
+      if (session?.isExpired?.()) session.renew?.();
+      let selection = proxyMgr ? await proxyMgr.select(endpoint) : { url: endpoint };
+      const dispatcher = proxyMgr ? proxyMgr.dispatcherFor(selection) : undefined;
+      try {
+        const data = await http.post(endpoint, {
+          headers: { "content-type": "application/json" },
+          body: { query, variables },
+          dispatcher: dispatcher as any,
+          cookieJar: session,
+        });
+        environment.setOutput("Response JSON", JSON.stringify(data));
+        if (page) environment.setOutput("Web page", page);
+        proxyMgr?.recordSuccess(selection, 0);
+        return true;
+      } catch (e: any) {
+        proxyMgr?.recordFailure(selection, e.message || String(e));
+        environment.log.error(e.message);
+        return false;
+      }
     }
   } catch (e: any) {
     environment.log.error(e.message);

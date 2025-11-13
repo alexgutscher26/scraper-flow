@@ -16,6 +16,7 @@ export type Environment = {
   >;
   politenessConfig?: PolitenessConfig;
   politenessState?: PolitenessState;
+  network?: import("./network").NetworkState;
 };
 
 export type ExecutionEnvironment<T extends WorkflowTask> = {
@@ -30,4 +31,5 @@ export type ExecutionEnvironment<T extends WorkflowTask> = {
   log: LogCollector;
   getPolitenessConfig(): PolitenessConfig | undefined;
   getPolitenessState(): PolitenessState | undefined;
+  getNetwork(): import("./network").NetworkState | undefined;
 };

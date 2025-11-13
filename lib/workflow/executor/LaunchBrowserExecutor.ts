@@ -8,6 +8,7 @@ import { createLogger } from "@/lib/log";
 import { applyHeaders } from "@/lib/politeness/userAgent";
 import { isAllowed } from "@/lib/politeness/robots";
 import { sleep } from "@/lib/politeness/delay";
+import { ProxyManager } from "@/lib/network/proxyManager";
 
 type StealthOptions = {
   enabled: boolean;
@@ -249,6 +250,9 @@ export async function LaunchBrowserExecutor(
   const logger = createLogger("executor/LaunchBrowser");
   try {
     const websiteUrl = environment.getInput("Website Url");
+    const net = environment.getNetwork?.();
+    const proxyMgr = net?.proxy as ProxyManager | undefined;
+    const selection = proxyMgr ? await proxyMgr.select(websiteUrl) : { url: websiteUrl } as any;
     const { stealth, evasion, cookies } = readStealthEnv();
     let evasionAttempts = 0;
     let evasionFailures = 0;
@@ -269,16 +273,18 @@ export async function LaunchBrowserExecutor(
       // "https://github.com/Sparticuz/chromium/releases/download/v119.0.2/chromium-v119.0.2-pack.tar"
       // "/opt/nodejs/node_modules/@sparticuz/chromium/bin"
 
+      const launchArgs: string[] = [
+        ...chromium.args,
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--hide-scrollbars",
+        "--disable-web-security",
+      ];
+      if (selection.proxy) launchArgs.push(`--proxy-server=${selection.proxy}`);
       browser = await puppeteerCore.launch({
         executablePath: await chromium.executablePath(executionPath),
-        args: [
-          ...chromium.args,
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--hide-scrollbars",
-          "--disable-web-security",
-        ],
+        args: launchArgs,
         defaultViewport: chromium.defaultViewport,
         headless: chromium.headless,
         // @ts-ignore
@@ -288,9 +294,11 @@ export async function LaunchBrowserExecutor(
       logger.info("Launching in development mode...");
       const localExecutablePath =
         "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+      const devArgs: string[] = ["--no-sandbox", "--disable-setuid-sandbox"];
+      if (selection.proxy) devArgs.push(`--proxy-server=${selection.proxy}`);
       browser = await puppeteer.launch({
         headless: true, //testing in headful modes
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        args: devArgs,
         executablePath: localExecutablePath,
       });
     }
@@ -298,6 +306,9 @@ export async function LaunchBrowserExecutor(
     environment.log.info("Browser launched successfully.");
     environment.setBrowser(browser);
     const page = await browser.newPage();
+    if (selection.auth) {
+      try { await (page as any).authenticate(selection.auth) } catch {}
+    }
     await page.setViewport({ width: 1080, height: 1024 });
     if (stealth.enabled && stealth.fingerprintSpoofing && evasion.fingerprint) {
       evasionAttempts++;
@@ -345,6 +356,20 @@ export async function LaunchBrowserExecutor(
         evasionFailures++;
         environment.log.warning("EVASION_FALLBACK: cookie clear failed");
       }
+    }
+    // Restore cookies from session manager if configured
+    if (net?.cookies?.enabled && net?.cookies?.persist && (net.session as any)) {
+      try {
+        const jar = (net.session as any).jarRef?.();
+        const header = jar?.cookieHeaderFor(websiteUrl);
+        if (header) {
+          const pairs = header.split(/;\s*/).map(kv => {
+            const [name, value] = kv.split("=");
+            return { name, value, url: websiteUrl } as any;
+          });
+          if (pairs.length) await (page as any).setCookie(...pairs);
+        }
+      } catch {}
     }
     if (stealth.enabled && stealth.cookieManagement && cookies.set && cookies.set.length) {
       evasionAttempts++;

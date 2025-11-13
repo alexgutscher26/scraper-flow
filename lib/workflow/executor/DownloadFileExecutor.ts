@@ -3,6 +3,7 @@ import { DownloadFileTask } from "../task/DownloadFile";
 import * as fs from "fs";
 import * as path from "path";
 import { http } from "@/lib/http";
+import { ProxyManager } from "@/lib/network/proxyManager";
 
 // Helper function to download files using browser page (for cases requiring authentication/cookies)
 async function downloadWithBrowser(
@@ -164,6 +165,12 @@ export async function DownloadFileExecutor(
 
     let binaryData: ArrayBuffer | null = null
     try {
+      const net = environment.getNetwork?.();
+      const proxyMgr = net?.proxy as ProxyManager | undefined;
+      const session = net?.session as any | undefined;
+      if (session?.isExpired?.()) session.renew?.();
+      const selection = proxyMgr ? await proxyMgr.select(downloadUrl) : { url: downloadUrl };
+      const dispatcher = proxyMgr ? proxyMgr.dispatcherFor(selection) : undefined;
       binaryData = await http.request<ArrayBuffer>(downloadUrl, {
         headers: {
           "User-Agent":
@@ -175,13 +182,22 @@ export async function DownloadFileExecutor(
         },
         method: "GET",
         signal: controller.signal,
+        dispatcher: dispatcher as any,
+        cookieJar: session,
       })
+      proxyMgr?.recordSuccess(selection, 0);
     } catch (error: any) {
       clearTimeout(timeoutId);
       if (error.name === "AbortError") {
         environment.log.error("Download was aborted due to timeout");
       } else {
         environment.log.error(`Fetch failed: ${error.message}`);
+      }
+      const net = environment.getNetwork?.();
+      const proxyMgr = net?.proxy as ProxyManager | undefined;
+      if (proxyMgr) {
+        const selection = await proxyMgr.select(downloadUrl);
+        proxyMgr.recordFailure(selection, error.message || String(error));
       }
       return false;
     }
