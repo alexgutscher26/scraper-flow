@@ -4,9 +4,14 @@ import { useEffect, useState, useRef } from "react";
 import { http } from "@/lib/http";
 
 /**
- * This component provides support for scheduled workflows in both development and production
- * It periodically fetches the cron API endpoint to check for scheduled workflows
- * This acts as a failsafe when Vercel cron jobs hit frequency limitations
+ * Manages the execution of scheduled workflows through a local cron runner.
+ *
+ * This component periodically fetches the cron API endpoint to check for scheduled workflows,
+ * enabling the runner based on the environment and configuration settings. It implements
+ * exponential backoff for error handling and updates the state with the number of workflows
+ * triggered and the last run time. The component does not render anything if the runner is inactive.
+ *
+ * @returns A JSX element containing debugging data attributes if the runner is active; otherwise, null.
  */
 export function LocalCronRunner() {
   const [lastRun, setLastRun] = useState<Date | null>(null);
@@ -29,6 +34,13 @@ export function LocalCronRunner() {
     if (shouldEnableRunner) {
       setIsRunnerActive(true);
 
+      /**
+       * Checks the cron job status and triggers workflows if necessary.
+       *
+       * This function makes an API call to retrieve the current status of cron workflows, updating the state with the number of workflows triggered and the last run time. It handles errors by implementing exponential backoff for repeated failures, ensuring that the polling interval is adjusted accordingly. If the API response is successful, it logs the number of workflows triggered; otherwise, it increments the failed attempts counter.
+       *
+       * @returns {Promise<void>} A promise that resolves when the cron check is complete.
+       */
       const checkCron = async () => {
         try {
           // Add a unique timestamp to prevent any API route caching
