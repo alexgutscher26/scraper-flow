@@ -21,10 +21,10 @@ interface Props {
 /**
  * Renders the Topbar component with navigation and action buttons.
  *
- * This component displays a header with a title, optional subtitle, and navigation buttons.
- * It utilizes the `useRouter` hook for navigation and conditionally renders buttons based on
- * the `hideButtons` and `isPublished` props. The `NavigationTabs` component is included to
- * manage workflow navigation.
+ * This component displays a header containing a title, an optional subtitle, and navigation buttons.
+ * It uses the `useRouter` hook to enable back navigation and conditionally renders action buttons
+ * based on the `hideButtons` and `isPublished` props. The `NavigationTabs` component is included
+ * to facilitate workflow navigation.
  *
  * @param {Object} props - The properties for the Topbar component.
  * @param {string} props.title - The title to display in the Topbar.
