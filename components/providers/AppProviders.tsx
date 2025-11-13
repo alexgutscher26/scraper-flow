@@ -6,6 +6,9 @@ import NextTopLoader from "nextjs-toploader";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LocalCronRunner } from "../LocalCronRunner";
 
+/**
+ * Provides application context with query client and theme provider.
+ */
 export function AppProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
