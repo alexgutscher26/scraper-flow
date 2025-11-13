@@ -383,6 +383,9 @@ async function setupEnvironmentForPhase(
     environment.phases[node.id].inputs[input.name] = outputValue;
   }
 }
+/**
+ * Creates an execution environment for a given application node.
+ */
 function createExecutionEnvironment(
   node: AppNode,
   environment: Environment,
@@ -501,6 +504,15 @@ function resolvePolitenessConfig(definitionJson: string): PolitenessConfig {
   return base;
 }
 
+/**
+ * Resolve the network configuration based on a JSON definition.
+ *
+ * This function parses the provided JSON string to extract network settings and applies them as overrides to the default network configuration.
+ * If the parsing fails or the settings are not defined, it returns the default configuration. The function handles various properties for proxy, cookies, and HTTP settings.
+ *
+ * @param definitionJson - A JSON string containing network configuration settings.
+ * @returns The resolved NetworkConfig object, which may include overrides from the provided JSON or defaults.
+ */
 function resolveNetworkConfig(definitionJson: string): NetworkConfig {
   const base = defaultNetworkConfig();
   try {
@@ -529,6 +541,9 @@ function resolveNetworkConfig(definitionJson: string): NetworkConfig {
   return base;
 }
 
+/**
+ * Checks if the given task type requires a network connection.
+ */
 function requiresNetwork(type: TaskType) {
   return (
     type === TaskType.LAUNCH_BROWSER ||
