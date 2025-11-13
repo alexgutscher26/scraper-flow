@@ -1,11 +1,25 @@
 import { ExecutionEnvironment } from "@/types/executor";
 import { SelectOptionTask } from "../task/SelectOption";
 
+/**
+ * Parses a comma-separated string input into an array of trimmed values.
+ */
 function parseValues(input: any) {
   const s = String(input ?? "");
   return s.split(",").map((v) => v.trim()).filter(Boolean);
 }
 
+/**
+ * Selects options in a web page based on the provided execution environment and input parameters.
+ *
+ * The function retrieves various inputs such as selector, mode, values, and search query from the environment.
+ * It checks for required inputs and waits for the selector to be visible. Depending on the tag type, it either
+ * selects options directly or simulates keyboard interactions to select options. It also handles filtering
+ * and logs errors if options are not found. Finally, it sets the output values in the environment.
+ *
+ * @param environment - The execution environment containing input methods and logging capabilities.
+ * @returns A promise that resolves to a boolean indicating the success of the selection process.
+ */
 export async function SelectExecutor(
   environment: ExecutionEnvironment<typeof SelectOptionTask>
 ): Promise<boolean> {
