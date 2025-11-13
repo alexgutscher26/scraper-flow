@@ -46,6 +46,15 @@ interface Props {
   triggerText?: string;
 }
 
+/**
+ * Create a dialog for credential creation with type-specific fields.
+ *
+ * This function manages the state of the dialog, handles form submission, and updates the form based on the selected credential type. It utilizes the useForm hook for form management and the useMutation hook for handling credential creation. The dialog includes fields that change dynamically based on the selected credential type, ensuring the correct data structure is used for each type.
+ *
+ * @param props - The properties for the CreateCredentialDialog component.
+ * @param props.triggerText - The text to display on the dialog trigger button.
+ * @returns A JSX element representing the credential creation dialog.
+ */
 export default function CreateCredentialDialog(props: Props) {
   const { triggerText } = props;
   const [open, setOpen] = useState(false);
@@ -156,6 +165,15 @@ export default function CreateCredentialDialog(props: Props) {
     },
   ];
 
+  /**
+   * Renders type-specific fields based on the selected credential type.
+   *
+   * The function uses a switch statement to determine which fields to render based on the value of selectedType.
+   * It handles three types: SMTP_EMAIL, API_KEY, and CUSTOM, each with its own set of input fields and validation logic.
+   * For SMTP_EMAIL, it includes specific instructions for Gmail accounts, while API_KEY and CUSTOM types allow for API credentials and custom data input, respectively.
+   *
+   * @returns JSX elements representing the form fields for the selected credential type, or null if no valid type is selected.
+   */
   const renderTypeSpecificFields = () => {
     switch (selectedType) {
       case CredentialType.SMTP_EMAIL:
