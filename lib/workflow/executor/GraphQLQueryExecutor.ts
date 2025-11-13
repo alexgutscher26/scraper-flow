@@ -4,6 +4,17 @@ import { applyHeaders } from "@/lib/politeness/userAgent";
 import { http } from "@/lib/http";
 import { ProxyManager } from "@/lib/network/proxyManager";
 
+/**
+ * Executes a GraphQL query against a specified endpoint.
+ *
+ * The function retrieves necessary inputs from the environment, including the endpoint URL, query, and optional variables.
+ * It handles both browser and non-browser contexts, applying appropriate headers and managing network requests.
+ * In case of failures, it attempts to use a failover mechanism with proxy management.
+ * The function logs errors and returns a boolean indicating success or failure.
+ *
+ * @param environment - The execution environment containing configuration and state for the GraphQL query.
+ * @returns A promise that resolves to a boolean indicating the success of the query execution.
+ */
 export async function GraphQLQueryExecutor(
   environment: ExecutionEnvironment<typeof GraphQLQueryTask>
 ): Promise<boolean> {
