@@ -47,6 +47,13 @@ interface Props {
   triggerText?: string;
 }
 
+/**
+ * Create a dialog for credential creation with various types.
+ *
+ * This function manages the state of the dialog, handles form submission, and updates the form based on the selected credential type. It utilizes the useForm hook for form management and the useMutation hook for credential creation. The dialog supports multiple credential types, each with specific fields, and provides user feedback through toast notifications upon success or error.
+ *
+ * @param props - The properties for the dialog, including triggerText for the button.
+ */
 export default function CreateCredentialDialog(props: Props) {
   const { triggerText } = props;
   const [open, setOpen] = useState(false);
@@ -103,6 +110,14 @@ export default function CreateCredentialDialog(props: Props) {
     },
     [mutate]
   );
+  /**
+   * Handles the change of credential type and updates the form values accordingly.
+   *
+   * The function sets the selected credential type and updates the form's credential data based on the specified type.
+   * It resets the data with default values for each credential type, including SMTP_EMAIL, API_KEY, TWO_FACTOR, and CUSTOM.
+   *
+   * @param type - The new credential type to set.
+   */
   const handleTypeChange = (type: CredentialTypeValue) => {
     setSelectedType(type);
     form.setValue("credentialData.type", type);
@@ -172,6 +187,15 @@ export default function CreateCredentialDialog(props: Props) {
     },
   ];
 
+  /**
+   * Render type-specific fields based on the selected credential type.
+   *
+   * This function uses a switch statement to determine which fields to render based on the value of selectedType.
+   * It handles different credential types such as SMTP_EMAIL, API_KEY, TWO_FACTOR, and CUSTOM, rendering appropriate
+   * form fields for each type, including validation and descriptions for user guidance.
+   *
+   * @returns JSX elements representing the form fields for the selected credential type, or null if no valid type is selected.
+   */
   const renderTypeSpecificFields = () => {
     switch (selectedType) {
       case CredentialType.SMTP_EMAIL:
