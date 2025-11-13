@@ -10,6 +10,16 @@ type Cookie = {
   sameSite?: "Lax" | "Strict" | "None";
 };
 
+/**
+ * Parse a Set-Cookie header string into a Cookie object.
+ *
+ * The function splits the header into its components, extracts the name and value of the cookie, and validates them.
+ * It then processes additional attributes such as domain, path, expires, max-age, secure, httponly, and samesite,
+ * updating the cookie object accordingly. If any validation fails, it returns null.
+ *
+ * @param header - The Set-Cookie header string to parse.
+ * @returns A Cookie object representing the parsed cookie, or null if parsing fails.
+ */
 function parseSetCookie(header: string): Cookie | null {
   const parts = header.split(/;\s*/);
   const [nameValue, ...attrs] = parts;
@@ -57,6 +67,15 @@ function isExpired(c: Cookie): boolean {
 export class CookieJar {
   private store = new Map<string, Cookie[]>(); // key by domain
 
+  /**
+   * Sets cookies based on the provided headers and URL.
+   *
+   * The function first checks if the setCookieHeaders are valid. It then parses each header, ensuring that secure cookies are only set for HTTPS URLs. It manages existing cookies by removing duplicates based on name and domain before adding the new parsed cookies to the store associated with the host.
+   *
+   * @param setCookieHeaders - An array of set-cookie headers to be processed.
+   * @param url - The URL to which the cookies will be associated.
+   * @returns void
+   */
   setCookies(setCookieHeaders: string[] | null | undefined, url: string): void {
     if (!setCookieHeaders || !setCookieHeaders.length) return;
     const u = new URL(url);
