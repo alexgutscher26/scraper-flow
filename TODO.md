@@ -162,9 +162,9 @@ Workflow Features
   - Linked files: `lib/workflow/executor/LaunchBrowserExecutor.ts:10`, `lib/politeness/**`, `types/politeness.ts`
 - [x] Form interaction executors: type, select, upload; captcha strategy [P2]
 - [x] Dynamic page handling: infinite scroll, intercept network responses [P2]
-- [ ] AI-assisted selector generation and validation feedback loop [P2]
+- [x] AI-assisted selector generation and validation feedback loop [P2]
 
-- [ ] Stealth mode and anti-bot evasion options [P2]
+- [x] Stealth mode and anti-bot evasion options [P2]
   - Linked files: `lib/workflow/executor/LaunchBrowserExecutor.ts:1`
 
 - [ ] Proxy rotation and session/cookie jar management [P2]

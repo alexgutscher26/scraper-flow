@@ -304,6 +304,58 @@ NEXT_PUBLIC_LOCAL_CRON_FREQUENCY=60000
 NEXT_PUBLIC_APP_URL=https://your-domain.com
 ```
 
+### Stealth Mode & Anti-bot Evasion
+```env
+# Core toggles
+STEALTH_MODE_ENABLED=true
+STEALTH_RANDOM_DELAYS_ENABLED=true
+STEALTH_MOUSE_MOVEMENT_ENABLED=false
+STEALTH_FINGERPRINT_SPOOFING_ENABLED=true
+STEALTH_UA_ROTATION_ENABLED=true
+STEALTH_COOKIE_MANAGEMENT_ENABLED=true
+
+# Delay parameters
+STEALTH_DELAY_MIN_MS=50
+STEALTH_DELAY_MAX_MS=250
+STEALTH_DELAY_JITTER_PCT=0.2
+
+# Mouse movement parameters
+STEALTH_MOUSE_POINTS=6
+STEALTH_MOUSE_JITTER_PX=3
+STEALTH_MOUSE_MIN_SPEED=300
+STEALTH_MOUSE_MAX_SPEED=800
+
+# Fingerprint spoofing pools/ranges
+STEALTH_LANGUAGES_POOL=en-US,en;q=0.9,fr-FR,fr;q=0.8
+STEALTH_PLATFORM_POOL=Win32,MacIntel,Linux x86_64
+STEALTH_DEVICE_MEMORY_MIN=4
+STEALTH_DEVICE_MEMORY_MAX=16
+STEALTH_HW_CONCURRENCY_MIN=4
+STEALTH_HW_CONCURRENCY_MAX=16
+STEALTH_WEBGL_SPOOFING=true
+
+# User-Agent overrides
+STEALTH_UA_OVERRIDE=
+STEALTH_UA_ROTATE_STRATEGY=perNavigation
+
+# Cookie settings
+STEALTH_COOKIE_CLEAR_BEFORE=false
+STEALTH_COOKIE_PERSIST=true
+STEALTH_COOKIE_SET_JSON=[{"name":"session","value":"abc","domain":"example.com"}]
+```
+
+#### Usage Example
+- Enable stealth globally and override UA for the launch step:
+```env
+STEALTH_MODE_ENABLED=true
+STEALTH_UA_OVERRIDE=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36
+```
+- Keep defaults for politeness and allow stealth to add small human-like delays and fingerprint spoofing without modifying workflow tasks.
+
+#### Notes
+- Stealth integrates with existing politeness settings (user-agent rotation, headers, accept-language). When `STEALTH_UA_OVERRIDE` is set, it supersedes the UA applied by politeness for the Launch step only.
+- Metrics are logged during the Launch step indicating evasion attempts, failures, and detections.
+
 ### Configuration Notes
 - **ENCRYPTION_SECRET**: Must be exactly 32 characters (64 hex digits)
 - **API_SECRET**: Used for secure communication between cron endpoints
