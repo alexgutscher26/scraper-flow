@@ -4,6 +4,18 @@ import { Label } from "@/components/ui/label";
 import { ParamProps } from "@/types/appNode";
 import { Textarea } from "@/components/ui/textarea";
 
+/**
+ * Renders a textarea input for a parameter with validation and state management.
+ *
+ * The component initializes internal state for the textarea value and handles updates based on props.
+ * It performs client-side validation for specific parameters, updating error and info messages accordingly.
+ * The component also updates the parent state when the textarea value changes.
+ *
+ * @param param - An object containing parameter details such as name and required status.
+ * @param value - The initial value for the textarea.
+ * @param updateNodeParamValue - A function to update the parent component's state with the textarea value.
+ * @param disabled - A boolean indicating whether the textarea should be disabled.
+ */
 function TextareaParam({
   param,
   value,
