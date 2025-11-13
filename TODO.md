@@ -160,7 +160,7 @@ Workflow Features
 - [ ] Templates for common flows: list→detail, pagination, login + extract [P2]
 - [x] Politeness features: robots.txt awareness, randomized delays, UA rotation [P0]
   - Linked files: `lib/workflow/executor/LaunchBrowserExecutor.ts:10`, `lib/politeness/**`, `types/politeness.ts`
-- [ ] Form interaction executors: type, select, upload; captcha strategy [P2]
+- [x] Form interaction executors: type, select, upload; captcha strategy [P2]
 - [ ] Dynamic page handling: infinite scroll, intercept network responses [P2]
 - [ ] AI-assisted selector generation and validation feedback loop [P2]
 

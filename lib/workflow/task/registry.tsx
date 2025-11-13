@@ -4,6 +4,7 @@ import { LaunchBrowserTask } from "./LaunchBrowser";
 import { PageToHtmlTask } from "./PageToHtml";
 import { WorkflowTask } from "@/types/workflow";
 import { FillInputTask } from "./FillInput";
+import { TypeInputTask } from "./TypeInput";
 import { ClickElementTask } from "./ClickElement";
 import { WaitForElementTask } from "./WaitForElement";
 import { DeliverViaWebhookTask } from "./DeliverViaWebhook";
@@ -21,6 +22,9 @@ import { DownloadFileTask } from "./DownloadFile";
 import { SendEmailTask } from "./SendEmail";
 import { LoopTask } from "./Loop";
 import { FilterDataTask } from "./FilterData";
+import { SelectOptionTask } from "./SelectOption";
+import { UploadFilesTask } from "./UploadFiles";
+import { SolveCaptchaTask } from "./SolveCaptcha";
 
 type Registry = {
   [K in TaskType]: WorkflowTask & { type: K };
@@ -31,6 +35,7 @@ export const TaskRegistry: Registry = {
   PAGE_TO_HTML: PageToHtmlTask,
   EXTRACT_TEXT_FROM_ELEMENT: ExtractTextFromElementTask,
   FILL_INPUT: FillInputTask,
+  TYPE_INPUT: TypeInputTask,
   CLICK_ELEMENT: ClickElementTask,
   WAIT_FOR_ELEMENT: WaitForElementTask,
   DELIVER_VIA_WEBHOOK: DeliverViaWebhookTask,
@@ -48,4 +53,7 @@ export const TaskRegistry: Registry = {
   SEND_EMAIL: SendEmailTask,
   LOOP: LoopTask,
   FILTER_DATA: FilterDataTask,
+  SELECT_OPTION: SelectOptionTask,
+  UPLOAD_FILES: UploadFilesTask,
+  SOLVE_CAPTCHA: SolveCaptchaTask,
 };

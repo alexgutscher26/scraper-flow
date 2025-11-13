@@ -143,6 +143,12 @@ export default function CreateCredentialDialog(props: Props) {
       icon: Key,
     },
     {
+      value: CredentialType.API_KEY,
+      label: "Captcha Provider",
+      description: "2Captcha, AntiCaptcha or similar service API key",
+      icon: Key,
+    },
+    {
       value: CredentialType.CUSTOM,
       label: "Custom",
       description: "Custom credential format",
@@ -251,7 +257,7 @@ export default function CreateCredentialDialog(props: Props) {
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Your API key"
+                      placeholder="Your API key (e.g., 2Captcha or AntiCaptcha)"
                       {...field}
                     />
                   </FormControl>
@@ -283,7 +289,7 @@ export default function CreateCredentialDialog(props: Props) {
                 <FormItem>
                   <FormLabel>Base URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://api.example.com" {...field} />
+                    <Input placeholder="https://api.2captcha.com or provider URL" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

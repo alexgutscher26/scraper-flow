@@ -73,8 +73,12 @@ function TaskMenu() {
             <AccordionContent className="flex flex-col gap-1">
               <TaskMenuBtn taskType={TaskType.NAVIGATE_URL} />
               <TaskMenuBtn taskType={TaskType.FILL_INPUT} />
+              <TaskMenuBtn taskType={TaskType.TYPE_INPUT} />
               <TaskMenuBtn taskType={TaskType.CLICK_ELEMENT} />
               <TaskMenuBtn taskType={TaskType.SCROLL_TO_ELEMENT} />
+              <TaskMenuBtn taskType={TaskType.SELECT_OPTION} />
+              <TaskMenuBtn taskType={TaskType.UPLOAD_FILES} />
+              <TaskMenuBtn taskType={TaskType.SOLVE_CAPTCHA} />
             </AccordionContent>
           </AccordionItem>{" "}
           <AccordionItem value="extraction">
