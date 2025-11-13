@@ -25,6 +25,10 @@ import { FilterDataTask } from "./FilterData";
 import { SelectOptionTask } from "./SelectOption";
 import { UploadFilesTask } from "./UploadFiles";
 import { SolveCaptchaTask } from "./SolveCaptcha";
+import { ExtractCssFromPageTask } from "./ExtractCssFromPage";
+import { ExtractXPathFromPageTask } from "./ExtractXPathFromPage";
+import { InterceptNetworkTask } from "./InterceptNetwork";
+import { GraphQLQueryTask } from "./GraphQLQuery";
 
 type Registry = {
   [K in TaskType]: WorkflowTask & { type: K };
@@ -56,4 +60,8 @@ export const TaskRegistry: Registry = {
   SELECT_OPTION: SelectOptionTask,
   UPLOAD_FILES: UploadFilesTask,
   SOLVE_CAPTCHA: SolveCaptchaTask,
+  EXTRACT_CSS_FROM_PAGE: ExtractCssFromPageTask,
+  EXTRACT_XPATH_FROM_PAGE: ExtractXPathFromPageTask,
+  INTERCEPT_NETWORK: InterceptNetworkTask,
+  GRAPHQL_QUERY: GraphQLQueryTask,
 };

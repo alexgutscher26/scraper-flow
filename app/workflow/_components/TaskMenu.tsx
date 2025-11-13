@@ -91,6 +91,8 @@ function TaskMenu() {
               <TaskMenuBtn taskType={TaskType.EXTRACT_DATA_WITH_AI} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_TABLE_DATA} />
               <TaskMenuBtn taskType={TaskType.TAKE_SCREENSHOT} />
+              <TaskMenuBtn taskType={TaskType.EXTRACT_CSS_FROM_PAGE} />
+              <TaskMenuBtn taskType={TaskType.EXTRACT_XPATH_FROM_PAGE} />
             </AccordionContent>
           </AccordionItem>{" "}
           <AccordionItem value="storage">
@@ -129,6 +131,8 @@ function TaskMenu() {
               <TaskMenuBtn taskType={TaskType.DATA_TRANSFORM} />
               <TaskMenuBtn taskType={TaskType.LOOP} />
               <TaskMenuBtn taskType={TaskType.FILTER_DATA} />
+              <TaskMenuBtn taskType={TaskType.INTERCEPT_NETWORK} />
+              <TaskMenuBtn taskType={TaskType.GRAPHQL_QUERY} />
             </AccordionContent>
           </AccordionItem>
           <AccordionItem value="communication">

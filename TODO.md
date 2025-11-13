@@ -170,7 +170,7 @@ Workflow Features
 - [ ] Proxy rotation and session/cookie jar management [P2]
   - Linked files: `lib/workflow/executionWorkflow.ts:1`
 
-- [ ] Advanced extraction: XPath/CSS, network intercept, GraphQL [P2]
+- [x] Advanced extraction: XPath/CSS, network intercept, GraphQL [P2]
   - Linked files: `lib/workflow/executor/**`
 
 - [ ] Form automation improvements: file upload, 2FA, captcha providers [P2]

@@ -28,6 +28,10 @@ import { FilterDataExecutor } from "./FilterDataExecutor";
 import { SelectExecutor } from "./SelectExecutor";
 import { UploadExecutor } from "./UploadExecutor";
 import { CaptchaExecutor } from "./CaptchaExecutor";
+import { ExtractCssFromPageExecutor } from "./ExtractCssFromPageExecutor";
+import { ExtractXPathFromPageExecutor } from "./ExtractXPathFromPageExecutor";
+import { InterceptNetworkExecutor } from "./InterceptNetworkExecutor";
+import { GraphQLQueryExecutor } from "./GraphQLQueryExecutor";
 
 type ExecutorFn<T extends WorkflowTask> = (
   environment: ExecutionEnvironment<T>
@@ -63,4 +67,8 @@ export const ExecutorRegistry: RegistryType = {
   SELECT_OPTION: SelectExecutor,
   UPLOAD_FILES: UploadExecutor,
   SOLVE_CAPTCHA: CaptchaExecutor,
+  EXTRACT_CSS_FROM_PAGE: ExtractCssFromPageExecutor,
+  EXTRACT_XPATH_FROM_PAGE: ExtractXPathFromPageExecutor,
+  INTERCEPT_NETWORK: InterceptNetworkExecutor,
+  GRAPHQL_QUERY: GraphQLQueryExecutor,
 };
