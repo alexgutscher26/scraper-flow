@@ -5,6 +5,17 @@ import { Label } from "@/components/ui/label";
 import { ParamProps } from "@/types/appNode";
 import { Textarea } from "@/components/ui/textarea";
 
+/**
+ * Renders a string input or textarea component with validation.
+ *
+ * This component manages its internal state for the input value and handles validation for specific cases, such as regex patterns for the "AcceptTypes" parameter. It updates the parent component's state through the updateNodeParamValue function when the input loses focus. The component also displays error messages and helper text based on the provided parameters.
+ *
+ * @param param - An object containing properties for the input, including name, required status, variant, and helper text.
+ * @param value - The initial value for the input field.
+ * @param updateNodeParamValue - A function to update the parent component's state with the new value.
+ * @param disabled - A boolean indicating whether the input should be disabled.
+ * @returns A JSX element representing the input or textarea component.
+ */
 function StringParam({
   param,
   value,
