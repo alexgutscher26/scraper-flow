@@ -57,6 +57,17 @@ export class HttpClient {
     }
   }
 
+  /**
+   * Sends an HTTP request and returns the response data.
+   *
+   * The function first checks if a cached response exists and is still valid. If not, it initiates a fetch request, handling retries and timeouts.
+   * It processes the response based on its content type and caches the result for future requests.
+   * The function also manages inflight requests to prevent duplicate fetches.
+   *
+   * @param input - The URL to which the request is sent.
+   * @param init - An optional object containing request initialization options, including method, headers, and timeout settings.
+   * @returns A promise that resolves to the response data of type T.
+   */
   async request<T = any>(input: string, init: RequestInit & RequestOptions = {}): Promise<T> {
     const key = stableKey(input, init)
     const now = performance.now?.() ?? Date.now()
@@ -65,6 +76,16 @@ export class HttpClient {
     const existing = this.inflight.get(key)
     if (existing) return existing as Promise<T>
 
+    /**
+     * Fetch data from a given input URL with retry logic and optional timeout.
+     *
+     * The function attempts to fetch data using the Fetch API, handling retries on failure based on specified conditions. It manages timeouts using an AbortController and captures cookies if a cookieJar is provided. The response is parsed based on its content type, and metrics are emitted for each request. If the response is not successful, it checks if the request should be retried based on the status code.
+     *
+     * @param input - The URL to fetch data from.
+     * @param init - An optional configuration object for the fetch request.
+     * @returns The parsed response data of type T.
+     * @throws Error If the fetch fails after the specified number of retries or if the response is not ok.
+     */
     const doFetch = async (): Promise<T> => {
       const method = String((init as any)?.method || "GET")
       let attempt = 0
