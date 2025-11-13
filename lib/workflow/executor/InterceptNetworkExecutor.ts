@@ -1,6 +1,16 @@
 import { ExecutionEnvironment } from "@/types/executor";
 import { InterceptNetworkTask } from "../task/InterceptNetwork";
 
+/**
+ * Intercepts network requests and responses based on specified criteria.
+ *
+ * This function retrieves input parameters such as URL pattern, resource type, method, duration, and max responses.
+ * It sets up event handlers for network responses and finished requests, filtering them according to the specified criteria.
+ * The collected data is then output as JSON. If any errors occur during processing, they are logged, and the function returns false.
+ *
+ * @param environment - The execution environment containing methods for logging and retrieving input parameters.
+ * @returns A promise that resolves to true if the operation is successful, or false if it fails.
+ */
 export async function InterceptNetworkExecutor(
   environment: ExecutionEnvironment<typeof InterceptNetworkTask>
 ): Promise<boolean> {
@@ -34,6 +44,15 @@ export async function InterceptNetworkExecutor(
       }
     };
 
+    /**
+     * Handles the response from a network request and processes it based on specified criteria.
+     *
+     * The function extracts the request details, including URL, method, and resource type, and checks them against provided filters.
+     * If the response body is to be included, it attempts to parse it based on the content type.
+     * Additionally, it captures any post data from the request and logs warnings for any errors encountered during processing.
+     *
+     * @param response - The response object from the network request.
+     */
     const handlerResponse = async (response: any) => {
       try {
         const req = response.request();
@@ -85,6 +104,13 @@ export async function InterceptNetworkExecutor(
       }
     };
 
+    /**
+     * Handles the completion of a request and processes its details.
+     *
+     * This function extracts the URL, resource type, and method from the request. It checks if the resource type and method match specified criteria, and validates the URL against a pattern if provided. It then gathers the response details, including status, headers, and optionally the body and post data, before pushing the item to a collection. Errors during processing are logged for debugging purposes.
+     *
+     * @param request - The request object containing details about the completed request.
+     */
     const handlerFinished = async (request: any) => {
       try {
         const url = request.url();
