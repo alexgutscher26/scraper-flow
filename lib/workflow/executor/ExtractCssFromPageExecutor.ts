@@ -4,6 +4,16 @@ import type { Page } from "puppeteer";
 
 const pageCache: WeakMap<any, Map<string, any>> = new WeakMap();
 
+/**
+ * Extract CSS or attribute values from a web page based on a given selector.
+ *
+ * The function retrieves the page from the execution environment and checks for the presence of the selector and attribute.
+ * It utilizes caching to avoid redundant extractions and evaluates the page to extract the desired values.
+ * If no data is found, it logs a warning. In case of errors, it logs the error message and returns false.
+ *
+ * @param environment - The execution environment containing the page and input parameters.
+ * @returns A promise that resolves to true if data extraction is successful, otherwise false.
+ */
 export async function ExtractCssFromPageExecutor(
   environment: ExecutionEnvironment<typeof ExtractCssFromPageTask>
 ): Promise<boolean> {
@@ -39,6 +49,16 @@ export async function ExtractCssFromPageExecutor(
     const result = await page.evaluate(
       ({ selector, attr, allFlag }) => {
         const els = Array.from(document.querySelectorAll(selector));
+        /**
+         * Retrieve the value of a specified attribute from a given HTML element.
+         *
+         * The function checks the attribute type and returns the corresponding value from the element.
+         * It handles various cases such as "innerText", "value", "href", "src", and "html",
+         * defaulting to the text content if the attribute does not match any case.
+         *
+         * @param el - The HTML element from which to retrieve the attribute value.
+         * @returns The value of the specified attribute or null if not applicable.
+         */
         const getVal = (el: Element) => {
           switch (attr) {
             case "innerText":
