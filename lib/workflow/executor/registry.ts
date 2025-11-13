@@ -32,6 +32,7 @@ import { ExtractCssFromPageExecutor } from "./ExtractCssFromPageExecutor";
 import { ExtractXPathFromPageExecutor } from "./ExtractXPathFromPageExecutor";
 import { InterceptNetworkExecutor } from "./InterceptNetworkExecutor";
 import { GraphQLQueryExecutor } from "./GraphQLQueryExecutor";
+import { GenerateSelectorExecutor } from "./GenerateSelectorExecutor";
 
 type ExecutorFn<T extends WorkflowTask> = (
   environment: ExecutionEnvironment<T>
@@ -71,4 +72,5 @@ export const ExecutorRegistry: RegistryType = {
   EXTRACT_XPATH_FROM_PAGE: ExtractXPathFromPageExecutor,
   INTERCEPT_NETWORK: InterceptNetworkExecutor,
   GRAPHQL_QUERY: GraphQLQueryExecutor,
+  GENERATE_SELECTOR_AI: GenerateSelectorExecutor,
 };

@@ -57,6 +57,7 @@ function TaskMenu() {
           type="multiple"
           className="w-full"
           defaultValue={[
+            "browser",
             "extraction",
             "interactions",
             "timing",
@@ -66,6 +67,12 @@ function TaskMenu() {
             "communication",
           ]}
         >
+          <AccordionItem value="browser">
+            <AccordionTrigger className="font-bold">Browser</AccordionTrigger>
+            <AccordionContent className="flex flex-col gap-1">
+              <TaskMenuBtn taskType={TaskType.LAUNCH_BROWSER} />
+            </AccordionContent>
+          </AccordionItem>
           <AccordionItem value="interactions">
             <AccordionTrigger className="font-bold">
               User interactions
@@ -89,6 +96,7 @@ function TaskMenu() {
               <TaskMenuBtn taskType={TaskType.PAGE_TO_HTML} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_TEXT_FROM_ELEMENT} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_DATA_WITH_AI} />
+              <TaskMenuBtn taskType={TaskType.GENERATE_SELECTOR_AI} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_TABLE_DATA} />
               <TaskMenuBtn taskType={TaskType.TAKE_SCREENSHOT} />
               <TaskMenuBtn taskType={TaskType.EXTRACT_CSS_FROM_PAGE} />

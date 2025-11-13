@@ -29,6 +29,7 @@ import { ExtractCssFromPageTask } from "./ExtractCssFromPage";
 import { ExtractXPathFromPageTask } from "./ExtractXPathFromPage";
 import { InterceptNetworkTask } from "./InterceptNetwork";
 import { GraphQLQueryTask } from "./GraphQLQuery";
+import { GenerateSelectorTask } from "./GenerateSelector";
 
 type Registry = {
   [K in TaskType]: WorkflowTask & { type: K };
@@ -64,4 +65,5 @@ export const TaskRegistry: Registry = {
   EXTRACT_XPATH_FROM_PAGE: ExtractXPathFromPageTask,
   INTERCEPT_NETWORK: InterceptNetworkTask,
   GRAPHQL_QUERY: GraphQLQueryTask,
+  GENERATE_SELECTOR_AI: GenerateSelectorTask,
 };
