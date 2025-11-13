@@ -47,6 +47,17 @@ async function downloadWithBrowser(
   }
 }
 
+/**
+ * Downloads a file from a specified URL or a web page element.
+ *
+ * The function retrieves the file URL based on the provided URL type, validates it, and attempts to download the file.
+ * If the direct download fails, it falls back to a browser-based download method.
+ * It also handles timeouts, logs errors, and ensures the downloaded file is valid before converting it to base64 and setting the output.
+ *
+ * @param environment - The execution environment containing methods for logging, input retrieval, and network management.
+ * @returns A promise that resolves to a boolean indicating the success of the download operation.
+ * @throws Error If any error occurs during the download process, including invalid URLs or file writing issues.
+ */
 export async function DownloadFileExecutor(
   environment: ExecutionEnvironment<typeof DownloadFileTask>
 ): Promise<boolean> {
