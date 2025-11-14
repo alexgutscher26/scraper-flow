@@ -14,6 +14,15 @@ type Stats = Record<
     failed: number;
   }
 >;
+/**
+ * Retrieve statistics of workflow executions for a specified period.
+ *
+ * The function first authenticates the user and checks for a valid user ID. It then converts the provided period into a date range and fetches workflow executions from the database. The statistics are calculated by iterating over each day in the date range, counting the number of successful and failed executions for each day. Finally, it formats the results into an array of objects containing the date and corresponding execution stats.
+ *
+ * @param period - The time period for which to retrieve workflow execution statistics.
+ * @returns An array of objects containing the date and the count of successful and failed executions for that date.
+ * @throws Error If the user is not found during authentication.
+ */
 export const GetWorkflowExecutionsStats = async (period: Period) => {
   const { userId } = await auth();
   if (!userId) {
