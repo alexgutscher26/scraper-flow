@@ -7,6 +7,9 @@ export class Semaphore {
     this.current = 0;
     this.queue = [];
   }
+  /**
+   * Increments the current count or adds a resolver to the queue if the max is reached.
+   */
   async acquire() {
     if (this.current < this.max) {
       this.current++;
