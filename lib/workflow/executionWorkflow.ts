@@ -10,12 +10,13 @@ import {
   BackoffStrategy,
 } from '@/types/workflow';
 import { computeRetryBackoffMs, runWithRetry } from './retry';
-import { Semaphore, runConcurrentWithLimit } from './concurrency';
+import { runConcurrentWithLimit } from './concurrency';
 import { ExecutionPhase } from '@prisma/client';
 import { AppNode } from '@/types/appNode';
 import { TaskRegistry } from './task/registry';
 import { TaskParamType, TaskType } from '@/types/TaskType';
-import { ExecutorRegistry } from './executor/registry';
+import { ExecutorRegistry, ExecutorMeta, ExecutorKind } from './executor/registry';
+import { WorkerPool, defaultConcurrencyConfig, ConcurrencyConfig } from './workerPool';
 import { Environment, ExecutionEnvironment } from '@/types/executor';
 import { Browser, Page } from 'puppeteer';
 import { Browser as BrowserCore, Page as PageCore } from 'puppeteer-core';
@@ -147,13 +148,15 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
     return;
   }
 
+  const concurrencyCfg = resolveConcurrencyConfig(execution.workflow.definition);
+  const workerPool = new WorkerPool(concurrencyCfg);
   const grouped = groupPhasesByNumber(execution.phases);
   for (const [, phases] of grouped) {
     const results = await runConcurrentWithLimit(
       phases.map((p) => async () =>
-        execitopnWorkflowPhase(p, environment, edges, execution.userId, retryPolicy)
+        execitopnWorkflowPhase(p, environment, edges, execution.userId, retryPolicy, workerPool)
       ),
-      networkSemaphore.max
+      workerPool.getMaxTotalConcurrency()
     );
     for (const r of results) {
       creditsConsumed += r.creditsConsumed;
@@ -245,7 +248,8 @@ async function execitopnWorkflowPhase(
   environment: Environment,
   edges: Edge[],
   userId: string,
-  retryPolicy: RetryPolicy
+  retryPolicy: RetryPolicy,
+  workerPool: WorkerPool
 ) {
   const node = JSON.parse(phase.node) as AppNode;
   let logCollector = createLogCollector({
@@ -285,14 +289,12 @@ async function execitopnWorkflowPhase(
     return ok;
   };
 
+  const kind = ExecutorMeta[node.data.type]?.kind || ExecutorKind.OTHER;
   let result;
-  if (requiresNetwork(node.data.type)) {
-    await networkSemaphore.acquire();
-    try {
-      result = await runWithRetry(attemptFn, retryPolicy, sleep, logCollector);
-    } finally {
-      networkSemaphore.release();
-    }
+  if (kind === ExecutorKind.BROWSER) {
+    result = await workerPool.runBrowser(() => runWithRetry(attemptFn, retryPolicy, sleep, logCollector));
+  } else if (kind === ExecutorKind.PAGE) {
+    result = await workerPool.runPage(() => runWithRetry(attemptFn, retryPolicy, sleep, logCollector));
   } else {
     result = await runWithRetry(attemptFn, retryPolicy, sleep, logCollector);
   }
@@ -306,6 +308,7 @@ async function execitopnWorkflowPhase(
 
   const outputs = environment.phases[node.id].outputs;
   outputs['_retry'] = retryState;
+  outputs['_workerMetrics'] = workerPool.getMetricsSnapshot();
 
   await finalizePhase(phase.id, node.data.type, success, outputs, logCollector, creditsConsumed);
 
@@ -635,11 +638,8 @@ function resolveNetworkConfig(definitionJson: string): NetworkConfig {
  * Checks if the given task type requires a network connection.
  */
 function requiresNetwork(type: TaskType) {
-  return (
-    type === TaskType.LAUNCH_BROWSER ||
-    type === TaskType.NAVIGATE_URL ||
-    type === TaskType.CLICK_ELEMENT
-  );
+  const kind = ExecutorMeta[type]?.kind || ExecutorKind.OTHER;
+  return kind === ExecutorKind.BROWSER || kind === ExecutorKind.PAGE;
 }
 
 async function maybePoliteDelay(type: TaskType, environment: Environment, collector: LogCollector) {
@@ -698,7 +698,46 @@ function resolveRetryPolicy(definitionJson: string): RetryPolicy {
   return base;
 }
 
-const networkSemaphore = new Semaphore(2);
+/**
+ * Resolves concurrency configuration from workflow definition JSON.
+ * Expected shape:
+ * {
+ *   "settings": {
+ *     "concurrency": {
+ *       "maxConcurrentBrowsers": number,
+ *       "maxConcurrentPages": number,
+ *       "maxQueueSize": number,
+ *       "queueStrategy": "block" | "fail"
+ *     }
+ *   }
+ * }
+ */
+function resolveConcurrencyConfig(definitionJson: string): ConcurrencyConfig {
+  const base = defaultConcurrencyConfig();
+  try {
+    const def = JSON.parse(definitionJson);
+    const override = def?.settings?.concurrency;
+    if (override && typeof override === 'object') {
+      return {
+        maxConcurrentBrowsers:
+          typeof override.maxConcurrentBrowsers === 'number'
+            ? override.maxConcurrentBrowsers
+            : base.maxConcurrentBrowsers,
+        maxConcurrentPages:
+          typeof override.maxConcurrentPages === 'number'
+            ? override.maxConcurrentPages
+            : base.maxConcurrentPages,
+        maxQueueSize:
+          typeof override.maxQueueSize === 'number' ? override.maxQueueSize : base.maxQueueSize,
+        queueStrategy:
+          override.queueStrategy === 'fail' || override.queueStrategy === 'block'
+            ? override.queueStrategy
+            : base.queueStrategy,
+      } as ConcurrencyConfig;
+    }
+  } catch {}
+  return base;
+}
 
 export function groupPhasesByNumber(phases: ExecutionPhase[]): Map<number, ExecutionPhase[]> {
   const map = new Map<number, ExecutionPhase[]>();

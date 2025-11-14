@@ -50,6 +50,14 @@ type CookieSettings = {
   persist?: boolean;
 };
 
+type ResourceBlockOptions = {
+  enabled: boolean;
+  blockImages: boolean;
+  blockFonts: boolean;
+  blockAds: boolean;
+  adUrlPatterns: string[];
+};
+
 /**
  * Derives stealth configuration from environment variables.
  */
@@ -126,6 +134,17 @@ function readStealthEnv(): {
     },
     cookies: { clearBefore, set, persist },
   };
+}
+
+function readResourceBlockEnv(): ResourceBlockOptions {
+  const enabled = (process.env.RESOURCE_BLOCK_ENABLE ?? 'true') !== 'false';
+  const blockImages = process.env.RESOURCE_BLOCK_IMAGES === 'true';
+  const blockFonts = process.env.RESOURCE_BLOCK_FONTS === 'true';
+  const blockAds = process.env.RESOURCE_BLOCK_ADS === 'true';
+  const raw = process.env.RESOURCE_BLOCK_AD_PATTERNS ??
+    'doubleclick.net,googlesyndication.com,adservice.google.com,ads.yahoo.com,adroll.com,/ads/,/adserver/';
+  const adUrlPatterns = raw.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+  return { enabled, blockImages, blockFonts, blockAds, adUrlPatterns };
 }
 
 /**
@@ -335,58 +354,122 @@ export async function LaunchBrowserExecutor(
     const proxyMgr = net?.proxy as ProxyManager | undefined;
     const selection = proxyMgr ? await proxyMgr.select(websiteUrl) : ({ url: websiteUrl } as any);
     const { stealth, evasion, cookies } = readStealthEnv();
+    const blocking = readResourceBlockEnv();
     let evasionAttempts = 0;
     let evasionFailures = 0;
     let detectionsFound = 0;
-    let browser: Browser | BrowserCore;
+    let browser: Browser | BrowserCore | undefined = environment.getBrowser?.();
+    const tStart = Date.now();
     logger.info(`@process.......... ${process.env.NODE_ENV} ${process.env.VERCEL_ENV}`);
-    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
-      logger.info('Launching in production mode...');
-      // Updated production configuration
-      const executionPath =
-        'https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar';
-
-      // "https://github.com/Sparticuz/chromium/releases/download/v119.0.2/chromium-v119.0.2-pack.tar"
-      // "/opt/nodejs/node_modules/@sparticuz/chromium/bin"
-
-      const launchArgs: string[] = [
-        ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--hide-scrollbars',
-        '--disable-web-security',
-      ];
-      if (selection.proxy) launchArgs.push(`--proxy-server=${selection.proxy}`);
-      browser = await puppeteerCore.launch({
-        executablePath: await chromium.executablePath(executionPath),
-        args: launchArgs,
-        defaultViewport: chromium.defaultViewport,
-        headless: chromium.headless,
-        // @ts-ignore
-        ignoreHTTPSErrors: true,
-      });
+    if (!browser) {
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+        logger.info('Launching in production mode...');
+        const executionPath =
+          'https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar';
+        const launchArgs: string[] = [
+          ...chromium.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--hide-scrollbars',
+          '--disable-web-security',
+        ];
+        if (selection.proxy) launchArgs.push(`--proxy-server=${selection.proxy}`);
+        browser = await puppeteerCore.launch({
+          executablePath: await chromium.executablePath(executionPath),
+          args: launchArgs,
+          defaultViewport: chromium.defaultViewport,
+          headless: chromium.headless,
+          // @ts-ignore
+          ignoreHTTPSErrors: true,
+        });
+        environment.log.info('Browser launched successfully.');
+      } else {
+        logger.info('Launching in development mode...');
+        const execPath = await resolveChromeExecutablePath();
+        const devArgs: string[] = ['--no-sandbox', '--disable-setuid-sandbox'];
+        if (selection.proxy) devArgs.push(`--proxy-server=${selection.proxy}`);
+        browser = await puppeteer.launch({
+          headless: true,
+          args: devArgs,
+          executablePath: execPath,
+        });
+        environment.log.info('Browser launched successfully.');
+      }
     } else {
-      logger.info('Launching in development mode...');
-      const execPath = await resolveChromeExecutablePath();
-      const devArgs: string[] = ['--no-sandbox', '--disable-setuid-sandbox'];
-      if (selection.proxy) devArgs.push(`--proxy-server=${selection.proxy}`);
-      browser = await puppeteer.launch({
-        headless: true,
-        args: devArgs,
-        executablePath: execPath,
-      });
+      environment.log.info('Browser reused');
     }
 
-    environment.log.info('Browser launched successfully.');
     environment.setBrowser(browser);
-    const page = await browser.newPage();
+    let page = environment.getPage?.();
+    if (!page || (page as any).isClosed?.()) {
+      page = await (browser as any).newPage();
+    } else {
+      try {
+        (page as any).removeAllListeners?.('request');
+      } catch {}
+    }
     if (selection.auth) {
       try {
         await (page as any).authenticate(selection.auth);
       } catch {}
     }
     await page.setViewport({ width: 1080, height: 1024 });
+    let totalRequests = 0;
+    let blockedTotal = 0;
+    let blockedImages = 0;
+    let blockedFonts = 0;
+    let blockedAds = 0;
+    if (blocking.enabled) {
+      try {
+        await (page as any).setRequestInterception(true);
+        (page as any).on('request', (req: any) => {
+          const url: string = String(req.url()).toLowerCase();
+          const type: string = String(req.resourceType?.());
+          totalRequests += 1;
+          let shouldBlock = false;
+          if (blocking.blockImages && type === 'image') shouldBlock = true;
+          if (
+            !shouldBlock &&
+            blocking.blockFonts &&
+            (type === 'font' ||
+              url.endsWith('.woff') ||
+              url.endsWith('.woff2') ||
+              url.endsWith('.ttf') ||
+              url.endsWith('.otf'))
+          )
+            shouldBlock = true;
+          if (!shouldBlock && blocking.blockAds) {
+            for (const p of blocking.adUrlPatterns) {
+              if (p && url.includes(p.toLowerCase())) {
+                shouldBlock = true;
+                break;
+              }
+            }
+          }
+          if (shouldBlock) {
+            blockedTotal += 1;
+            if (type === 'image') blockedImages += 1;
+            else if (type === 'font' || url.endsWith('.woff') || url.endsWith('.woff2') || url.endsWith('.ttf') || url.endsWith('.otf')) blockedFonts += 1;
+            else if (blocking.blockAds) blockedAds += 1;
+            try {
+              req.abort('blockedbyclient');
+            } catch {
+              try {
+                req.continue();
+              } catch {}
+            }
+          } else {
+            try {
+              req.continue();
+            } catch {}
+          }
+        });
+        environment.log.info(
+          `RESOURCE_BLOCKING: enabled=${blocking.enabled} images=${blocking.blockImages} fonts=${blocking.blockFonts} ads=${blocking.blockAds}`
+        );
+      } catch {}
+    }
     if (stealth.enabled && stealth.fingerprintSpoofing && evasion.fingerprint) {
       evasionAttempts++;
       try {
@@ -477,6 +560,7 @@ export async function LaunchBrowserExecutor(
       await applySmallDelay(evasion.delays);
       environment.log.info('DELAY_APPLIED: post-navigation');
     }
+    const tEnd = Date.now();
     if (stealth.enabled) {
       const probe = await probeBotDetection(page as any);
       if (probe.detected) {
@@ -507,6 +591,10 @@ export async function LaunchBrowserExecutor(
     }
     environment.setPage(page);
     environment.log.info(`Opened the website successfully. URL:${websiteUrl}`);
+    environment.log.info(
+      `RESOURCE_BLOCKING_METRIC: total=${totalRequests} blocked=${blockedTotal} blockedImages=${blockedImages} blockedFonts=${blockedFonts} blockedAds=${blockedAds}`
+    );
+    environment.log.info(`PERF_METRIC: domContentLoadedMs=${tEnd - tStart}`);
     if (stealth.enabled) {
       environment.log.info(
         `EVASION_METRIC: attempts=${evasionAttempts} failures=${evasionFailures} detections=${detectionsFound}`
@@ -517,6 +605,13 @@ export async function LaunchBrowserExecutor(
   } catch (e: any) {
     environment.log.error(`Failed to launch browser: ${e.message}`);
     logger.error(`Error while launching puppeteer: ${e instanceof Error ? e.message : String(e)}`);
+    try {
+      const b = environment.getBrowser?.();
+      if (!b) throw new Error('noop');
+      if ((b as any).isConnected?.()) {
+        await (b as any).close?.();
+      }
+    } catch {}
     return false;
   }
 }
