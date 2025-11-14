@@ -16,7 +16,7 @@ function isValidSecret(secret: string): boolean {
 /**
  * Handles the POST request for validating candidate selectors against HTML.
  *
- * The function first checks for a valid Bearer token in the authorization header. If the token is invalid or missing, it returns a 401 Unauthorized response. It then parses the request body to extract the HTML and candidates, ensuring both are provided. Each candidate is validated against the HTML, and the results are logged and returned in the response.
+ * The function first checks for a valid Bearer token in the authorization header. If the token is invalid or missing, it returns a 401 Unauthorized response. It then parses the request body to extract the HTML and candidates, ensuring both are provided. Each candidate is validated against the HTML, and the results are logged and returned in the response. If any errors occur during processing, appropriate error messages are returned based on the type of error encountered.
  *
  * @param req - The incoming request object containing headers and body.
  * @returns A JSON response containing the validation results or an error message.
