@@ -70,9 +70,9 @@ Testing & Quality
 
 Security & Compliance
 
-- [ ] Verify Stripe API version pinned in client initialization [P0]
+- [x] Verify Stripe API version pinned in client initialization [P0]
   - Linked files: `lib/stripe/stripe.ts`, `package.json:77`
-- [ ] Narrow public route scope; confirm required endpoints [P0]
+- [x] Narrow public route scope; confirm required endpoints [P0]
   - Linked files: `middleware.ts:1`
 - [x] Mask/redact sensitive data in logs; audit credential access [P0]
   - Linked files: `lib/log.ts:1`, `docs/logging-policies.md:1`
