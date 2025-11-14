@@ -4,6 +4,16 @@ import type { Page } from "puppeteer";
 
 const xpathCache: WeakMap<any, Map<string, any>> = new WeakMap();
 
+/**
+ * Extracts data from a web page using a specified XPath expression.
+ *
+ * The function retrieves the web page from the execution environment and checks for the presence of the XPath and attribute inputs.
+ * It utilizes caching to avoid redundant evaluations and executes the XPath against the page's document to extract the desired data.
+ * The results are then stored in the environment's output. If any errors occur during execution, they are logged.
+ *
+ * @param environment - The execution environment containing the page and input parameters.
+ * @returns A promise that resolves to a boolean indicating the success of the extraction process.
+ */
 export async function ExtractXPathFromPageExecutor(
   environment: ExecutionEnvironment<typeof ExtractXPathFromPageTask>
 ): Promise<boolean> {
@@ -36,6 +46,14 @@ export async function ExtractXPathFromPageExecutor(
     }
 
     const result = await page.evaluate(({ xpath, attr, allFlag }) => {
+      /**
+       * Retrieve the value of a specified attribute from a given HTML element.
+       *
+       * The function checks if the element is null and returns null if it is. It then uses a switch statement to determine which attribute to retrieve based on the provided `attr` value. Depending on the attribute, it casts the element to the appropriate type and returns the corresponding value or null if the attribute is not present.
+       *
+       * @param el - The HTML element from which to retrieve the attribute value.
+       * @returns The value of the specified attribute or null if the element is null or the attribute is not present.
+       */
       const getVal = (el: Element | null) => {
         if (!el) return null;
         switch (attr) {
