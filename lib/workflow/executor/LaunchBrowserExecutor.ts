@@ -9,6 +9,8 @@ import { applyHeaders } from "@/lib/politeness/userAgent";
 import { isAllowed } from "@/lib/politeness/robots";
 import { sleep } from "@/lib/politeness/delay";
 import { ProxyManager } from "@/lib/network/proxyManager";
+import fs from "fs";
+import os from "os";
 
 type StealthOptions = {
   enabled: boolean;
@@ -292,14 +294,13 @@ export async function LaunchBrowserExecutor(
       });
     } else {
       logger.info("Launching in development mode...");
-      const localExecutablePath =
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+      const execPath = await resolveChromeExecutablePath();
       const devArgs: string[] = ["--no-sandbox", "--disable-setuid-sandbox"];
       if (selection.proxy) devArgs.push(`--proxy-server=${selection.proxy}`);
       browser = await puppeteer.launch({
-        headless: true, //testing in headful modes
+        headless: true,
         args: devArgs,
-        executablePath: localExecutablePath,
+        executablePath: execPath,
       });
     }
 
@@ -442,4 +443,36 @@ export async function LaunchBrowserExecutor(
     );
     return false;
   }
+}
+
+export async function resolveChromeExecutablePath(platform?: NodeJS.Platform): Promise<string> {
+  const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  if (envPath && fs.existsSync(envPath)) return envPath;
+  const p = platform ?? process.platform;
+  const candidates: string[] = [];
+  if (p === "win32") {
+    const localAppData = process.env.LOCALAPPDATA || `${os.homedir()}\\AppData\\Local`;
+    candidates.push(
+      "C\\\u005c\u005cProgram Files\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe",
+      "C\\\u005c\u005cProgram Files (x86)\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe",
+      `${localAppData}\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe`
+    );
+  } else if (p === "darwin") {
+    candidates.push(
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "/Applications/Chromium.app/Contents/MacOS/Chromium"
+    );
+  } else {
+    candidates.push(
+      "/usr/bin/google-chrome",
+      "/usr/bin/google-chrome-stable",
+      "/usr/bin/chromium-browser",
+      "/usr/bin/chromium",
+      "/snap/bin/chromium"
+    );
+  }
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  throw new Error("Chrome executable not found; set PUPPETEER_EXECUTABLE_PATH or install Chrome/Chromium");
 }

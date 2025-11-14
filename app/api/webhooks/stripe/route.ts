@@ -1,28 +1,31 @@
 import { HandleCheckoutSessionCompleted } from "@/lib/stripe/handleCheckoutSessionCompleted";
-import { stripe } from "@/lib/stripe/stripe";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createLogger } from "@/lib/log";
+import { getEnv, formatEnvError } from "@/lib/env";
+import Stripe from "stripe";
 
 export const maxDuration = 60; // This function can run for a maximum of 60 seconds
 
 export async function POST(req: Request, res: Response) {
   const logger = createLogger("api/webhooks/stripe");
   try {
+    const env = getEnv();
     const body = await req.text();
     const signature = headers().get("stripe-signature") as string;
 
     if (!signature) {
       return new NextResponse("No signature found", { status: 400 });
     }
-    if (!process.env.STRIPE_WEBHOOK_SECRET) {
-      return new NextResponse("Webhook secret not configured", { status: 500 });
-    }
+    const stripeClient = new Stripe(env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-01-27.acacia",
+      typescript: true,
+    });
 
-    const event = stripe.webhooks.constructEvent(
+    const event = stripeClient.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      env.STRIPE_WEBHOOK_SECRET
     );
     logger.info(`@event... ${event.type}`);
 
@@ -42,6 +45,10 @@ export async function POST(req: Request, res: Response) {
     logger.error(`stripe webhook error: ${message}`);
     if (message.toLowerCase().includes("aborted") || (error as any)?.name === "AbortError") {
       return new NextResponse("Request aborted", { status: 408 });
+    }
+    const envMsg = formatEnvError(error);
+    if (envMsg.includes("Environment validation failed")) {
+      return new NextResponse(envMsg, { status: 500 });
     }
     return new NextResponse("Webhook error", { status: 400 });
   }

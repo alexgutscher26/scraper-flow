@@ -3,6 +3,7 @@
 Scrape Flow is a comprehensive web scraping and automation platform that allows users to create, schedule, and manage sophisticated web scraping workflows with an intuitive visual interface. This application provides a powerful yet user-friendly way to extract data from websites, process it with AI, perform complex data transformations, and deliver results through multiple channels, including webhooks and email.
 
 ## Table of Contents
+
 - [Features](#features)
 - [Task Types](#task-types)
 - [Technology Stack](#technology-stack)
@@ -22,6 +23,7 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 ## Features
 
 ### Core Capabilities
+
 - **Visual Workflow Builder**: Drag-and-drop interface for creating complex scraping workflows
 - **22 Task Types**: Comprehensive set of tasks across 7 categories for all automation needs
 - **AI-Powered Extraction**: Intelligent data extraction using AI models
@@ -32,6 +34,7 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 - **Multi-format Output**: JSON, CSV, and custom data transformation support
 
 ### Advanced Features
+
 - **Conditional Logic**: Dynamic workflow paths based on data conditions
 - **Loop Processing**: Iterate over data sets with configurable loop controls
 - **Email Automation**: Send rich HTML/text emails with attachments
@@ -41,6 +44,7 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 - **Data Transformation**: Built-in data processing and formatting tools
 
 ### Enterprise Features
+
 - **Scalable Architecture**: Built for high-volume data processing
 - **Analytics Dashboard**: Comprehensive execution statistics and credit usage tracking
 - **User Management**: Multi-user support with Clerk authentication
@@ -51,6 +55,7 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 ## Task Types
 
 ### Browser Automation (5 Tasks)
+
 - **Launch Browser** (5 credits): Initialize browser and navigate to websites
 - **Navigate URL** (2 credits): Navigate to specific URLs within workflows
 - **Page to HTML** (2 credits): Extract full HTML content from web pages
@@ -58,38 +63,46 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 - **Take Screenshot** (3 credits): Capture full-page or viewport screenshots
 
 ### Element Interaction (4 Tasks)
+
 - **Click Element** (3 credits): Interact with clickable elements on pages
 - **Fill Input** (1 credit): Fill form inputs with dynamic data
 - **Scroll to Element** (1 credit): Scroll to specific elements on pages
 - **Wait Delay** (1 credit): Add controlled delays in workflow execution
 
 ### Data Extraction (3 Tasks)
+
 - **Extract Text from Element** (2 credits): Extract text content using CSS selectors
 - **Extract Table Data** (3 credits): Extract structured data from HTML tables
 - **Extract Data with AI** (4 credits): AI-powered intelligent data extraction
 
 ### Data Processing (4 Tasks)
+
 - **Read Property from JSON** (1 credit): Extract specific properties from JSON data
 - **Add Property to JSON** (1 credit): Add new properties to JSON objects
 - **Data Transform** (2 credits): Advanced data transformation and formatting
 - **Conditional Logic** (1 credit): Create dynamic workflow paths
 
 ### Control Flow (1 Task)
+
 - **Loop** (2 credits): Iterate over data collections with customizable controls
 
 ### Communication (2 Tasks)
+
 - **Send Email** (3 credits): Send HTML/text emails with attachment support
 - **Deliver via Webhook** (1 credit): Send data to external APIs and services
 
 ### Storage & File Operations (1 Task)
+
 - **Download File** (3 credits): Download and process files from URLs
 
 ### AI & Advanced (1 Task)
+
 - **Extract Data with AI** (4 credits): Leverage AI for complex data extraction scenarios
 
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14 (App Router)
 - **UI Components**: Shadcn UI (built on Radix UI)
 - **Styling**: Tailwind CSS
@@ -99,6 +112,7 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 - **Flow Editor**: XYFlow (React Flow)
 
 ### Backend
+
 - **API**: Next.js Server Actions and API Routes
 - **Database ORM**: Prisma
 - **Authentication**: Clerk
@@ -109,6 +123,7 @@ Scrape Flow is a comprehensive web scraping and automation platform that allows 
 - **Email Service**: Resend
 
 ### Infrastructure
+
 - **Hosting**: Vercel
 - **Cron Jobs**: Vercel Cron + Browser-based hybrid system
 - **File Storage**: Built-in file download and processing
@@ -121,6 +136,7 @@ Experience Scrape Flow in action at our [Live Demo](https://scrape-flow-demo.ver
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js (v18 or higher)
 - PostgreSQL database (for application data storage)
 - Clerk account (for authentication)
@@ -131,12 +147,14 @@ Experience Scrape Flow in action at our [Live Demo](https://scrape-flow-demo.ver
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/your-username/scrape-flow.git
 cd scrape-flow
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -145,11 +163,13 @@ npm install
 Create a `.env` file in the root directory and add the necessary environment variables (see [Environment Variables](#environment-variables) section)
 
 4. Run database migrations:
+
 ```bash
 npx prisma migrate dev
 ```
 
 5. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -157,7 +177,9 @@ npm run dev
 ## Architecture
 
 ### Workflow Execution Engine
+
 The application features a sophisticated workflow execution engine that handles:
+
 - **Task Registry**: Dynamic loading and validation of all task types
 - **Execution Context**: Isolated execution environments for each workflow run
 - **Credit Tracking**: Real-time credit consumption monitoring
@@ -165,6 +187,7 @@ The application features a sophisticated workflow execution engine that handles:
 - **Progress Tracking**: Live execution progress updates
 
 ### Data Flow
+
 1. **Workflow Definition**: Users create workflows using the visual editor
 2. **Validation**: Workflows are validated for completeness and credit requirements
 3. **Execution**: Tasks are executed sequentially with data passing between them
@@ -174,6 +197,7 @@ The application features a sophisticated workflow execution engine that handles:
 ## Workflow System
 
 ### Visual Workflow Editor
+
 - **Drag-and-Drop Interface**: Intuitive task placement and connection
 - **Real-time Validation**: Immediate feedback on workflow completeness
 - **Task Configuration**: Detailed parameter configuration for each task
@@ -181,6 +205,7 @@ The application features a sophisticated workflow execution engine that handles:
 - **Export/Import**: Save and share workflow definitions
 
 ### Execution Engine
+
 - **Sequential Processing**: Tasks execute in defined order
 - **Data Persistence**: Workflow state maintained throughout execution
 - **Credit Management**: Pre-execution credit validation and real-time tracking
@@ -188,6 +213,7 @@ The application features a sophisticated workflow execution engine that handles:
 - **Execution History**: Complete audit trail of all workflow runs
 
 ### Execution Logs
+
 - Fields: `id`, `timestamp`, `logLevel`, `message`, `executionPhaseId`, `phaseId`, `taskType`, `metadata`
 - Metadata: JSON object including `scope` and contextual attributes
 - Example:
@@ -196,14 +222,17 @@ The application features a sophisticated workflow execution engine that handles:
 ## Scheduling & Automation
 
 ### Hybrid Scheduling System
+
 To overcome platform limitations, Scrape Flow implements a unique hybrid scheduling approach:
 
 #### Vercel Cron Integration
+
 - Daily cron job configured in `vercel.json`
 - Serves as a backup execution trigger
 - Ensures workflows are checked at least once daily
 
 #### Browser-Based Local Cron
+
 - Client-side component running in user browsers
 - Polls `/api/workflows/cron` endpoint at configurable intervals
 - Works in both development and production environments
@@ -212,17 +241,20 @@ To overcome platform limitations, Scrape Flow implements a unique hybrid schedul
 ### Schedule Types
 
 #### Simple Intervals
+
 - **Seconds**: `30s` (every 30 seconds)
 - **Minutes**: `5m` (every 5 minutes)
 - **Hours**: `2h` (every 2 hours)
 - **Days**: `1d` (daily)
 
 #### Cron Expressions
+
 - **Standard Cron**: `0 9 * * 1-5` (weekdays at 9am)
 - **Complex Patterns**: `*/15 * * * *` (every 15 minutes)
 - **Custom Schedules**: Full cron expression support
 
 ### Resilience Features
+
 - **Exponential Backoff**: Automatic retry with increasing delays
 - **Cache Prevention**: Timestamp-based cache busting
 - **Error Recovery**: Continues operation during temporary failures
@@ -231,12 +263,14 @@ To overcome platform limitations, Scrape Flow implements a unique hybrid schedul
 ## Credit System & Billing
 
 ### Credit-Based Usage
+
 - **Transparent Pricing**: Each task type has a defined credit cost
 - **Pre-execution Validation**: Workflows validate credit requirements before running
 - **Real-time Tracking**: Live credit consumption monitoring
 - **Usage Analytics**: Detailed breakdown of credit usage by task type
 
 ### Billing Integration
+
 - **Stripe Integration**: Secure payment processing
 - **Flexible Plans**: Multiple credit packages available
 - **Auto-refill**: Optional automatic credit top-up
@@ -244,6 +278,7 @@ To overcome platform limitations, Scrape Flow implements a unique hybrid schedul
 - **Usage Forecasting**: Predict credit needs based on workflow schedules
 
 ### Credit Costs by Task Type
+
 - **High Cost (5 credits)**: Launch Browser
 - **Medium Cost (3-4 credits)**: AI Extraction, Screenshots, File Downloads, Email Sending
 - **Standard Cost (2 credits)**: Data extraction, Navigation
@@ -252,18 +287,21 @@ To overcome platform limitations, Scrape Flow implements a unique hybrid schedul
 ## Security & Credentials
 
 ### Authentication & Authorization
+
 - **Clerk Integration**: Secure user authentication and session management
 - **Protected Routes**: Middleware-based route protection
 - **API Security**: Secure API endpoints with proper authentication
 - **User Isolation**: Complete data separation between users
 
 ### Credential Management
+
 - **AES-256-CBC Encryption**: Military-grade encryption for stored credentials
 - **Secure Storage**: Database-encrypted credential storage
 - **Access Control**: User-specific credential access
 - **Audit Trail**: Complete history of credential usage
 
 ### Security Best Practices
+
 - **Parameterized Queries**: SQL injection prevention via Prisma
 - **Environment Variables**: Secure secret management
 - **HTTPS Enforcement**: Secure communication channels
@@ -272,18 +310,21 @@ To overcome platform limitations, Scrape Flow implements a unique hybrid schedul
 ## Analytics & Monitoring
 
 ### Execution Analytics
+
 - **Success/Failure Rates**: Comprehensive execution statistics
 - **Performance Metrics**: Execution time and resource usage tracking
 - **Credit Consumption**: Detailed credit usage analytics
 - **Trend Analysis**: Historical data and usage patterns
 
 ### Real-time Monitoring
+
 - **Live Execution Tracking**: Real-time workflow execution monitoring
 - **Progress Indicators**: Visual progress tracking for running workflows
 - **Error Reporting**: Immediate error notifications and detailed logs
 - **Performance Alerts**: Automatic alerts for unusual activity
 
 ### Dashboard Features
+
 - **Usage Overview**: High-level statistics and trends
 - **Workflow Performance**: Individual workflow success rates
 - **Credit Forecasting**: Predictive analytics for credit usage
@@ -292,6 +333,7 @@ To overcome platform limitations, Scrape Flow implements a unique hybrid schedul
 ## Environment Variables
 
 ### Required Variables
+
 ```env
 DATABASE_URL=postgresql://username:password@host:port/database
 API_SECRET=your-secure-api-secret-for-cron-authentication
@@ -302,9 +344,18 @@ STRIPE_SECRET_KEY=sk_test_your-stripe-secret-key
 STRIPE_WEBHOOK_SECRET=whsec_your-stripe-webhook-secret
 OPENAI_API_KEY=sk-your-openai-api-key
 RESEND_API_KEY=re_your-resend-api-key
+PUPPETEER_EXECUTABLE_PATH=/absolute/path/to/chrome-or-chromium
 ```
 
+### Validation
+
+- Runtime validation is enforced using a centralized Zod schema in `lib/env.ts`.
+- Validation runs on application startup and before handling API requests.
+- Endpoints fail fast with `500` and a clear message when variables are missing/invalid.
+- Validated keys: `API_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `ENCRYPTION_SECRET`, `NEXT_PUBLIC_APP_URL`.
+
 ### Optional Variables
+
 ```env
 NEXT_PUBLIC_ENABLE_LOCAL_CRON=true
 NEXT_PUBLIC_LOCAL_CRON_FREQUENCY=60000
@@ -312,6 +363,7 @@ NEXT_PUBLIC_APP_URL=https://your-domain.com
 ```
 
 ### Stealth Mode & Anti-bot Evasion
+
 ```env
 # Core toggles
 STEALTH_MODE_ENABLED=true
@@ -352,80 +404,114 @@ STEALTH_COOKIE_SET_JSON=[{"name":"session","value":"abc","domain":"example.com"}
 ```
 
 #### Usage Example
+
 - Enable stealth globally and override UA for the launch step:
+
 ```env
 STEALTH_MODE_ENABLED=true
 STEALTH_UA_OVERRIDE=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36
 ```
+
 - Keep defaults for politeness and allow stealth to add small human-like delays and fingerprint spoofing without modifying workflow tasks.
 
 #### Notes
+
 - Stealth integrates with existing politeness settings (user-agent rotation, headers, accept-language). When `STEALTH_UA_OVERRIDE` is set, it supersedes the UA applied by politeness for the Launch step only.
 - Metrics are logged during the Launch step indicating evasion attempts, failures, and detections.
 
 ### Configuration Notes
+
 - **ENCRYPTION_SECRET**: Must be exactly 32 characters (64 hex digits)
 - **API_SECRET**: Used for secure communication between cron endpoints
 - **Local Cron**: Enable for development or enhanced scheduling reliability
 
+### Chrome Executable Detection
+
+- The application locates the browser executable in this order:
+  - `PUPPETEER_EXECUTABLE_PATH` if set and points to a valid file
+  - OS-specific auto-detection paths
+    - Windows: `C:\Program Files\Google\Chrome\Application\chrome.exe`, `C:\Program Files (x86)\...`, `%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe`
+    - macOS: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`, `/Applications/Chromium.app/Contents/MacOS/Chromium`
+    - Linux: `/usr/bin/google-chrome`, `/usr/bin/google-chrome-stable`, `/usr/bin/chromium-browser`, `/usr/bin/chromium`, `/snap/bin/chromium`
+- Troubleshooting:
+  - Ensure Chrome/Chromium is installed and accessible on your system
+  - Set `PUPPETEER_EXECUTABLE_PATH` to the exact executable if auto-detection fails
+  - Verify your CI/CD environment includes the executable or uses a headless Chromium distribution
+
 ## Screenshots
 
 ### Login & Signup page
+
 ![SignIn](https://github.com/user-attachments/assets/a9d2e420-fc16-4756-9f29-23f24a5dcce6)
 
 ### Home Page
+
 ![HomePage-1](https://github.com/user-attachments/assets/3c769bcb-d283-46a7-ba44-1b1d1b53a5c8)
 
 ### Home Page With Chart
+
 ![HomePage-2](https://github.com/user-attachments/assets/f4806685-eefe-4ab6-a67c-5a99691ca724)
 
 ### Workflow Page
+
 ![WorkFlow](https://github.com/user-attachments/assets/dbc7c21c-613e-4c16-8261-8db3c420aaea)
 
 ### Workflow Page With Action
+
 ![WorkFlowAction](https://github.com/user-attachments/assets/7ffef8ec-b8be-4869-a950-6900b809410d)
 
 ### Workflow Creation
+
 ![WorkFlowCreationForm](https://github.com/user-attachments/assets/d8606910-f684-4241-b39c-c65a0daf1780)
 
 ### Workflow Scheduler Configuration
+
 ![WorkFlowCronJob](https://github.com/user-attachments/assets/d1ed026a-6ab3-46ff-8ff9-b69c85583c0f)
 
 ### Workflow Editor
+
 ![WorkFlowCreation-1](https://github.com/user-attachments/assets/e08c0d60-aa45-4d3d-9b28-d6a629128fa2)
 
-### Workflow Editor Validation 
+### Workflow Editor Validation
+
 ![WorkFlowCreation-2](https://github.com/user-attachments/assets/466dff29-5396-4161-87aa-5d613f778d82)
 
 ### Execution Monitor
+
 ![WorkFlowSucess](https://github.com/user-attachments/assets/b206a159-37c7-4b48-98d7-9e324204f1eb)
 
 ### All Workflow
+
 ![AllWorkFlow](https://github.com/user-attachments/assets/d97f75bb-d4cf-48a9-a235-ee7d706a90ba)
 
 ### Credential Page
+
 ![image](https://github.com/user-attachments/assets/31870f1d-de1b-4d99-a3cf-508574b43773)
 
 ### Credential creation form
+
 ![image](https://github.com/user-attachments/assets/51d6fb68-4ba8-48ad-b7f4-ca168b5b405e)
 
 ### Billing Page
+
 ![Billing-1](https://github.com/user-attachments/assets/91b206ec-95f2-42b7-819a-1980ad55a920)
 
 ### Billing Chart
+
 ![Billing-2](https://github.com/user-attachments/assets/4dd52d31-efd7-4228-a085-6b53827d9bdf)
 
 ### Transaction History
+
 ![Billing-3](https://github.com/user-attachments/assets/e752b5b3-84de-46c0-892c-53e1465d2d0e)
 
 ### Payment Invoice
+
 ![image](https://github.com/user-attachments/assets/d879a925-a36e-48b2-8c67-ed7e53d041d7)
-
-
 
 ## Deployment
 
 ### Vercel Deployment (Recommended)
+
 1. **Repository Setup**: Connect your GitHub repository to Vercel
 2. **Environment Configuration**: Add all required environment variables in Vercel dashboard
 3. **Database Setup**: Configure PostgreSQL database for application data (Vercel Postgres recommended)
@@ -433,12 +519,14 @@ STEALTH_UA_OVERRIDE=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 5. **Cron Configuration**: Verify `vercel.json` cron configuration is active
 
 ### Manual Deployment
+
 1. **Build**: `npm run build`
 2. **Database**: Run migrations in production environment
 3. **Environment**: Ensure all environment variables are properly set
 4. **Start**: `npm start` or use process manager like PM2
 
 ### Post-Deployment Checklist
+
 - [ ] Verify application database connections
 - [ ] Test authentication flow
 - [ ] Confirm Stripe webhook endpoints
@@ -451,6 +539,7 @@ STEALTH_UA_OVERRIDE=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 We welcome contributions to Scrape Flow! Please follow these guidelines:
 
 ### Development Setup
+
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature-name`
 3. Make your changes with appropriate tests
@@ -458,6 +547,7 @@ We welcome contributions to Scrape Flow! Please follow these guidelines:
 5. Submit a pull request with detailed description
 
 ### Adding New Task Types
+
 1. Create task definition in `lib/workflow/task/`
 2. Add task to registry in `lib/workflow/task/registry.tsx`
 3. Implement executor in `lib/workflow/executor/`
@@ -465,13 +555,16 @@ We welcome contributions to Scrape Flow! Please follow these guidelines:
 5. Include comprehensive tests
 
 ### Coding Standards
+
 - **TypeScript**: Strict mode enabled, proper type definitions required
 - **Formatting**: Prettier and ESLint configurations must be followed
 - **Testing**: Unit tests required for new features
 - **Documentation**: Update README and inline documentation
 
 ### Bug Reports
+
 Please include:
+
 - Detailed description of the issue
 - Steps to reproduce
 - Expected vs actual behavior
@@ -499,9 +592,12 @@ npm run start          # Start production server
 **License**: MIT License  
 **Maintainer**: Harmik Lathiya
 **Support**: [Create an issue](https://github.com/Lathiya50/scrape-flow/issues)
+
 ## Form Automation
 
 See docs/form-automation.md for file upload validation and progress, captcha provider verification, and 2FA credential support.
+
 ## Migration Notes
+
 - ExecutionLog now includes `phaseId`, `taskType`, and `metadata` (`JSONB`). Existing rows are backfilled from `executionPhaseId` and default values.
 - Apply database migrations with `npx prisma migrate dev`. Verify logs render in the Execution Viewer.

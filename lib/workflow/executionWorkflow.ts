@@ -24,12 +24,20 @@ import { defaultNetworkConfig, NetworkConfig, NetworkState } from "@/types/netwo
 import { ProxyManager } from "@/lib/network/proxyManager";
 import { SessionManager } from "@/lib/network/cookieJar";
 import { computeDelayMs, sleep } from "@/lib/politeness/delay";
+import { getEnv, formatEnvError } from "@/lib/env";
 
 import { checkAndReserveWorkflowCredits } from "./creditCheck";
 import { getCredentialValue } from "../credential/getCredentialValue";
 
 export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   const logger = createLogger("workflow/execution");
+  try {
+    getEnv();
+  } catch (err) {
+    const msg = formatEnvError(err);
+    logger.error(msg);
+    throw err as Error;
+  }
   const execution = await prisma.workflowExecution.findUnique({
     where: { id: executionId },
     include: { phases: true, workflow: true },
@@ -369,10 +377,15 @@ async function setupEnvironmentForPhase(
           });
           environment.phases[node.id].inputs[input.name] = credentialValue;
         } catch (error) {
+          // If environment validation failed, stop execution immediately
+          try {
+            getEnv();
+          } catch (e) {
+            throw e as Error;
+          }
           logCollector.error(
             `Failed to resolve credential ${inputVal}: ${error instanceof Error ? error.message : String(error)}`
           );
-          // Continue execution but with undefined credential - executor will handle the error
           environment.phases[node.id].inputs[input.name] = undefined;
         }
       } else {

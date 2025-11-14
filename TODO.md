@@ -19,10 +19,10 @@ High-Impact Improvements
 - [x] Add runtime env validation using `zod` [P0]
   - Linked files: `app/api/workflows/execute/route.ts:14`, `app/api/webhooks/stripe/route.ts:1`, `lib/workflow/executionWorkflow.ts:375`
   - DoD: single `env` schema validates required vars; endpoints fail fast with 500 + reason
-- [ ] Remove hardcoded Chrome path; use env var or auto-detect [P0]
+- [x] Remove hardcoded Chrome path; use env var or auto-detect [P0]
   - Linked files: `lib/workflow/executor/LaunchBrowserExecutor.ts:52`
   - DoD: supports `PUPPETEER_EXECUTABLE_PATH` with OS auto-detect fallback; documented in README
-- [ ] Add workflow-level retry/backoff policy captured in `ExecutionPhase` [P1]
+- [x] Add workflow-level retry/backoff policy captured in `ExecutionPhase` [P1]
   - Linked files: `lib/workflow/executionWorkflow.ts:1`, `types/workflow.ts`, `lib/workflow/executionPlan.ts:22`
   - DoD: per-task `maxAttempts` + backoff; persisted in phases; UI reflects attempts
 - [ ] Implement rate limiting and abuse protection for cron/execute endpoints [P0]

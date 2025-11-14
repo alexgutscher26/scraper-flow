@@ -10,21 +10,26 @@ import {
 import { timingSafeEqual } from "crypto";
 import { parseWorkflowSchedule } from "@/lib/cron/scheduleParser";
 import { createLogger } from "@/lib/log";
+import { getEnv, formatEnvError } from "@/lib/env";
 
 function isValidSecret(secret: string): boolean {
-  const API_SECRET = process.env.API_SECRET;
-  if (!API_SECRET) {
-    return false;
-  }
+  const { API_SECRET } = getEnv();
   try {
     return timingSafeEqual(Buffer.from(secret), Buffer.from(API_SECRET));
-  } catch (error) {
+  } catch {
     return false;
   }
 }
 
 export async function GET(req: Request, res: Response) {
   const logger = createLogger("api/workflows/execute");
+  try {
+    getEnv();
+  } catch (err) {
+    const msg = formatEnvError(err);
+    logger.error(msg);
+    return Response.json({ error: msg }, { status: 500 });
+  }
   const authHeader = req.headers.get("authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
