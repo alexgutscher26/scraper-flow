@@ -1,6 +1,15 @@
 import { ExecutionEnvironment } from "@/types/executor";
 import { DoubleClickElementTask } from "../task/DoubleClickElement";
 
+/**
+ * Executes a double-click action on a specified element within a web page.
+ *
+ * This function retrieves the current page and the selector from the provided environment.
+ * It checks for the existence of both before attempting to perform a double-click action.
+ * If successful, it logs the page as output; otherwise, it handles errors gracefully.
+ *
+ * @param environment - The execution environment containing the page and input details.
+ */
 export async function DoubleClickElementExecutor(
   environment: ExecutionEnvironment<typeof DoubleClickElementTask>
 ): Promise<boolean> {
