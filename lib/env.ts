@@ -11,6 +11,9 @@ const EnvSchema = z.object({
   RATE_LIMIT_USER_CRON: z.string().optional().default('10'),
   RATE_LIMIT_GLOBAL_EXECUTE: z.string().optional().default('120'),
   RATE_LIMIT_USER_EXECUTE: z.string().optional().default('60'),
+  IDEMPOTENCY_TTL_SECONDS: z.string().optional().default('600'),
+  UPSTASH_REDIS_REST_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

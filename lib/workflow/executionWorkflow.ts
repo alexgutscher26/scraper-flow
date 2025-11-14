@@ -30,6 +30,7 @@ import { ProxyManager } from '@/lib/network/proxyManager';
 import { SessionManager } from '@/lib/network/cookieJar';
 import { computeDelayMs, sleep } from '@/lib/politeness/delay';
 import { getEnv, formatEnvError } from '@/lib/env';
+import { fingerprint, hasOutputFingerprint, markOutputFingerprint } from '@/lib/idempotency';
 
 import { checkAndReserveWorkflowCredits } from './creditCheck';
 import { getCredentialValue } from '../credential/getCredentialValue';
@@ -316,13 +317,40 @@ async function finalizePhase(
 
   // Filter out BROWSER_INSTANCE outputs before serialization
   const serializableOutputs = filterSerializableOutputs(outputs);
+  const { IDEMPOTENCY_TTL_SECONDS } = getEnv();
+  let fp = fingerprint(sanitizeObject(serializableOutputs));
+  let duplicate = false;
+  try {
+    const phaseMeta = await prisma.executionPhase.findUnique({
+      where: { id: phaseId },
+      select: { workflowExecutionId: true, node: true },
+    });
+    if (phaseMeta?.workflowExecutionId) {
+      const exec = await prisma.workflowExecution.findUnique({
+        where: { id: phaseMeta.workflowExecutionId },
+        select: { workflowId: true },
+      });
+      const nodeId = (() => {
+        try {
+          return (JSON.parse(phaseMeta!.node) as any)?.id || 'unknown';
+        } catch {
+          return 'unknown';
+        }
+      })();
+      const ns = `wf:${exec?.workflowId || 'unknown'}:node:${nodeId}`;
+      duplicate = await hasOutputFingerprint(ns, fp);
+      await markOutputFingerprint(ns, fp, Number(IDEMPOTENCY_TTL_SECONDS));
+    }
+  } catch {}
 
   await prisma.executionPhase.update({
     where: { id: phaseId },
     data: {
       status,
       completedAt: new Date(),
-      outputs: JSON.stringify(sanitizeObject(serializableOutputs)),
+      outputs: JSON.stringify(
+        sanitizeObject({ ...serializableOutputs, _fingerprint: fp, _duplicate: duplicate })
+      ),
       creditsConsumed,
       logs: {
         createMany: {

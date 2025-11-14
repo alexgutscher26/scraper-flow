@@ -33,7 +33,7 @@ High-Impact Improvements
   - Linked files: `app/api/workflows/cron/route.ts:132`, `app/api/workflows/execute/route.ts:1`, `lib/workflow/executionWorkflow.ts:1`
   - DoD: duplicate requests are safely ignored; outputs deduped via hash/fingerprint
 
-- [ ] Parallel phases and branching (AND/OR) in execution engine [P1]
+- [x] Parallel phases and branching (AND/OR) in execution engine [P1]
   - Linked files: `lib/workflow/executionPlan.ts:22`, `lib/workflow/executionWorkflow.ts:1`
   - DoD: phases may run concurrently when inputs satisfied; branching supported; UI visualizes concurrency
 

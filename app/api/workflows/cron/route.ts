@@ -6,6 +6,8 @@ import { parseWorkflowSchedule } from '@/lib/cron/scheduleParser';
 import { createLogger } from '@/lib/log';
 import { http } from '@/lib/http';
 import { rateLimit, applyRateLimitHeaders } from '@/lib/rateLimit';
+import { getEnv } from '@/lib/env';
+import { reserveIdempotencyKey } from '@/lib/idempotency';
 
 export async function GET(req: Request, res: Response) {
   const logger = createLogger('api/workflows/cron');
@@ -45,8 +47,24 @@ export async function GET(req: Request, res: Response) {
     const creditCheckResult = await checkWorkflowCredits(workflow.id);
 
     if (creditCheckResult.canExecute) {
+      const { IDEMPOTENCY_TTL_SECONDS } = getEnv();
+      const bucket = new Date(now);
+      bucket.setSeconds(0, 0);
+      const idemKey = `cron:${workflow.id}:${bucket.toISOString()}`;
+      const reservation = await reserveIdempotencyKey(idemKey, Number(IDEMPOTENCY_TTL_SECONDS));
+      if (!reservation.reserved) {
+        workflowsSkipped.push({
+          id: workflow.id,
+          name: workflow.name,
+          reason: 'duplicate_trigger',
+          required: workflow.creditsCost,
+          available: creditCheckResult.userCredits || 0,
+        });
+        logger.info(`Duplicate cron trigger detected for ${workflow.name} (${workflow.id}); skipping`);
+        continue;
+      }
       // Only trigger workflow if sufficient credits are available
-      await triggerWorkflow(workflow.id);
+      await triggerWorkflow(workflow.id, idemKey);
       workflowsRun.push({
         id: workflow.id,
         name: workflow.name,
@@ -143,7 +161,7 @@ async function calculateNextRun(scheduleExpression: string): Promise<Date | null
  *
  * @param {string} workflowId - The ID of the workflow to be triggered.
  */
-async function triggerWorkflow(workflowId: string) {
+async function triggerWorkflow(workflowId: string, idempotencyKey?: string) {
   const triggerApiUrl = getAppUrl(`api/workflows/execute?workflowId=${workflowId}`);
 
   try {
@@ -153,6 +171,7 @@ async function triggerWorkflow(workflowId: string) {
       headers: {
         Authorization: `Bearer ${process.env.API_SECRET!}`,
         'Content-Type': 'application/json',
+        ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
       },
       cache: 'no-store',
       method: 'GET',

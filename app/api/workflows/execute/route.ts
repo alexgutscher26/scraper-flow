@@ -12,6 +12,8 @@ import { parseWorkflowSchedule } from '@/lib/cron/scheduleParser';
 import { createLogger } from '@/lib/log';
 import { getEnv, formatEnvError } from '@/lib/env';
 import { rateLimit, applyRateLimitHeaders } from '@/lib/rateLimit';
+import { getEnv } from '@/lib/env';
+import { reserveIdempotencyKey, completeIdempotencyKey, getIdempotencyRecord } from '@/lib/idempotency';
 
 function isValidSecret(secret: string): boolean {
   const { API_SECRET } = getEnv();
@@ -54,6 +56,17 @@ export async function GET(req: Request, res: Response) {
   const workflowId = searchParams.get('workflowId') as string;
   if (!workflowId) {
     return Response.json({ error: 'WorkflowId is required' }, { status: 400 });
+  }
+  const { IDEMPOTENCY_TTL_SECONDS } = getEnv();
+  const idemHeader = req.headers.get('Idempotency-Key') || undefined;
+  const bucket = new Date();
+  bucket.setSeconds(0, 0);
+  const idemKey = idemHeader || `exec:${workflowId}:${bucket.toISOString()}`;
+  const reservation = await reserveIdempotencyKey(idemKey, Number(IDEMPOTENCY_TTL_SECONDS));
+  if (!reservation.reserved) {
+    const cached = reservation.existing || (await getIdempotencyRecord(idemKey));
+    const body = cached?.value || { error: 'Duplicate or in-progress request', key: idemKey };
+    return Response.json(body, { status: 409 });
   }
   const workflow = await prisma.workflow.findUnique({
     where: {
@@ -113,7 +126,9 @@ export async function GET(req: Request, res: Response) {
       },
     });
     await ExecutionWorkflow(execution.id, nextRun || undefined);
-    return new Response(null, { status: 200, headers: hdrs });
+    const respBody = { status: 'completed', executionId: execution.id };
+    await completeIdempotencyKey(idemKey, respBody, Number(IDEMPOTENCY_TTL_SECONDS));
+    return Response.json(respBody, { status: 200, headers: hdrs });
   } catch (e) {
     logger.error(`Error executing workflow: ${e instanceof Error ? e.message : String(e)}`);
     return Response.json({ error: 'Internal server error' }, { status: 500 });
