@@ -303,7 +303,18 @@ async function execitopnWorkflowPhase(
 }
 
 /**
- * Finalizes a phase by persisting status, outputs and logs.
+ * Finalizes a phase by persisting status, outputs, and logs.
+ *
+ * This function updates the execution phase status based on success or failure, filters and serializes outputs,
+ * and logs the relevant information. It also checks for duplicate outputs using a fingerprint mechanism
+ * and handles potential errors during database operations.
+ *
+ * @param phaseId - The unique identifier of the phase to finalize.
+ * @param taskType - The type of task associated with the phase.
+ * @param success - A boolean indicating whether the phase was successful.
+ * @param outputs - The outputs generated during the phase.
+ * @param logCollector - An instance of LogCollector to gather logs.
+ * @param creditsConsumed - The number of credits consumed during the phase.
  */
 async function finalizePhase(
   phaseId: string,
