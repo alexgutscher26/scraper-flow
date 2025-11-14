@@ -37,6 +37,11 @@ const routes = [
   },
 ];
 
+/**
+ * Renders the desktop sidebar component.
+ *
+ * The DesktopSidebar function utilizes the usePathname hook to determine the current route. It then finds the active route from the routes array based on the pathname. The sidebar displays a logo, user credits, and a list of links for navigation, highlighting the active route. The layout is responsive and styled for desktop view.
+ */
 function DesktopSidebar() {
   const pathname = usePathname();
   const activeRoute = React.useMemo(() => {
