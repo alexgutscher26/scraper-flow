@@ -61,7 +61,7 @@ function FlowEditor(props: Props) {
     (event: React.DragEvent) => {
       event.preventDefault();
       const taskType = event.dataTransfer.getData("application/reactflow");
-      if (typeof taskType === undefined || !taskType) return;
+      if (!taskType) return;
       const position = screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
@@ -74,7 +74,12 @@ function FlowEditor(props: Props) {
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((edges) => addEdge({ ...connection, animated: true }, edges));
+      setEdges((edges) => {
+        const filtered = edges.filter(
+          (e) => !(e.target === connection.target && e.targetHandle === connection.targetHandle)
+        );
+        return addEdge({ ...connection, animated: true }, filtered);
+      });
       if (!connection.targetHandle) return;
       const node = nodes.find((node) => node.id === connection.target);
       if (!node) return;
@@ -116,6 +121,14 @@ function FlowEditor(props: Props) {
 
       if (input?.type !== output?.type) {
         console.error("invalid connection:input and output types do not match");
+        return false;
+      }
+
+      if (
+        edges.some(
+          (e) => e.target === connection.target && e.targetHandle === connection.targetHandle
+        )
+      ) {
         return false;
       }
 

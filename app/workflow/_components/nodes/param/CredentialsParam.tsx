@@ -1,9 +1,7 @@
 "use client";
-import React, { useEffect, useId, useState } from "react";
-import { Input } from "@/components/ui/input";
+import React, { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { ParamProps } from "@/types/appNode";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,

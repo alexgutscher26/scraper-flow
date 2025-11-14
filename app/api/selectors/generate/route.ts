@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     preferredAttributes,
     maxCandidates: 12,
   };
-  const candidates = rerankWithOverride(generateSelectors(input, opts), override);
+  const candidates = rerankWithOverride(generateSelectors(input, opts), override as any);
   const validations = candidates.map((c) => validateAgainstHtml(html, c));
   logger.info(`Generated ${candidates.length} selector candidates`);
   return Response.json({ candidates, validations });

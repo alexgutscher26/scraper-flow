@@ -12,7 +12,7 @@ export async function VerifyTwoFactor({ credentialId, code }: { credentialId: st
   if (!userId) throw new Error("unauthorized");
   const cred = await prisma.credential.findUnique({ where: { id: credentialId } });
   if (!cred || cred.userId !== userId) throw new Error("not found");
-  const d = decryptCredential(cred);
+  const d = decryptCredential({ ...cred, description: cred.description ?? undefined });
   if (d.type !== CredentialType.TWO_FACTOR) throw new Error("invalid credential type");
   const method = d.data.method;
   if (method === "totp") {

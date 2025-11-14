@@ -22,7 +22,13 @@ export const smtpEmailCredentialSchema = z.object({
         domain.endsWith("@gmail.com") || domain.endsWith("@googlemail.com")
       );
     }, "Only Gmail addresses (@gmail.com or @googlemail.com) are supported for SMTP configuration"),
-  password: z.string().min(1, "Gmail App Password is required"),
+  password: z
+    .string()
+    .min(1, "Gmail App Password is required")
+    .refine((p) => {
+      const len = p.replace(/\s+/g, "").length;
+      return len === 16 || len === 15;
+    }, "Gmail App Password must be 15–16 characters (spaces ignored)"),
 });
 
 // API Key credential schema

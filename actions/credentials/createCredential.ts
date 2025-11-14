@@ -31,6 +31,12 @@ export async function CreateCredential(form: createCredentialSchemaType) {
       processedData = { ...processedData, recoveryCodes: hashed };
     }
   }
+  if (data.credentialData.type === CredentialType.SMTP_EMAIL) {
+    const p = processedData?.password as string;
+    if (typeof p === "string") {
+      processedData = { ...processedData, password: p.replace(/\s+/g, "") };
+    }
+  }
   // Convert the structured credential data to JSON string
   const credentialValue = JSON.stringify(processedData);
   const encryptedValue = symmetricEncrypt(credentialValue);

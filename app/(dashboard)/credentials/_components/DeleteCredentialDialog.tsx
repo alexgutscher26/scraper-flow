@@ -48,7 +48,7 @@ function DeleteCredentialDialog({ name }: Props) {
           <XIcon size={18} />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>

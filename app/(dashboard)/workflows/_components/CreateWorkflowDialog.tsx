@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation } from "@tanstack/react-query";
 import { CreateWorkFlow } from "@/actions/workflows/createWorkflow";
+import { CreateWorkflowFromTemplate } from "@/actions/workflows/createWorkflowFromTemplate";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
@@ -58,6 +59,15 @@ function CreateWorkflowDialog(props: CreateWorkflowDialogProps) {
     },
     [mutate]
   );
+  const { mutate: createFromTemplate, isPending: isTemplatePending } = useMutation({
+    mutationFn: CreateWorkflowFromTemplate,
+    onSuccess: () => {
+      toast.success("Workflow created successfully", { id: "create-workflow-success" });
+    },
+    onError: () => {
+      toast.error("Failed to create workflow", { id: "create-workflow-success" });
+    },
+  });
   return (
     <Dialog
       open={open}
@@ -69,7 +79,7 @@ function CreateWorkflowDialog(props: CreateWorkflowDialogProps) {
       <DialogTrigger asChild>
         <Button>{triggerText ?? "Create workflow"}</Button>
       </DialogTrigger>
-      <DialogContent className="px-0">
+      <DialogContent className="px-0 max-h-[90vh] overflow-y-auto">
         <CustomDialogHeader
           icon={Layers2Icon}
           title="Create workflow"
@@ -128,6 +138,44 @@ function CreateWorkflowDialog(props: CreateWorkflowDialogProps) {
               </Button>
             </form>
           </Form>
+          <div className="mt-8 space-y-4">
+            <h3 className="text-sm font-medium text-muted-foreground">Start from a template</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                className="border rounded-md p-4 text-left hover:shadow-sm hover:border-primary/30"
+                disabled={isTemplatePending}
+                onClick={() => {
+                  toast.loading("Creating workflow...", { id: "create-workflow-success" });
+                  createFromTemplate({ name: "Example HTML", description: "Fetch page HTML", templateKey: "example_html" });
+                }}
+              >
+                <div className="font-semibold">Visit and get HTML</div>
+                <div className="text-xs text-muted-foreground">Launches browser, navigates to a site, returns page HTML</div>
+              </button>
+              <button
+                className="border rounded-md p-4 text-left hover:shadow-sm hover:border-primary/30"
+                disabled={isTemplatePending}
+                onClick={() => {
+                  toast.loading("Creating workflow...", { id: "create-workflow-success" });
+                  createFromTemplate({ name: "Example Screenshot", description: "Capture a screenshot", templateKey: "example_screenshot" });
+                }}
+              >
+                <div className="font-semibold">Visit and take screenshot</div>
+                <div className="text-xs text-muted-foreground">Launches browser, captures a screenshot with default settings</div>
+              </button>
+              <button
+                className="border rounded-md p-4 text-left hover:shadow-sm hover:border-primary/30"
+                disabled={isTemplatePending}
+                onClick={() => {
+                  toast.loading("Creating workflow...", { id: "create-workflow-success" });
+                  createFromTemplate({ name: "Comprehensive Capture", description: "Wait, extract, screenshot, deliver", templateKey: "comprehensive_capture" });
+                }}
+              >
+                <div className="font-semibold">Comprehensive capture</div>
+                <div className="text-xs text-muted-foreground">Launch, wait for content, extract links and text, take screenshot, send to webhook</div>
+              </button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -7,7 +7,6 @@ import { TaskRegistry } from "@/lib/workflow/task/registry";
 import NodeInputs from "./NodeInputs";
 import NodeInput from "./NodeInput";
 import NodeOutputs, { NodeOutput } from "./NodeOutputs";
-import { Badge } from "@/components/ui/badge";
 
 const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === "true";
 const NodeComponent = memo((props: NodeProps) => {
