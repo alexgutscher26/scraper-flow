@@ -14,6 +14,12 @@ const EnvSchema = z.object({
   IDEMPOTENCY_TTL_SECONDS: z.string().optional().default('600'),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  RATE_LIMIT_USER_TIER_ASSIGNMENTS: z.string().optional(),
+  RATE_LIMIT_USER_TIER_LIMITS: z.string().optional(),
+  RATE_LIMIT_IP_LIMITS: z.string().optional(),
+  RATE_LIMIT_UNAUTH_LIMITS: z.string().optional(),
+  RATE_LIMIT_PENALTY_BASE_SECONDS: z.string().optional(),
+  RATE_LIMIT_PENALTY_MAX_SECONDS: z.string().optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

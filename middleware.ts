@@ -4,24 +4,33 @@ import { NextResponse } from 'next/server';
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/api/workflows/cron',
-  '/api/workflows/execute',
   '/api/webhooks/stripe',
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
   const url = new URL(request.url);
-  const isApiTarget =
+  const isTrustedApiTarget =
     url.pathname === '/api/workflows/cron' || url.pathname === '/api/workflows/execute';
-  if (!isPublicRoute(request)) {
-    await auth.protect();
-  }
-  if (isApiTarget) {
+
+  if (isTrustedApiTarget) {
+    const authHeader = request.headers.get('authorization');
+    const apiSecret = process.env.API_SECRET;
+    const hasValidBearer =
+      !!apiSecret && !!authHeader && authHeader.startsWith('Bearer ') && authHeader.split(' ')[1] === apiSecret;
+
+    if (!hasValidBearer && !isPublicRoute(request)) {
+      await auth.protect();
+    }
+
     const requestHeaders = new Headers(request.headers);
     if (auth.userId) {
       requestHeaders.set('x-user-id', auth.userId);
     }
     return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  if (!isPublicRoute(request)) {
+    await auth.protect();
   }
 });
 

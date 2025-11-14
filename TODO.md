@@ -76,7 +76,7 @@ Security & Compliance
   - Linked files: `middleware.ts:1`
 - [x] Mask/redact sensitive data in logs; audit credential access [P0]
   - Linked files: `lib/log.ts:1`, `docs/logging-policies.md:1`
-- [ ] Add per-user and per-endpoint rate limiting; consider IP throttling [P0]
+- [x] Add per-user and per-endpoint rate limiting; consider IP throttling [P0]
   - Linked files: `app/api/workflows/execute/route.ts:1`, `app/api/workflows/cron/route.ts:1`
 - [ ] Secret management checklist for local and Vercel [P1]
   - Linked files: `docs/deployment-monitoring.md:1`, `README.md:144`

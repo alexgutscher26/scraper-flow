@@ -12,25 +12,41 @@ import { reserveIdempotencyKey } from '@/lib/idempotency';
 export async function GET(req: Request, res: Response) {
   const logger = createLogger('api/workflows/cron');
   const userId = req.headers.get('x-user-id');
+  const ipHeader =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    null;
   const hdrs = new Headers();
   let rl: {
     user: import('@/lib/rateLimit').RateLimitResult;
     global: import('@/lib/rateLimit').RateLimitResult;
+    ip: import('@/lib/rateLimit').RateLimitResult;
+    effective: import('@/lib/rateLimit').RateLimitResult;
   } | null = null;
   try {
-    rl = await rateLimit('cron', userId);
+    rl = await rateLimit('cron', userId, ipHeader, !!userId);
   } catch {
     const reset = Math.floor(Date.now() / 1000) + 60;
     rl = {
       user: { allowed: true, limit: 1000, remaining: 1000, reset },
       global: { allowed: true, limit: 1000, remaining: 1000, reset },
+      ip: { allowed: true, limit: 1000, remaining: 1000, reset },
+      effective: { allowed: true, limit: 1000, remaining: 1000, reset },
     };
   }
-  // Prefer the stricter of user/global (if user present)
-  const active = userId ? rl.user.allowed && rl.global.allowed : rl.global.allowed;
-  const headerSource = userId ? rl.user : rl.global;
-  applyRateLimitHeaders(hdrs, headerSource);
-  if (!active) {
+  const hasEffective = rl && 'effective' in rl;
+  const headerSource = hasEffective
+    ? rl.effective
+    : userId
+    ? rl.user
+    : rl.global;
+  applyRateLimitHeaders(hdrs, headerSource as any);
+  const allowed = hasEffective
+    ? rl.effective.allowed
+    : userId
+    ? rl.user.allowed && rl.global.allowed
+    : rl.global.allowed;
+  if (!allowed) {
     return new Response(null, { status: 429, headers: hdrs });
   }
   const now = new Date();

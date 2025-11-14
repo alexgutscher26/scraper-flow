@@ -38,23 +38,30 @@ export async function GET(req: Request, res: Response) {
     return Response.json({ error: msg }, { status: 500 });
   }
   const authHeader = req.headers.get('authorization');
-
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
+  const userIdHeader = req.headers.get('x-user-id');
+  const ipHeader =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    null;
+  const rl = await rateLimit('execute', userIdHeader, ipHeader, true);
+  const hdrs = new Headers();
+  const hasEffective = rl && 'effective' in rl;
+  const headerSource = hasEffective ? rl.effective : userIdHeader ? rl.user : rl.global;
+  applyRateLimitHeaders(hdrs, headerSource as any);
+  const allowed = hasEffective
+    ? rl.effective.allowed
+    : userIdHeader
+    ? rl.user.allowed && rl.global.allowed
+    : rl.global.allowed;
+  if (!allowed) {
+    return new Response(null, { status: 429, headers: hdrs });
+  }
   const select = authHeader.split(' ')[1];
   if (!isValidSecret(select)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const userIdHeader = req.headers.get('x-user-id');
-  const rl = await rateLimit('execute', userIdHeader);
-  const hdrs = new Headers();
-  const active = userIdHeader ? rl.user.allowed && rl.global.allowed : rl.global.allowed;
-  const headerSource = userIdHeader ? rl.user : rl.global;
-  applyRateLimitHeaders(hdrs, headerSource);
-  if (!active) {
-    return new Response(null, { status: 429, headers: hdrs });
   }
   const { searchParams } = new URL(req.url);
   const workflowId = searchParams.get('workflowId') as string;
