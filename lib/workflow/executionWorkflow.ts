@@ -10,6 +10,7 @@ import {
   BackoffStrategy,
 } from '@/types/workflow';
 import { computeRetryBackoffMs, runWithRetry } from './retry';
+import { Semaphore, runConcurrentWithLimit } from './concurrency';
 import { ExecutionPhase } from '@prisma/client';
 import { AppNode } from '@/types/appNode';
 import { TaskRegistry } from './task/registry';
@@ -146,20 +147,19 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
     return;
   }
 
-  // If we have enough credits, proceed with execution
-  for (const phase of execution.phases) {
-    const phaseExecution = await execitopnWorkflowPhase(
-      phase,
-      environment,
-      edges,
-      execution.userId,
-      retryPolicy
+  const grouped = groupPhasesByNumber(execution.phases);
+  for (const [, phases] of grouped) {
+    const results = await runConcurrentWithLimit(
+      phases.map((p) => async () =>
+        execitopnWorkflowPhase(p, environment, edges, execution.userId, retryPolicy)
+      ),
+      networkSemaphore.max
     );
-    creditsConsumed += phaseExecution.creditsConsumed;
-    if (!phaseExecution.success) {
-      executionFailed = true;
-      break;
+    for (const r of results) {
+      creditsConsumed += r.creditsConsumed;
+      if (!r.success) executionFailed = true;
     }
+    if (executionFailed) break;
   }
   await finalizeWorkflowExecution(
     executionId,
@@ -285,7 +285,17 @@ async function execitopnWorkflowPhase(
     return ok;
   };
 
-  const result = await runWithRetry(attemptFn, retryPolicy, sleep, logCollector);
+  let result;
+  if (requiresNetwork(node.data.type)) {
+    await networkSemaphore.acquire();
+    try {
+      result = await runWithRetry(attemptFn, retryPolicy, sleep, logCollector);
+    } finally {
+      networkSemaphore.release();
+    }
+  } else {
+    result = await runWithRetry(attemptFn, retryPolicy, sleep, logCollector);
+  }
   attempt = result.attempts;
   success = result.success;
   retryState.attempt = attempt;
@@ -687,3 +697,17 @@ function resolveRetryPolicy(definitionJson: string): RetryPolicy {
   } catch {}
   return base;
 }
+
+const networkSemaphore = new Semaphore(2);
+
+export function groupPhasesByNumber(phases: ExecutionPhase[]): Map<number, ExecutionPhase[]> {
+  const map = new Map<number, ExecutionPhase[]>();
+  for (const p of phases) {
+    const list = map.get(p.number) || [];
+    list.push(p);
+    map.set(p.number, list);
+  }
+  return new Map([...map.entries()].sort((a, b) => a[0] - b[0]));
+}
+
+export { runConcurrentWithLimit };

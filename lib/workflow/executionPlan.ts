@@ -59,7 +59,8 @@ export function FlowToExecutionPlan(
         // If the node is already planned then continue
         continue;
       }
-      const invalidInputs = getInvalidInputs(currentNode, edges, planned);
+      const gate = (currentNode.data?.gate as 'AND' | 'OR' | undefined) || 'AND';
+      const invalidInputs = getInvalidInputs(currentNode, edges, planned, gate);
       if (invalidInputs.length > 0) {
         const incomers = getIncomers(currentNode, nodes, edges);
         if (incomers.every((incomer: any) => planned.has(incomer.id))) {
@@ -75,7 +76,6 @@ export function FlowToExecutionPlan(
             inputs: invalidInputs,
           });
         } else {
-          //let's skip this node for now
           continue;
         }
       }
@@ -98,7 +98,12 @@ export function FlowToExecutionPlan(
   return { executionPlan };
 }
 
-function getInvalidInputs(node: AppNode, edges: Edge[], planned: Set<string>) {
+function getInvalidInputs(
+  node: AppNode,
+  edges: Edge[],
+  planned: Set<string>,
+  gate: 'AND' | 'OR' = 'AND'
+) {
   const invalidInputs = [];
 
   const inputs = TaskRegistry[node.data.type].inputs;
@@ -106,7 +111,6 @@ function getInvalidInputs(node: AppNode, edges: Edge[], planned: Set<string>) {
     const inputValue = node.data.inputs[input.name];
     const inputValueProvided = inputValue?.length > 0;
     if (inputValueProvided) {
-      // If the input value is provided then it is valid
       continue;
     }
     // If the input value is not provided then we need to check if it is connected
@@ -115,21 +119,27 @@ function getInvalidInputs(node: AppNode, edges: Edge[], planned: Set<string>) {
     const requiredInputProvidedByVisitedOutput =
       input.required && inputLinkedToOutput && planned.has(inputLinkedToOutput.source);
 
-    if (requiredInputProvidedByVisitedOutput) {
-      // If the required input is provided by a visited output then it is valid
-      continue;
-    } else if (!input.required) {
-      // If the input is not required then it is valid
-      if (!inputLinkedToOutput) {
-        // If the input is not required and not connected then it is valid
+    if (gate === 'AND') {
+      if (requiredInputProvidedByVisitedOutput) {
         continue;
+      } else if (!input.required) {
+        if (!inputLinkedToOutput) {
+          continue;
+        }
+        if (inputLinkedToOutput && planned.has(inputLinkedToOutput.source)) {
+          continue;
+        }
       }
-      if (inputLinkedToOutput && planned.has(inputLinkedToOutput.source)) {
-        // If the input is not required and connected then it is valid
-        continue;
+      invalidInputs.push(input.name);
+    } else {
+      const anySatisfied =
+        requiredInputProvidedByVisitedOutput ||
+        (!!inputLinkedToOutput && planned.has(inputLinkedToOutput.source));
+      if (anySatisfied) {
+        return [];
       }
+      invalidInputs.push(input.name);
     }
-    invalidInputs.push(input.name);
   }
   return invalidInputs;
 }

@@ -37,11 +37,11 @@ High-Impact Improvements
   - Linked files: `lib/workflow/executionPlan.ts:22`, `lib/workflow/executionWorkflow.ts:1`
   - DoD: phases may run concurrently when inputs satisfied; branching supported; UI visualizes concurrency
 
-- [ ] Worker pool for executors with configurable concurrency [P1]
+- [x] Worker pool for executors with configurable concurrency [P1]
   - Linked files: `lib/workflow/executionWorkflow.ts:1`, `lib/workflow/executor/registry.ts:25`
   - DoD: limit concurrent pages/browsers; backpressure; metrics per worker
 
-- [ ] Page/browser reuse and resource blocking for performance [P1]
+- [x] Page/browser reuse and resource blocking for performance [P1]
   - Linked files: `lib/workflow/executor/LaunchBrowserExecutor.ts:1`
   - DoD: reuse single browser context when possible; block images/fonts/ads optionally; measure wins
 

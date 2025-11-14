@@ -75,6 +75,19 @@ function ExecutionViewer({ initialData }: Props) {
     setSelectedPhase(phaseToSelect?.id);
   }, [query?.data?.phases, isRunning, setSelectedPhase]);
 
+  const def = initialData?.definition ? JSON.parse(initialData.definition) : {};
+  const edges = (def?.edges || []) as any[];
+  const groups = (query.data?.phases || []).reduce<Record<number, typeof query.data.phases>>(
+    (acc, p) => {
+      const arr = acc[p.number] || [];
+      arr.push(p);
+      acc[p.number] = arr;
+      return acc;
+    },
+    {}
+  );
+  const sortedGroups = Object.entries(groups).sort((a, b) => Number(a[0]) - Number(b[0]));
+
   return (
     <div className="flex h-full w-full">
       <aside className="flex w-[440px] min-w-[440px] max-w-[440px] flex-grow border-separate flex-col overflow-hidden border-r-2">
@@ -125,22 +138,32 @@ function ExecutionViewer({ initialData }: Props) {
         </div>
         <Separator />
         <div className="h-full overflow-auto px-2 py-4">
-          {query.data?.phases.map((phase, index) => (
-            <Button
-              key={phase.id}
-              className="w-full justify-between"
-              variant={selectedPhase === phase.id ? 'secondary' : 'ghost'}
-              onClick={() => {
-                if (isRunning) return;
-                setSelectedPhase(phase.id);
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{index + 1}</Badge>
-                <p className="font-semibold">{phase.name}</p>
+          {sortedGroups.map(([num, phases], gi) => (
+            <div key={num} className="mb-3">
+              <div className="flex items-center justify-between px-1 py-1">
+                <Badge variant="outline">Phase {num}</Badge>
+                <span className="text-xs text-muted-foreground">{phases?.length} branch(es)</span>
               </div>
-              <PhaseStatusBadge status={phase.status as ExecutionPhaseStatus} />
-            </Button>
+              <div className="grid grid-cols-1 gap-2">
+                {phases?.map((phase) => (
+                  <Button
+                    key={phase.id}
+                    className="w-full justify-between"
+                    variant={selectedPhase === phase.id ? 'secondary' : 'ghost'}
+                    onClick={() => {
+                      if (isRunning) return;
+                      setSelectedPhase(phase.id);
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">{gi + 1}</Badge>
+                      <p className="font-semibold">{phase.name}</p>
+                    </div>
+                    <PhaseStatusBadge status={phase.status as ExecutionPhaseStatus} />
+                  </Button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </aside>
@@ -181,6 +204,33 @@ function ExecutionViewer({ initialData }: Props) {
                 </div>
               </Badge>
             </div>
+            <Card>
+              <CardHeader className="rounded-lg rounded-b-none border-b bg-gray-50 py-4 dark:bg-background">
+                <CardTitle className="text-base">Dependencies</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Incoming sources connected to this phase
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="py-3">
+                <div className="flex flex-wrap gap-2">
+                  {edges
+                    .filter((e) => {
+                      try {
+                        const n = JSON.parse((phaseDetails.data as any).node);
+                        return e.target === n.id;
+                      } catch {
+                        return false;
+                      }
+                    })
+                    .map((e) => (
+                      <Badge key={`${e.source}-${e.target}-${e.targetHandle}`} variant="outline">
+                        {e.sourceHandle} → {e.targetHandle}
+                      </Badge>
+                    ))}
+                  {edges.length === 0 && <span className="text-sm">No dependencies</span>}
+                </div>
+              </CardContent>
+            </Card>
             <ParamaterViews
               title="Inputs"
               subTitle="Inputs used for this phase"
