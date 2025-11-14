@@ -7,6 +7,13 @@ import { WorkflowExecutionStatus } from '@/types/workflow';
 import { auth } from '@clerk/nextjs/server';
 const { COMPLETED, FAILED } = WorkflowExecutionStatus;
 
+/**
+ * Retrieves statistics for workflow executions within a specified period.
+ *
+ * The function first authenticates the user and checks for authorization. It then converts the provided period into a date range and queries the database for workflow executions that match the user ID and fall within the date range. The results are filtered by execution status and include credits consumed. Finally, it calculates the total credits consumed and the number of phases executed, returning these statistics as an object.
+ *
+ * @param {Period} period - The time period for which to retrieve workflow execution statistics.
+ */
 export const GetStatsCardsValues = async (period: Period) => {
   const { userId } = await auth();
   if (!userId) {
