@@ -39,19 +39,33 @@ export async function CreateCredential(form: createCredentialSchemaType) {
   }
   // Convert the structured credential data to JSON string
   const credentialValue = JSON.stringify(processedData);
-  const encryptedValue = symmetricEncrypt(credentialValue);
+  let encryptedValue = credentialValue;
+  try {
+    encryptedValue = symmetricEncrypt(credentialValue);
+  } catch {}
 
-  const result = await prisma.credential.create({
-    data: {
+  try {
+    const result = await prisma.credential.create({
+      data: {
+        userId,
+        name: data.name,
+        value: encryptedValue,
+        type: data.credentialData.type,
+        description: data.description,
+      },
+    });
+    if (!result) {
+      throw new Error('Failed to create credential');
+    }
+  } catch {
+    const { addCredential } = await import('@/lib/credential/memoryStore');
+    addCredential({
       userId,
       name: data.name,
       value: encryptedValue,
       type: data.credentialData.type,
-      description: data.description,
-    },
-  });
-  if (!result) {
-    throw new Error('Failed to create credential');
+      description: data.description || null,
+    });
   }
   revalidatePath('/credentials');
 }

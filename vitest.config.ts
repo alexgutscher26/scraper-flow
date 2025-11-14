@@ -10,5 +10,17 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      lines: 80,
+      functions: 80,
+      statements: 80,
+      branches: 80,
+      all: true,
+      include: ['lib/**/*.{ts,tsx}'],
+      exclude: ['**/*.d.ts', 'lib/**/__tests__/**', 'tests/**'],
+    },
   },
 });

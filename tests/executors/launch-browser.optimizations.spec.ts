@@ -150,7 +150,9 @@ describe('LaunchBrowserExecutor optimizations', () => {
     const env1 = makeEnv({ browser, page, url: `http://localhost:${port}/index.html` });
     await LaunchBrowserExecutor(env1);
     const baseline = Number(
-      (env1.logs.find((l: string) => l.includes('PERF_METRIC:')) || '').split('domContentLoadedMs=')[1]
+      (env1.logs.find((l: string) => l.includes('PERF_METRIC:')) || '').split(
+        'domContentLoadedMs='
+      )[1]
     );
     process.env.RESOURCE_BLOCK_ENABLE = 'true';
     process.env.RESOURCE_BLOCK_IMAGES = 'true';
@@ -161,7 +163,9 @@ describe('LaunchBrowserExecutor optimizations', () => {
     const env2 = makeEnv({ browser, page, url: `http://localhost:${port}/index.html` });
     await LaunchBrowserExecutor(env2);
     const optimized = Number(
-      (env2.logs.find((l: string) => l.includes('PERF_METRIC:')) || '').split('domContentLoadedMs=')[1]
+      (env2.logs.find((l: string) => l.includes('PERF_METRIC:')) || '').split(
+        'domContentLoadedMs='
+      )[1]
     );
     const report = `PERF_COMPARISON: baselineMs=${baseline} optimizedMs=${optimized}`;
     expect(report).toMatch(/baselineMs=\d+/);

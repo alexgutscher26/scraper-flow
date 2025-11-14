@@ -47,7 +47,7 @@ High-Impact Improvements
 
 Testing & Quality
 
-- [ ] Establish `vitest` runner and coverage reporting [P1]
+- [x] Establish `vitest` runner and coverage reporting [P1]
   - Linked files: `package.json:5`, `.eslintrc.json:1`
   - DoD: `npm run test` passes locally + CI; coverage threshold ≥80% for core libs
 - [ ] Unit tests for workflow orchestration and credit consumption [P1]

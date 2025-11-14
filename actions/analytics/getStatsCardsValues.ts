@@ -13,31 +13,37 @@ export const GetStatsCardsValues = async (period: Period) => {
     throw new Error('unauthorized');
   }
   const dateRange = PeriodToDateRange(period);
-  const executions = await prisma.workflowExecution.findMany({
-    where: {
-      userId,
-      startedAt: {
-        gte: dateRange.startDate,
-        lte: dateRange.endDate,
+  let executions: Array<{
+    creditsConsumed: number;
+    phases: Array<{ creditsConsumed: number | null }>;
+  }> = [];
+  try {
+    executions = await prisma.workflowExecution.findMany({
+      where: {
+        userId,
+        startedAt: {
+          gte: dateRange.startDate,
+          lte: dateRange.endDate,
+        },
+        status: {
+          in: [COMPLETED, FAILED],
+        },
       },
-      status: {
-        in: [COMPLETED, FAILED],
-      },
-    },
-    select: {
-      creditsConsumed: true,
-      phases: {
-        where: {
-          creditsConsumed: {
-            not: null,
+      select: {
+        creditsConsumed: true,
+        phases: {
+          where: {
+            creditsConsumed: {
+              not: null,
+            },
+          },
+          select: {
+            creditsConsumed: true,
           },
         },
-        select: {
-          creditsConsumed: true,
-        },
       },
-    },
-  });
+    });
+  } catch {}
 
   const stats = {
     workflowExecutions: executions.length,

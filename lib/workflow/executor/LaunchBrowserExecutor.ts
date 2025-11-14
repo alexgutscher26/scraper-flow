@@ -141,9 +141,13 @@ function readResourceBlockEnv(): ResourceBlockOptions {
   const blockImages = process.env.RESOURCE_BLOCK_IMAGES === 'true';
   const blockFonts = process.env.RESOURCE_BLOCK_FONTS === 'true';
   const blockAds = process.env.RESOURCE_BLOCK_ADS === 'true';
-  const raw = process.env.RESOURCE_BLOCK_AD_PATTERNS ??
+  const raw =
+    process.env.RESOURCE_BLOCK_AD_PATTERNS ??
     'doubleclick.net,googlesyndication.com,adservice.google.com,ads.yahoo.com,adroll.com,/ads/,/adserver/';
-  const adUrlPatterns = raw.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+  const adUrlPatterns = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
   return { enabled, blockImages, blockFonts, blockAds, adUrlPatterns };
 }
 
@@ -450,7 +454,14 @@ export async function LaunchBrowserExecutor(
           if (shouldBlock) {
             blockedTotal += 1;
             if (type === 'image') blockedImages += 1;
-            else if (type === 'font' || url.endsWith('.woff') || url.endsWith('.woff2') || url.endsWith('.ttf') || url.endsWith('.otf')) blockedFonts += 1;
+            else if (
+              type === 'font' ||
+              url.endsWith('.woff') ||
+              url.endsWith('.woff2') ||
+              url.endsWith('.ttf') ||
+              url.endsWith('.otf')
+            )
+              blockedFonts += 1;
             else if (blocking.blockAds) blockedAds += 1;
             try {
               req.abort('blockedbyclient');

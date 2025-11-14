@@ -10,9 +10,9 @@ import ExecutionStatusChat from './_components/ExecutionStatusChat';
 import { GetCreditUsageInPeriod } from '@/actions/analytics/getCreditUsageInPeriod';
 import CreditUsageChat from '../billing/_components/CreditUsageChat';
 
-const HomePage = ({ searchParams }: { searchParams: { month?: string; year?: string } }) => {
+const HomePage = ({ searchParams }: { searchParams?: { month?: string; year?: string } }) => {
   const currentDate = new Date();
-  const { month, year } = searchParams;
+  const { month, year } = searchParams ?? {};
   const period: Period = {
     month: month ? parseInt(month) : currentDate.getMonth(),
     year: year ? parseInt(year) : currentDate.getFullYear(),

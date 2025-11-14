@@ -1,3 +1,15 @@
 {
-  "extends": ["next/core-web-vitals", "prettier"]
+  "extends": ["next/core-web-vitals", "prettier"],
+  "overrides": [
+    {
+      "files": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+      "plugins": ["vitest"],
+      "env": { "vitest/globals": true },
+      "rules": {
+        "vitest/no-focused-tests": "error",
+        "vitest/no-disabled-tests": "warn",
+        "vitest/consistent-test-it": ["warn", { "fn": "test" }]
+      }
+    }
+  ]
 }

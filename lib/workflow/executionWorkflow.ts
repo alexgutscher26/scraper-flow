@@ -153,8 +153,9 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   const grouped = groupPhasesByNumber(execution.phases);
   for (const [, phases] of grouped) {
     const results = await runConcurrentWithLimit(
-      phases.map((p) => async () =>
-        execitopnWorkflowPhase(p, environment, edges, execution.userId, retryPolicy, workerPool)
+      phases.map(
+        (p) => async () =>
+          execitopnWorkflowPhase(p, environment, edges, execution.userId, retryPolicy, workerPool)
       ),
       workerPool.getMaxTotalConcurrency()
     );
@@ -292,9 +293,13 @@ async function execitopnWorkflowPhase(
   const kind = ExecutorMeta[node.data.type]?.kind || ExecutorKind.OTHER;
   let result;
   if (kind === ExecutorKind.BROWSER) {
-    result = await workerPool.runBrowser(() => runWithRetry(attemptFn, retryPolicy, sleep, logCollector));
+    result = await workerPool.runBrowser(() =>
+      runWithRetry(attemptFn, retryPolicy, sleep, logCollector)
+    );
   } else if (kind === ExecutorKind.PAGE) {
-    result = await workerPool.runPage(() => runWithRetry(attemptFn, retryPolicy, sleep, logCollector));
+    result = await workerPool.runPage(() =>
+      runWithRetry(attemptFn, retryPolicy, sleep, logCollector)
+    );
   } else {
     result = await runWithRetry(attemptFn, retryPolicy, sleep, logCollector);
   }

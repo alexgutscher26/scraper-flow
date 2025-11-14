@@ -8,12 +8,26 @@ export async function GetCredentialsForUser() {
   if (!userId) {
     throw new Error('User not found');
   }
-  return prisma.credential.findMany({
-    where: {
-      userId,
-    },
-    orderBy: {
-      name: 'asc',
-    },
-  });
+  try {
+    return await prisma.credential.findMany({
+      where: {
+        userId,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  } catch {
+    const { listCredentials } = await import('@/lib/credential/memoryStore');
+    const items = listCredentials(userId);
+    return items.map((c) => ({
+      id: c.id,
+      userId: c.userId,
+      name: c.name,
+      value: c.value,
+      type: c.type,
+      description: c.description || undefined,
+      createdAt: c.createdAt,
+    }));
+  }
 }

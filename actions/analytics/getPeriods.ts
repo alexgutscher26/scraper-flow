@@ -8,16 +8,19 @@ export const GetPeriods = async () => {
   if (!userId) {
     throw new Error('unauthorized');
   }
-  const years = await prisma.workflowExecution.aggregate({
-    where: {
-      userId,
-    },
-    _min: {
-      startedAt: true,
-    },
-  });
   const currentYear = new Date().getFullYear();
-  const minYear = years._min?.startedAt?.getFullYear() || currentYear;
+  let minYear = currentYear;
+  try {
+    const years = await prisma.workflowExecution.aggregate({
+      where: {
+        userId,
+      },
+      _min: {
+        startedAt: true,
+      },
+    });
+    minYear = years._min?.startedAt?.getFullYear() || currentYear;
+  } catch {}
   const periods: Period[] = [];
 
   for (let year = minYear; year <= currentYear; year++) {

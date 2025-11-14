@@ -22,7 +22,7 @@ class BoundedSemaphore {
     this.maxQueueSize = maxQueueSize === undefined ? Infinity : Math.max(0, maxQueueSize);
     this.strategy = strategy;
   }
-  async acquire(): Promise<{ waitedMs: number }>{
+  async acquire(): Promise<{ waitedMs: number }> {
     const start = Date.now();
     if (this.current < this.max) {
       this.current++;
@@ -153,7 +153,9 @@ export class WorkerPool {
       if (err?.code === 'BACKPRESSURE') {
         m.backpressureRejected++;
       }
-      this.logger.warn(`${type} worker rejected: ${err instanceof Error ? err.message : String(err)}`);
+      this.logger.warn(
+        `${type} worker rejected: ${err instanceof Error ? err.message : String(err)}`
+      );
       throw err;
     }
     const start = Date.now();

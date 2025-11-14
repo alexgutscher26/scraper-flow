@@ -4,12 +4,13 @@ import { AppNode } from '@/types/appNode';
 import { Edge } from '@xyflow/react';
 import { TaskType } from '@/types/TaskType';
 
-const mkNode = (id: string, type: TaskType, inputs: Record<string, string> = {}, extra: any = {}) => ({
-  id,
-  type: 'Node',
-  position: { x: 0, y: 0 },
-  data: { type, inputs, ...extra },
-} as unknown as AppNode);
+const mkNode = (id: string, type: TaskType, inputs: Record<string, string> = {}, extra: any = {}) =>
+  ({
+    id,
+    type: 'Node',
+    position: { x: 0, y: 0 },
+    data: { type, inputs, ...extra },
+  }) as unknown as AppNode;
 
 describe('FlowToExecutionPlan parallel phases', () => {
   it('groups nodes into concurrent phases when dependencies allow', () => {
@@ -18,8 +19,20 @@ describe('FlowToExecutionPlan parallel phases', () => {
     const p2 = mkNode('C', TaskType.PAGE_TO_HTML, {});
     const nodes = [entry, p1, p2];
     const edges: Edge[] = [
-      { id: 'e1', source: 'A', target: 'B', sourceHandle: 'Web page', targetHandle: 'Web page' } as any,
-      { id: 'e2', source: 'A', target: 'C', sourceHandle: 'Web page', targetHandle: 'Web page' } as any,
+      {
+        id: 'e1',
+        source: 'A',
+        target: 'B',
+        sourceHandle: 'Web page',
+        targetHandle: 'Web page',
+      } as any,
+      {
+        id: 'e2',
+        source: 'A',
+        target: 'C',
+        sourceHandle: 'Web page',
+        targetHandle: 'Web page',
+      } as any,
     ];
     const res = FlowToExecutionPlan(nodes, edges);
     expect(res.error).toBeUndefined();
@@ -34,7 +47,13 @@ describe('FlowToExecutionPlan parallel phases', () => {
     const read = mkNode('C', TaskType.READ_PROPERTY_FROM_JSON, {}, { gate: 'AND' });
     const nodes = [entry, html, read];
     const edges: Edge[] = [
-      { id: 'e1', source: 'A', target: 'B', sourceHandle: 'Web page', targetHandle: 'Web page' } as any,
+      {
+        id: 'e1',
+        source: 'A',
+        target: 'B',
+        sourceHandle: 'Web page',
+        targetHandle: 'Web page',
+      } as any,
       { id: 'e2', source: 'B', target: 'C', sourceHandle: 'Html', targetHandle: 'JSON' } as any,
     ];
     const res = FlowToExecutionPlan(nodes, edges);
@@ -47,7 +66,13 @@ describe('FlowToExecutionPlan parallel phases', () => {
     const read = mkNode('C', TaskType.READ_PROPERTY_FROM_JSON, {}, { gate: 'OR' });
     const nodes = [entry, html, read];
     const edges: Edge[] = [
-      { id: 'e1', source: 'A', target: 'B', sourceHandle: 'Web page', targetHandle: 'Web page' } as any,
+      {
+        id: 'e1',
+        source: 'A',
+        target: 'B',
+        sourceHandle: 'Web page',
+        targetHandle: 'Web page',
+      } as any,
       { id: 'e2', source: 'B', target: 'C', sourceHandle: 'Html', targetHandle: 'JSON' } as any,
     ];
     const res = FlowToExecutionPlan(nodes, edges);

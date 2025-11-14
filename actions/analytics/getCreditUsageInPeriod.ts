@@ -38,52 +38,47 @@ export const GetCreditUsageInPeriod = async (period: Period) => {
     }, {} as any);
 
   // Process data in batches to prevent exceeding Prisma's response size limit
-  let processedAll = false;
-  let skip = 0;
-  const batchSize = 1000; // Adjust based on your data size
-
-  while (!processedAll) {
-    const executionsPhases = await prisma.executionPhase.findMany({
-      where: {
-        userId,
-        startedAt: {
-          gte: dateRange.startDate,
-          lt: dateRange.endDate,
+  try {
+    let processedAll = false;
+    let skip = 0;
+    const batchSize = 1000;
+    while (!processedAll) {
+      const executionsPhases = await prisma.executionPhase.findMany({
+        where: {
+          userId,
+          startedAt: {
+            gte: dateRange.startDate,
+            lt: dateRange.endDate,
+          },
+          status: {
+            in: [COMPLETED, FAILED],
+          },
         },
-        status: {
-          in: [COMPLETED, FAILED],
+        select: {
+          startedAt: true,
+          status: true,
+          creditsConsumed: true,
         },
-      },
-      select: {
-        startedAt: true,
-        status: true,
-        creditsConsumed: true,
-      },
-      skip: skip,
-      take: batchSize,
-      orderBy: {
-        startedAt: 'asc',
-      },
-    });
-
-    // If we got fewer records than the batch size, we've processed everything
-    if (executionsPhases.length < batchSize) {
-      processedAll = true;
-    }
-
-    // Process this batch
-    executionsPhases.forEach((phase) => {
-      const date = format(phase.startedAt!, dateFormat);
-      if (phase.status === COMPLETED) {
-        stats[date].success += phase.creditsConsumed || 0;
-      } else if (phase.status === FAILED) {
-        stats[date].failed += phase.creditsConsumed || 0;
+        skip,
+        take: batchSize,
+        orderBy: {
+          startedAt: 'asc',
+        },
+      });
+      if (executionsPhases.length < batchSize) {
+        processedAll = true;
       }
-    });
-
-    // Move to the next batch
-    skip += batchSize;
-  }
+      executionsPhases.forEach((phase) => {
+        const date = format(phase.startedAt!, dateFormat);
+        if (phase.status === COMPLETED) {
+          stats[date].success += phase.creditsConsumed || 0;
+        } else if (phase.status === FAILED) {
+          stats[date].failed += phase.creditsConsumed || 0;
+        }
+      });
+      skip += batchSize;
+    }
+  } catch {}
 
   const result = Object.entries(stats).map(([date, infos]) => {
     return {

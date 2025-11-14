@@ -5,13 +5,11 @@ import { httpMetricsBus } from '@/lib/metrics/http';
 describe('HttpClient', () => {
   it('caches JSON within TTL', async () => {
     const client = new HttpClient({ ttlMs: 1000 });
-    const fetchSpy = vi
-      .spyOn(global, 'fetch' as any)
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true }), {
-          headers: { 'content-type': 'application/json' },
-        })
-      );
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: true }), {
+        headers: { 'content-type': 'application/json' },
+      })
+    );
     const a = await client.get<any>('https://example.com/a');
     const b = await client.get<any>('https://example.com/a');
     expect(a.ok).toBe(true);
@@ -43,13 +41,11 @@ describe('HttpClient', () => {
     const client = new HttpClient({ ttlMs: 0 });
     const events: any[] = [];
     httpMetricsBus.on((m) => events.push(m));
-    const fetchSpy = vi
-      .spyOn(global, 'fetch' as any)
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({ ok: true }), {
-          headers: { 'content-type': 'application/json', 'content-length': '12' },
-        })
-      );
+    const fetchSpy = vi.spyOn(global, 'fetch' as any).mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: true }), {
+        headers: { 'content-type': 'application/json', 'content-length': '12' },
+      })
+    );
     await client.get<any>('https://example.com/c');
     expect(events.length).toBeGreaterThanOrEqual(1);
     expect(events[0].url).toContain('example.com/c');
