@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { runConcurrentWithLimit } from '@/lib/workflow/concurrency';
 
+/**
+ * Returns a promise that resolves after a specified delay.
+ */
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe('runConcurrentWithLimit throughput', () => {

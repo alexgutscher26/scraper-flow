@@ -36,6 +36,17 @@ import { fingerprint, hasOutputFingerprint, markOutputFingerprint } from '@/lib/
 import { checkAndReserveWorkflowCredits } from './creditCheck';
 import { getCredentialValue } from '../credential/getCredentialValue';
 
+/**
+ * Executes a workflow based on the provided execution ID and optional next run date.
+ *
+ * The function initializes the execution environment, checks for sufficient credits, and processes the workflow phases concurrently.
+ * It handles errors related to environment setup and credit availability, updating the execution status accordingly.
+ * Finally, it cleans up the environment and revalidates the workflow runs path.
+ *
+ * @param executionId - The unique identifier for the workflow execution.
+ * @param nextRun - An optional date indicating the next scheduled run for the workflow.
+ * @throws Error If the execution is not found or if there are insufficient credits to run the workflow.
+ */
 export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   const logger = createLogger('workflow/execution');
   try {
@@ -239,6 +250,15 @@ async function finalizeWorkflowExecution(
 
 /**
  * Executes a single `ExecutionPhase` with automatic retry/backoff based on the provided policy.
+ *
+ * This function sets up the environment for the phase, updates the execution phase status, and attempts to execute the phase while managing credits and retries. It handles network requirements and logs relevant information throughout the process. The final phase state is recorded, including any retry information and credits consumed.
+ *
+ * @param phase - The execution phase to be processed.
+ * @param environment - The environment context in which the phase is executed.
+ * @param edges - The edges associated with the execution phase.
+ * @param userId - The ID of the user executing the phase.
+ * @param retryPolicy - The policy governing retry attempts and backoff strategy.
+ * @returns An object containing the success status and the number of credits consumed.
  */
 async function execitopnWorkflowPhase(
   phase: ExecutionPhase,
@@ -700,6 +720,9 @@ function resolveRetryPolicy(definitionJson: string): RetryPolicy {
 
 const networkSemaphore = new Semaphore(2);
 
+/**
+ * Groups execution phases by their number.
+ */
 export function groupPhasesByNumber(phases: ExecutionPhase[]): Map<number, ExecutionPhase[]> {
   const map = new Map<number, ExecutionPhase[]>();
   for (const p of phases) {

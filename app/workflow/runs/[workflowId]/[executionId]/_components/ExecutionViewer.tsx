@@ -41,6 +41,16 @@ type ExecutionData = Awaited<ReturnType<typeof GetWorkflowExecutionWithPhases>>;
 interface Props {
   initialData: ExecutionData;
 }
+/**
+ * Renders the execution viewer component displaying workflow execution phases and their details.
+ *
+ * This component manages the state of the selected phase, fetches execution and phase details using queries,
+ * and updates the UI based on the execution status. It also handles the grouping of phases and displays
+ * relevant information such as duration, credits consumed, and dependencies for the selected phase.
+ *
+ * @param {Object} Props - The properties for the ExecutionViewer component.
+ * @param {Object} Props.initialData - The initial data for the workflow execution.
+ */
 function ExecutionViewer({ initialData }: Props) {
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
 
