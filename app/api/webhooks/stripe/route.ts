@@ -38,9 +38,11 @@ export async function POST(req: Request, res: Response) {
     }
     return new NextResponse(null, { status: 200 });
   } catch (error) {
-    logger.error(
-      `stripe webhook error: ${error instanceof Error ? error.message : String(error)}`
-    );
+    const message = error instanceof Error ? error.message : String(error);
+    logger.error(`stripe webhook error: ${message}`);
+    if (message.toLowerCase().includes("aborted") || (error as any)?.name === "AbortError") {
+      return new NextResponse("Request aborted", { status: 408 });
+    }
     return new NextResponse("Webhook error", { status: 400 });
   }
 }

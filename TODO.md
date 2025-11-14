@@ -13,10 +13,10 @@ High-Impact Improvements
 
 - [x] Introduce unified logger across API and executors
   - Linked files: `lib/log.ts:1`, `types/log.ts:1`, `lib/workflow/executionPlan.ts:22`, `app/api/workflows/cron/route.ts:6`, `app/api/workflows/execute/route.ts:12`
-- [ ] Enrich `ExecutionLog` with phase id, task type, structured metadata [P0]
+- [x] Enrich `ExecutionLog` with phase id, task type, structured metadata [P0]
   - Linked files: `prisma/migrations/20250604170711_init/migration.sql:57`, `app/workflow/runs/[workflowId]/[executionId]/_components/ExecutionViewer.tsx:345`, `actions/workflows/getWorkflowPhaseDetails.ts:1`
   - DoD: logs include `phaseId`, `taskType`, `scope`; UI renders enriched fields; migration applied
-- [ ] Add runtime env validation using `zod` [P0]
+- [x] Add runtime env validation using `zod` [P0]
   - Linked files: `app/api/workflows/execute/route.ts:14`, `app/api/webhooks/stripe/route.ts:1`, `lib/workflow/executionWorkflow.ts:375`
   - DoD: single `env` schema validates required vars; endpoints fail fast with 500 + reason
 - [ ] Remove hardcoded Chrome path; use env var or auto-detect [P0]

@@ -187,6 +187,12 @@ The application features a sophisticated workflow execution engine that handles:
 - **Error Handling**: Graceful failure recovery with detailed error messages
 - **Execution History**: Complete audit trail of all workflow runs
 
+### Execution Logs
+- Fields: `id`, `timestamp`, `logLevel`, `message`, `executionPhaseId`, `phaseId`, `taskType`, `metadata`
+- Metadata: JSON object including `scope` and contextual attributes
+- Example:
+  - `{"scope":"phase","nodeId":"abc123","phaseNumber":1}`
+
 ## Scheduling & Automation
 
 ### Hybrid Scheduling System
@@ -496,3 +502,6 @@ npm run start          # Start production server
 ## Form Automation
 
 See docs/form-automation.md for file upload validation and progress, captcha provider verification, and 2FA credential support.
+## Migration Notes
+- ExecutionLog now includes `phaseId`, `taskType`, and `metadata` (`JSONB`). Existing rows are backfilled from `executionPhaseId` and default values.
+- Apply database migrations with `npx prisma migrate dev`. Verify logs render in the Execution Viewer.

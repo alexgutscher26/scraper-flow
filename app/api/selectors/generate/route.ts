@@ -24,26 +24,34 @@ export async function POST(req: Request) {
   if (!isValidSecret(token)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const body = await req.json();
-  const html: string = body.html;
-  if (!html) return Response.json({ error: "html is required" }, { status: 400 });
-  const description: string | undefined = body.description;
-  const mode: string = body.mode || "flexible";
-  const specificityLevel: number = Number(body.specificityLevel || 1);
-  const strategy: string = body.strategy || "both";
-  const preferredAttributes: string[] | undefined = body.preferredAttributes;
-  const override: { selector: string; type?: string } | undefined = body.override;
+  try {
+    const body = await req.json();
+    const html: string = body.html;
+    if (!html) return Response.json({ error: "html is required" }, { status: 400 });
+    const description: string | undefined = body.description;
+    const mode: string = body.mode || "flexible";
+    const specificityLevel: number = Number(body.specificityLevel || 1);
+    const strategy: string = body.strategy || "both";
+    const preferredAttributes: string[] | undefined = body.preferredAttributes;
+    const override: { selector: string; type?: string } | undefined = body.override;
 
-  const input: GenerationInput = { html, description };
-  const opts: GenerationOptions = {
-    type: strategy as any,
-    mode: mode as any,
-    specificityLevel,
-    preferredAttributes,
-    maxCandidates: 12,
-  };
-  const candidates = rerankWithOverride(generateSelectors(input, opts), override as any);
-  const validations = candidates.map((c) => validateAgainstHtml(html, c));
-  logger.info(`Generated ${candidates.length} selector candidates`);
-  return Response.json({ candidates, validations });
+    const input: GenerationInput = { html, description };
+    const opts: GenerationOptions = {
+      type: strategy as any,
+      mode: mode as any,
+      specificityLevel,
+      preferredAttributes,
+      maxCandidates: 12,
+    };
+    const candidates = rerankWithOverride(generateSelectors(input, opts), override as any);
+    const validations = candidates.map((c) => validateAgainstHtml(html, c));
+    logger.info(`Generated ${candidates.length} selector candidates`);
+    return Response.json({ candidates, validations });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.toLowerCase().includes("aborted") || (error as any)?.name === "AbortError") {
+      return Response.json({ error: "Request aborted" }, { status: 408 });
+    }
+    return Response.json({ error: "Invalid request body" }, { status: 400 });
+  }
 }

@@ -69,7 +69,8 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
 
   // If we don't have enough credits, mark the execution as failed and early return
   if (!creditsCheck.success) {
-    const logCollector = createLogCollector();
+    const firstPhaseId = execution.phases[0]?.id;
+    const logCollector = createLogCollector({ phaseId: firstPhaseId, taskType: "SYSTEM", metadata: { scope: "workflow", reason: "INSUFFICIENT_CREDITS" } });
     logCollector.error(
       `Insufficient credits to run workflow. Required: ${totalCreditsRequired}, Available: ${
         creditsCheck.userCredits || 0
@@ -91,11 +92,16 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
               completedAt: new Date(),
               logs: {
                 create: {
-                  message: `Workflow execution failed - insufficient credits (Required: ${totalCreditsRequired}, Available: ${
-                    creditsCheck.userCredits || 0
-                  })`,
+                  message: `Workflow execution failed - insufficient credits (Required: ${totalCreditsRequired}, Available: ${creditsCheck.userCredits || 0})`,
                   logLevel: "error",
                   timestamp: new Date(),
+                  phaseId: firstPhaseId ?? execution.phases[0]?.id ?? "",
+                  taskType: "SYSTEM",
+                  metadata: {
+                    scope: "workflow",
+                    required: totalCreditsRequired,
+                    available: creditsCheck.userCredits || 0,
+                  },
                 },
               },
             },
@@ -212,10 +218,10 @@ async function execitopnWorkflowPhase(
   edges: Edge[],
   userId: string
 ) {
-  let logCollector = createLogCollector();
-  const startedAt = new Date();
   const node = JSON.parse(phase.node) as AppNode;
-  await setupEnvironmentForPhase(node, environment, edges, userId, logCollector);
+  let logCollector = createLogCollector({ phaseId: phase.id, taskType: node.data.type, metadata: { scope: "phase", nodeId: node.id, phaseNumber: phase.number } });
+  const startedAt = new Date();
+  await setupEnvironmentForPhase(node, environment, edges, userId, logCollector, phase.id);
   await maybePoliteDelay(node.data.type, environment, logCollector);
   await prisma.executionPhase.update({
     where: { id: phase.id },
@@ -241,6 +247,7 @@ async function execitopnWorkflowPhase(
 
   await finalizePhase(
     phase.id,
+    node.data.type,
     success,
     outputs,
     logCollector,
@@ -252,6 +259,7 @@ async function execitopnWorkflowPhase(
 
 async function finalizePhase(
   phaseId: string,
+  taskType: TaskType,
   success: boolean,
   outputs: any,
   logCollector: LogCollector,
@@ -277,6 +285,9 @@ async function finalizePhase(
             message: log.message,
             logLevel: log.level,
             timestamp: log.timestamp,
+            phaseId: log.phaseId ?? phaseId,
+            taskType: log.taskType ?? taskType,
+            metadata: log.metadata ?? { scope: "phase" },
           })),
         },
       },
@@ -336,7 +347,8 @@ async function setupEnvironmentForPhase(
   environment: Environment,
   edges: Edge[],
   userId: string,
-  logCollector: LogCollector
+  logCollector: LogCollector,
+  phaseId: string
 ) {
   environment.phases[node.id] = {
     inputs: {},
@@ -353,7 +365,7 @@ async function setupEnvironmentForPhase(
           const credentialValue = await getCredentialValue(inputVal, userId, {
             requester: `workflow/${node.data.type}`,
             method: "db",
-            correlationId: phase.id,
+            correlationId: phaseId,
           });
           environment.phases[node.id].inputs[input.name] = credentialValue;
         } catch (error) {

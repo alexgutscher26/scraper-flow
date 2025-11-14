@@ -345,6 +345,8 @@ function ParamaterViews({
 
 function LogViewer({ logs }: { logs: ExecutionLog[] | undefined }) {
   if (!logs || logs.length === 0) return null;
+  const [openRows, setOpenRows] = useState<Record<string, boolean>>({});
+  const toggleRow = (id: string) => setOpenRows((s) => ({ ...s, [id]: !s[id] }));
   return (
     <Card>
       <CardHeader className="rounded-lg rounded-b-none border-b py-4 bg-gray-50 dark:bg-background">
@@ -358,34 +360,59 @@ function LogViewer({ logs }: { logs: ExecutionLog[] | undefined }) {
           <TableHeader className="text-muted-foreground text-sm">
             <TableRow>
               <TableHead>Time</TableHead>
+              <TableHead>Phase</TableHead>
+              <TableHead>Task Type</TableHead>
               <TableHead>Level</TableHead>
               <TableHead>Message</TableHead>
+              <TableHead>Metadata</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {logs?.map((log) => (
-              <TableRow key={log.id} className="text-muted-foreground">
-                <TableCell
-                  width={190}
-                  className="text-xs text-muted-foreground p-[2px] pl-4"
-                >
-                  {log.timestamp.toISOString()}
-                </TableCell>
-                <TableCell
-                  width={80}
-                  className={cn(
-                    "uppercase text-xs text-bold p-[3px] pl-4",
-                    (log.logLevel as LogLevel) === "error" &&
-                      "text-destructive",
-                    (log.logLevel as LogLevel) === "info" && "text-primary"
-                  )}
-                >
-                  {log.logLevel}
-                </TableCell>
-                <TableCell className="text-sm flex-1 p-[3px] pl-4">
-                  {log.message}
-                </TableCell>
-              </TableRow>
+              <React.Fragment key={log.id}>
+                <TableRow className="text-muted-foreground">
+                  <TableCell
+                    width={190}
+                    className="text-xs text-muted-foreground p-[2px] pl-4"
+                  >
+                    {log.timestamp.toISOString()}
+                  </TableCell>
+                  <TableCell width={160} className="text-xs p-[3px] pl-4">
+                    {log.phaseId ?? "-"}
+                  </TableCell>
+                  <TableCell width={160} className="text-xs p-[3px] pl-4">
+                    {String((log as any).taskType ?? "-")}
+                  </TableCell>
+                  <TableCell
+                    width={80}
+                    className={cn(
+                      "uppercase text-xs text-bold p-[3px] pl-4",
+                      (log.logLevel as LogLevel) === "error" &&
+                        "text-destructive",
+                      (log.logLevel as LogLevel) === "info" && "text-primary"
+                    )}
+                  >
+                    {log.logLevel}
+                  </TableCell>
+                  <TableCell className="text-sm flex-1 p-[3px] pl-4">
+                    {log.message}
+                  </TableCell>
+                  <TableCell width={120} className="p-[3px] pl-4">
+                    <Button variant="outline" size="sm" onClick={() => toggleRow(log.id)}>
+                      {openRows[log.id] ? "Hide" : "View"}
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                {openRows[log.id] && (
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-4">
+                      <pre className="text-xs overflow-auto max-h-64 bg-gray-50 dark:bg-background rounded p-3">
+                        {JSON.stringify((log as any).metadata ?? {}, null, 2)}
+                      </pre>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
@@ -393,3 +420,5 @@ function LogViewer({ logs }: { logs: ExecutionLog[] | undefined }) {
     </Card>
   );
 }
+
+export { LogViewer };

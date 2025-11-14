@@ -78,6 +78,9 @@ model ExecutionLog {
   timestamp        DateTime       @default(now())
   executionPhaseId String
   executionPhase   ExecutionPhase @relation(fields: [executionPhaseId], references: [id], onDelete: Cascade)
+  phaseId          String
+  taskType         String
+  metadata         Json
 }
 
 model UserBalance {

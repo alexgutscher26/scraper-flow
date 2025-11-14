@@ -1,4 +1,4 @@
-import { Log, LogCollector, LogFunction, LogLevel, LogLevels } from "@/types/log";
+import { Log, LogCollector, LogFunction, LogLevel, LogLevels, LogContext } from "@/types/log";
 import { sanitizeString } from "./logSecure/sanitizer";
 import { initSecureConsole } from "./logSecure/console";
 
@@ -9,7 +9,7 @@ try {
 /**
  * Creates a log collector that stores log messages with their levels and timestamps.
  */
-export function createLogCollector(): LogCollector {
+export function createLogCollector(context?: LogContext): LogCollector {
   const logs: Log[] = [];
 
   const getAll = () => logs;
@@ -18,7 +18,14 @@ export function createLogCollector(): LogCollector {
   LogLevels.forEach((level) => {
     logFunctions[level] = (message: string) => {
       const sanitized = sanitizeString(message);
-      logs.push({ message: sanitized, level, timestamp: new Date() });
+      logs.push({
+        message: sanitized,
+        level,
+        timestamp: new Date(),
+        phaseId: context?.phaseId,
+        taskType: context?.taskType,
+        metadata: context?.metadata,
+      });
     };
   });
   return {

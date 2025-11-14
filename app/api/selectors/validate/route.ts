@@ -23,13 +23,21 @@ export async function POST(req: Request) {
   if (!isValidSecret(token)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const body = await req.json();
-  const html: string = body.html;
-  const candidates: CandidateSelector[] = body.candidates || [];
-  if (!html || !Array.isArray(candidates)) {
-    return Response.json({ error: "html and candidates are required" }, { status: 400 });
+  try {
+    const body = await req.json();
+    const html: string = body.html;
+    const candidates: CandidateSelector[] = body.candidates || [];
+    if (!html || !Array.isArray(candidates)) {
+      return Response.json({ error: "html and candidates are required" }, { status: 400 });
+    }
+    const results = candidates.map((c) => validateAgainstHtml(html, c));
+    logger.info(`Validated ${results.length} selectors`);
+    return Response.json({ results });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.toLowerCase().includes("aborted") || (error as any)?.name === "AbortError") {
+      return Response.json({ error: "Request aborted" }, { status: 408 });
+    }
+    return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
-  const results = candidates.map((c) => validateAgainstHtml(html, c));
-  logger.info(`Validated ${results.length} selectors`);
-  return Response.json({ results });
 }
