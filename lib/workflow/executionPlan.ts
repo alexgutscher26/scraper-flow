@@ -16,6 +16,16 @@ type FlowToExecutionPlanType = {
   };
 };
 
+/**
+ * Generate an execution plan for a workflow based on the provided nodes and edges.
+ *
+ * The function identifies the entry point of the workflow and validates inputs for each node. It constructs the execution plan in phases, ensuring that all nodes are processed while handling invalid inputs. If any node has invalid inputs, it logs the errors and returns them. The function continues until all nodes are planned or no further nodes can be added.
+ *
+ * @param nodes - An array of AppNode objects representing the nodes in the workflow.
+ * @param edges - An array of Edge objects representing the connections between nodes.
+ * @param options - Optional configuration for the execution plan, including a retry policy.
+ * @returns The execution plan or an error object if validation fails.
+ */
 export function FlowToExecutionPlan(
   nodes: AppNode[],
   edges: Edge[],
@@ -98,6 +108,20 @@ export function FlowToExecutionPlan(
   return { executionPlan };
 }
 
+/**
+ * Retrieve a list of invalid inputs for a given node based on its connections and requirements.
+ *
+ * The function checks each input of the node to determine if it has a provided value. If not, it evaluates
+ * the connections through edges to see if the input is linked to a valid output. Depending on the specified
+ * gate ('AND' or 'OR'), it determines if the input is considered invalid based on the requirements and
+ * connections to other nodes. The results are collected and returned as an array of invalid input names.
+ *
+ * @param node - The AppNode for which invalid inputs are being checked.
+ * @param edges - An array of Edge objects representing connections between nodes.
+ * @param planned - A Set of strings representing the sources of outputs that have been visited.
+ * @param gate - A string that determines the logic gate to use ('AND' or 'OR').
+ * @returns An array of invalid input names for the specified node.
+ */
 function getInvalidInputs(
   node: AppNode,
   edges: Edge[],
