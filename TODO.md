@@ -25,7 +25,7 @@ High-Impact Improvements
 - [x] Add workflow-level retry/backoff policy captured in `ExecutionPhase` [P1]
   - Linked files: `lib/workflow/executionWorkflow.ts:1`, `types/workflow.ts`, `lib/workflow/executionPlan.ts:22`
   - DoD: per-task `maxAttempts` + backoff; persisted in phases; UI reflects attempts
-- [ ] Implement rate limiting and abuse protection for cron/execute endpoints [P0]
+- [x] Implement rate limiting and abuse protection for cron/execute endpoints [P0]
   - Linked files: `app/api/workflows/cron/route.ts:1`, `app/api/workflows/execute/route.ts:1`, `middleware.ts:1`
   - DoD: per-user and global limits; 429 responses with headers; public route scope tightened
 

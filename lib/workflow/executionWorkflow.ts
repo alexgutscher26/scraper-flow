@@ -4,7 +4,12 @@ import prisma from "@/lib/prisma";
 import {
   ExecutionPhaseStatus,
   WorkflowExecutionStatus,
+  RetryPolicy,
+  ExecutionPhaseRetryState,
+  defaultRetryPolicy,
+  BackoffStrategy,
 } from "@/types/workflow";
+import { computeRetryBackoffMs, runWithRetry } from "./retry";
 import { ExecutionPhase } from "@prisma/client";
 import { AppNode } from "@/types/appNode";
 import { TaskRegistry } from "./task/registry";
@@ -51,6 +56,7 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   environment.politenessConfig = resolvePolitenessConfig(execution.workflow.definition);
   environment.politenessState = { robotsCache: new Map(), uaPerDomain: new Map() } as PolitenessState;
   environment.network = { config: resolveNetworkConfig(execution.workflow.definition) } as NetworkState;
+  const retryPolicy = resolveRetryPolicy(execution.workflow.definition);
   if (environment.network?.config?.proxy?.enabled) {
     environment.network.proxy = new ProxyManager(environment.network.config.proxy);
   }
@@ -136,7 +142,8 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
       phase,
       environment,
       edges,
-      execution.userId
+      execution.userId,
+      retryPolicy
     );
     creditsConsumed += phaseExecution.creditsConsumed;
     if (!phaseExecution.success) {
@@ -220,11 +227,15 @@ async function finalizeWorkflowExecution(
     });
 }
 
+/**
+ * Executes a single `ExecutionPhase` with automatic retry/backoff based on the provided policy.
+ */
 async function execitopnWorkflowPhase(
   phase: ExecutionPhase,
   environment: Environment,
   edges: Edge[],
-  userId: string
+  userId: string,
+  retryPolicy: RetryPolicy
 ) {
   const node = JSON.parse(phase.node) as AppNode;
   let logCollector = createLogCollector({ phaseId: phase.id, taskType: node.data.type, metadata: { scope: "phase", nodeId: node.id, phaseNumber: phase.number } });
@@ -242,16 +253,33 @@ async function execitopnWorkflowPhase(
 
   const creditsRequired = TaskRegistry[node.data.type].credits;
   logCollector.info(`Running task ${node.data.type} with ${creditsRequired} credits`);
-  // TODO
-  let success = await decrementCredits(userId, creditsRequired, logCollector);
-  const creditsConsumed = success ? creditsRequired : 0;
 
-  if (success) {
-    // we can run the task if credits are available
-    success = await executePhase(phase, node, environment, logCollector);
-  }
+  let attempt = 1;
+  let success = false;
+  let creditsConsumed = 0;
+  let retryState: ExecutionPhaseRetryState = { attempt };
+
+  const attemptFn = async () => {
+    const creditsOk = await decrementCredits(userId, creditsRequired, logCollector);
+    if (!creditsOk) {
+      retryState.lastFailureReason = "CREDITS_INSUFFICIENT";
+      return false;
+    }
+    creditsConsumed += creditsRequired;
+    const ok = await executePhase(phase, node, environment, logCollector);
+    if (!ok) retryState.lastFailureReason = "EXECUTOR_FAILURE";
+    return ok;
+  };
+
+  const result = await runWithRetry(attemptFn, retryPolicy, sleep, logCollector);
+  attempt = result.attempts;
+  success = result.success;
+  retryState.attempt = attempt;
+  retryState.nextBackoffMs = success ? undefined : computeRetryBackoffMs(retryPolicy, Math.min(attempt, retryPolicy.maxAttempts));
+  retryState.lastFailureAt = success ? undefined : new Date().toISOString();
 
   const outputs = environment.phases[node.id].outputs;
+  outputs["_retry"] = retryState;
 
   await finalizePhase(
     phase.id,
@@ -265,6 +293,9 @@ async function execitopnWorkflowPhase(
   return { success, creditsConsumed };
 }
 
+/**
+ * Finalizes a phase by persisting status, outputs and logs.
+ */
 async function finalizePhase(
   phaseId: string,
   taskType: TaskType,
@@ -584,4 +615,47 @@ async function maybePoliteDelay(type: TaskType, environment: Environment, collec
   const ms = computeDelayMs(cfg);
   collector.info(`Politeness delay: ${ms}ms`);
   await sleep(ms);
+}
+/**
+ * Computes the backoff delay for the given attempt based on a retry policy.
+ */
+// helper functions moved to ./retry for testability
+
+/**
+ * Resolve the retry policy configuration based on the workflow definition JSON.
+ *
+ * Example definition override:
+ * {
+ *   "settings": {
+ *     "retry": {
+ *       "maxAttempts": 5,
+ *       "initialDelayMs": 1000,
+ *       "maxDelayMs": 30000,
+ *       "multiplier": 2,
+ *       "jitterPct": 0.1,
+ *       "retryOnFailure": true,
+ *       "retryOnCreditFailure": false
+ *     }
+ *   }
+ * }
+ */
+function resolveRetryPolicy(definitionJson: string): RetryPolicy {
+  const base = defaultRetryPolicy();
+  try {
+    const def = JSON.parse(definitionJson);
+    const override = def?.settings?.retry;
+    if (override && typeof override === "object") {
+      return {
+        maxAttempts: typeof override.maxAttempts === "number" ? override.maxAttempts : base.maxAttempts,
+        initialDelayMs: typeof override.initialDelayMs === "number" ? override.initialDelayMs : base.initialDelayMs,
+        maxDelayMs: typeof override.maxDelayMs === "number" ? override.maxDelayMs : base.maxDelayMs,
+        multiplier: typeof override.multiplier === "number" ? override.multiplier : base.multiplier,
+        jitterPct: typeof override.jitterPct === "number" ? override.jitterPct : base.jitterPct,
+        strategy: BackoffStrategy.EXPONENTIAL,
+        retryOnFailure: override.retryOnFailure ?? base.retryOnFailure,
+        retryOnCreditFailure: override.retryOnCreditFailure ?? base.retryOnCreditFailure,
+      } as RetryPolicy;
+    }
+  } catch {}
+  return base;
 }

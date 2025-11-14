@@ -2,6 +2,7 @@ import { AppNode, AppNodeMissingInputs } from "@/types/appNode";
 import {
   WorkflowExecutionPlan,
   WorkflowExecutionPlanPhase,
+  RetryPolicy,
 } from "@/types/workflow";
 import { Edge } from "@xyflow/react";
 import { TaskRegistry } from "./task/registry";
@@ -21,7 +22,8 @@ type FlowToExecutionPlanType = {
 
 export function FlowToExecutionPlan(
   nodes: AppNode[],
-  edges: Edge[]
+  edges: Edge[],
+  options?: { retryPolicy?: RetryPolicy }
 ): FlowToExecutionPlanType {
   const logger = createLogger("workflow/executionPlan");
   const entryPoint = nodes.find(
@@ -48,6 +50,7 @@ export function FlowToExecutionPlan(
     {
       phase: 1,
       nodes: [entryPoint],
+      retryPolicy: options?.retryPolicy,
     },
   ];
   planned.add(entryPoint.id);
@@ -59,6 +62,7 @@ export function FlowToExecutionPlan(
     const nextPhase: WorkflowExecutionPlanPhase = {
       phase,
       nodes: [],
+      retryPolicy: options?.retryPolicy,
     };
     for (const currentNode of nodes) {
       if (planned.has(currentNode.id)) {

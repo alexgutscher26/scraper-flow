@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { FlowToExecutionPlan } from "@/lib/workflow/executionPlan";
+import { RetryPolicy, defaultRetryPolicy } from "@/types/workflow";
 import { ExecutionWorkflow } from "@/lib/workflow/executionWorkflow";
 import { TaskRegistry } from "@/lib/workflow/task/registry";
 import {
@@ -43,7 +44,12 @@ export async function RunWorkflow(form: {
       throw new Error("flow definition is not defined");
     }
     const flow = JSON.parse(flowDefinition);
-    const result = FlowToExecutionPlan(flow.nodes, flow.edges);
+    const retry: RetryPolicy = {
+      ...defaultRetryPolicy(),
+      ...(flow?.settings?.retry || {}),
+      strategy: "EXPONENTIAL",
+    } as RetryPolicy;
+    const result = FlowToExecutionPlan(flow.nodes, flow.edges, { retryPolicy: retry });
 
     if (result.error) throw new Error("flow definition is not valid");
     if (!result.executionPlan) throw new Error("no execution plan generated");

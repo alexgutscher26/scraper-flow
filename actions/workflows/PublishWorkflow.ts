@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { FlowToExecutionPlan } from "@/lib/workflow/executionPlan";
+import { RetryPolicy, defaultRetryPolicy } from "@/types/workflow";
 import { CalculateWorkflowCost } from "@/lib/workflow/helpers";
 import { WorkflowStatus } from "@/types/workflow";
 import { auth } from "@clerk/nextjs/server";
@@ -38,7 +39,12 @@ export async function PublishWorkflow({
     );
   }
   const flow = JSON.parse(flowDefinition);
-  const result = FlowToExecutionPlan(flow.nodes, flow.edges);
+  const retry: RetryPolicy = {
+    ...defaultRetryPolicy(),
+    ...(flow?.settings?.retry || {}),
+    strategy: "EXPONENTIAL",
+  } as RetryPolicy;
+  const result = FlowToExecutionPlan(flow.nodes, flow.edges, { retryPolicy: retry });
   if (result.error) {
     throw new Error(`Invalid flow configuration: ${result.error}`);
   }
