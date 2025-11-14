@@ -344,6 +344,14 @@ async function probeBotDetection(page: any): Promise<{ detected: boolean; signal
   return { detected: signals.length > 0, signals };
 }
 
+/**
+ * Launches a browser instance to navigate to a specified website URL.
+ *
+ * The function retrieves the website URL and network settings from the provided environment. It handles browser launching in both production and development modes, manages request interception for resource blocking, and applies stealth techniques such as fingerprint spoofing and user-agent rotation. It also logs various metrics related to resource blocking and evasion attempts, and returns a boolean indicating the success of the operation.
+ *
+ * @param environment - The execution environment containing configurations and methods for browser and network management.
+ * @returns A promise that resolves to a boolean indicating whether the browser was successfully launched.
+ */
 export async function LaunchBrowserExecutor(
   environment: ExecutionEnvironment<typeof LaunchBrowserTask>
 ): Promise<boolean> {

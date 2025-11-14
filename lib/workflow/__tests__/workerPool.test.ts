@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { WorkerPool } from '../../workflow/workerPool';
 
+/**
+ * Returns a promise that resolves after a specified delay.
+ */
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 describe('WorkerPool concurrency', () => {

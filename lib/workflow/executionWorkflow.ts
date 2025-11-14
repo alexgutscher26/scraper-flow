@@ -635,7 +635,7 @@ function resolveNetworkConfig(definitionJson: string): NetworkConfig {
 }
 
 /**
- * Checks if the given task type requires a network connection.
+ * Determines if the specified task type necessitates a network connection.
  */
 function requiresNetwork(type: TaskType) {
   const kind = ExecutorMeta[type]?.kind || ExecutorKind.OTHER;
