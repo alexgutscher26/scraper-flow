@@ -229,6 +229,15 @@ async function finalizeWorkflowExecution(
 
 /**
  * Executes a single `ExecutionPhase` with automatic retry/backoff based on the provided policy.
+ *
+ * This function sets up the environment for the phase, updates the execution phase status, and attempts to execute the phase while managing credits and retries. It logs the process and handles failures by updating the retry state. Finally, it finalizes the phase and returns the success status along with the credits consumed.
+ *
+ * @param phase - The execution phase to be processed.
+ * @param environment - The environment context for the execution.
+ * @param edges - The edges associated with the execution phase.
+ * @param userId - The ID of the user executing the phase.
+ * @param retryPolicy - The policy governing the retry mechanism.
+ * @returns An object containing the success status and the number of credits consumed.
  */
 async function execitopnWorkflowPhase(
   phase: ExecutionPhase,
@@ -259,6 +268,14 @@ async function execitopnWorkflowPhase(
   let creditsConsumed = 0;
   let retryState: ExecutionPhaseRetryState = { attempt };
 
+  /**
+   * Attempts to execute a phase after decrementing user credits.
+   *
+   * This function first checks if the user has sufficient credits by calling the decrementCredits function.
+   * If the credits are insufficient, it updates the retryState with a failure reason and returns false.
+   * If credits are available, it consumes the required credits and attempts to execute the specified phase
+   * using the executePhase function, updating the retryState if the execution fails.
+   */
   const attemptFn = async () => {
     const creditsOk = await decrementCredits(userId, creditsRequired, logCollector);
     if (!creditsOk) {
@@ -294,7 +311,16 @@ async function execitopnWorkflowPhase(
 }
 
 /**
- * Finalizes a phase by persisting status, outputs and logs.
+ * Finalizes a phase by persisting status, outputs, and logs.
+ *
+ * This function updates the execution phase in the database with the given phaseId. It determines the status based on the success parameter, filters the outputs to ensure only serializable data is included, and logs the relevant information. The function also records the completion time and the credits consumed during the phase.
+ *
+ * @param phaseId - The identifier of the phase to be finalized.
+ * @param taskType - The type of task associated with the phase.
+ * @param success - Indicates whether the phase was successful.
+ * @param outputs - The outputs generated during the phase.
+ * @param logCollector - The collector for logs generated during the phase.
+ * @param creditsConsumed - The number of credits consumed during the phase.
  */
 async function finalizePhase(
   phaseId: string,
@@ -624,20 +650,12 @@ async function maybePoliteDelay(type: TaskType, environment: Environment, collec
 /**
  * Resolve the retry policy configuration based on the workflow definition JSON.
  *
- * Example definition override:
- * {
- *   "settings": {
- *     "retry": {
- *       "maxAttempts": 5,
- *       "initialDelayMs": 1000,
- *       "maxDelayMs": 30000,
- *       "multiplier": 2,
- *       "jitterPct": 0.1,
- *       "retryOnFailure": true,
- *       "retryOnCreditFailure": false
- *     }
- *   }
- * }
+ * This function parses the provided JSON string to extract retry settings and applies them to the default retry policy.
+ * If the settings are not defined or an error occurs during parsing, the default policy is returned.
+ * The function ensures that each property is validated before being applied to the final configuration.
+ *
+ * @param definitionJson - A JSON string representing the workflow definition containing retry settings.
+ * @returns The resolved RetryPolicy based on the provided definition or the default policy if no valid settings are found.
  */
 function resolveRetryPolicy(definitionJson: string): RetryPolicy {
   const base = defaultRetryPolicy();
