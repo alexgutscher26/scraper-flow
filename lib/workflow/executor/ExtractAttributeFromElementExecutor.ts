@@ -1,6 +1,16 @@
 import { ExecutionEnvironment } from "@/types/executor";
 import { ExtractAttributeFromElementTask } from "../task/ExtractAttributeFromElement";
 
+/**
+ * Extracts a specified attribute value from a DOM element on a web page.
+ *
+ * The function retrieves the current page and the selector and attribute name from the environment.
+ * It checks for the presence of these values, logs an error if any are missing, and attempts to evaluate
+ * the attribute value using the page's context. The result is then set as an output in the environment.
+ *
+ * @param environment - The execution environment containing the page and input parameters.
+ * @returns A promise that resolves to true if the attribute was successfully extracted, otherwise false.
+ */
 export async function ExtractAttributeFromElementExecutor(
   environment: ExecutionEnvironment<typeof ExtractAttributeFromElementTask>
 ): Promise<boolean> {

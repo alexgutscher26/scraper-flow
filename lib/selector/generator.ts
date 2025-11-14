@@ -1,10 +1,16 @@
 import * as cheerio from "cheerio";
 import { CandidateSelector, GenerationInput, GenerationOptions, SelectorType } from "./types";
 
+/**
+ * Normalizes a string by replacing multiple spaces with a single space and trimming it.
+ */
 function normalizeText(t: string) {
   return t.replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Checks if a class name is likely dynamic based on specific patterns.
+ */
 function isLikelyDynamicClass(cls: string) {
   return /\b\w*\d{3,}\w*\b/.test(cls) || /[_-]{2,}/.test(cls);
 }
@@ -18,6 +24,18 @@ function computePerformanceCost(sel: string) {
   return Math.max(0.1, 3 - cost);
 }
 
+/**
+ * Compute the stability score of a given HTML element based on its attributes and classes.
+ *
+ * The function evaluates the element's ID, class attributes, and preferred attributes to calculate a score.
+ * It adds points for the presence of an ID, counts stable classes, and checks for preferred attributes,
+ * while also considering the tag name. The final score is returned as a numeric value.
+ *
+ * @param $ - The CheerioAPI instance used for parsing and manipulating the HTML.
+ * @param el - The HTML element for which the stability score is being computed.
+ * @param preferred - An array of preferred attribute names to check against the element.
+ * @returns The computed stability score as a numeric value.
+ */
 function computeStabilityScore($: cheerio.CheerioAPI, el: cheerio.Element, preferred: string[]) {
   let s = 0;
   const id = (el.attribs || {}).id;
@@ -72,6 +90,17 @@ function buildXpathCandidates($: cheerio.CheerioAPI, el: cheerio.Element, opts: 
   return Array.from(new Set(candidates));
 }
 
+/**
+ * Generate a list of candidate selectors based on the provided input and options.
+ *
+ * The function first attempts to find elements matching the input description. If none are found, it defaults to a set of candidate elements.
+ * It then builds CSS and XPath selectors for each target element, calculating scores based on uniqueness, stability, and performance.
+ * Finally, it filters and sorts the selectors based on the provided options before returning the top candidates.
+ *
+ * @param input - The input containing HTML and an optional description for selector generation.
+ * @param opts - Options that dictate the type of selectors to generate and other preferences.
+ * @returns An array of candidate selectors sorted by their computed scores.
+ */
 export function generateSelectors(input: GenerationInput, opts: GenerationOptions): CandidateSelector[] {
   const $ = cheerio.load(input.html);
   const targets: cheerio.Element[] = [];

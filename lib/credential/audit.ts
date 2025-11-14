@@ -8,7 +8,7 @@ export type CredentialAccessContext = {
 };
 
 /**
- * Generates a fingerprint for the given value using SHA-256 hashing.
+ * Generates a SHA-256 fingerprint for the given value.
  */
 function fingerprint(value: string): string {
   const key = process.env.LOG_HASH_KEY || "";

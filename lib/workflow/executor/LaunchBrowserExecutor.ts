@@ -126,11 +126,20 @@ function readStealthEnv(): {
 
 /**
  * Attaches fingerprint spoofing scripts before any document executes.
+ *
+ * This function modifies the properties of the navigator object to spoof various browser fingerprinting parameters, including languages, platform, hardware concurrency, and device memory. It also overrides the permissions query method to control notification permissions and optionally spoofs WebGL parameters if specified. The function utilizes a helper function to randomly select values from provided pools or defaults.
+ *
+ * @param page - The page object on which to evaluate the spoofing scripts.
+ * @param params - The parameters for fingerprint spoofing, including languagesPool, platformPool, deviceMemoryRange, hardwareConcurrencyRange, and webglSpoofing.
+ * @returns A promise that resolves when the scripts have been attached to the page.
  */
 async function attachFingerprintSpoofing(
   page: any,
   params: NonNullable<EvasionParams["fingerprint"]>
 ) {
+  /**
+   * Returns a random element from the array or a fallback value if the array is empty or not an array.
+   */
   const pick = <T>(arr: T[], fallback: T) => (Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : fallback);
   const languages = params.languagesPool ?? ["en-US", "en"];
   const platform = pick(params.platformPool ?? ["Win32"], "Win32");
@@ -173,6 +182,10 @@ async function attachFingerprintSpoofing(
 
 /**
  * Applies a small randomized delay to mimic human pacing.
+ *
+ * This function calculates a delay duration based on the provided parameters, ensuring that the minimum delay is at least 50 milliseconds and the maximum is at least equal to the minimum. It introduces a jitter effect to the delay, which is a percentage of the base delay, to create variability. Finally, it awaits the completion of a sleep function for the calculated duration.
+ *
+ * @param {NonNullable<EvasionParams["delays"]>} [params] - Optional parameters to configure the delay settings, including minMs, maxMs, and jitterPct.
  */
 async function applySmallDelay(params?: NonNullable<EvasionParams["delays"]>) {
   const min = Math.max(0, params?.minMs ?? 50);
@@ -186,6 +199,13 @@ async function applySmallDelay(params?: NonNullable<EvasionParams["delays"]>) {
 
 /**
  * Simulates human-like mouse movement along random waypoints.
+ *
+ * The function generates a series of random points within the viewport dimensions, applying jitter based on the provided parameters.
+ * It then moves the mouse cursor to each point in sequence, calculating the distance and speed for a more natural movement effect.
+ * A small delay is applied between movements to further mimic human behavior.
+ *
+ * @param page - The page object representing the context in which the mouse movement occurs.
+ * @param params - Optional parameters for customizing the mouse movement behavior, including path points, jitter, and speed.
  */
 async function simulateMouseMovement(page: any, params?: NonNullable<EvasionParams["mouse"]>) {
   const vp = await page.viewport();
@@ -213,7 +233,12 @@ async function simulateMouseMovement(page: any, params?: NonNullable<EvasionPara
 }
 
 /**
- * Clears all browser cookies using CDP.
+ * Clears all browser cookies using the Chrome DevTools Protocol (CDP).
+ *
+ * This function establishes a CDP session with the provided page and sends a command to clear all browser cookies.
+ * It handles any potential errors silently, ensuring that the operation does not disrupt the flow of execution.
+ *
+ * @param {any} page - The page object from which to create a CDP session for cookie management.
  */
 async function clearCookies(page: any) {
   try {
@@ -224,6 +249,14 @@ async function clearCookies(page: any) {
 
 /**
  * Probes for common bot-detection signals.
+ *
+ * This function evaluates the content of the provided page to identify potential bot-detection signals.
+ * It checks the inner text of the document body for specific keywords associated with bot detection,
+ * such as "captcha" and "Access Denied". Additionally, it checks for a Cloudflare challenge signal
+ * if present. The function returns an object indicating whether any signals were detected and the
+ * list of detected signals.
+ *
+ * @param page - The page object to evaluate for bot-detection signals.
  */
 async function probeBotDetection(page: any): Promise<{ detected: boolean; signals: string[] }> {
   const signals = await page.evaluate(() => {

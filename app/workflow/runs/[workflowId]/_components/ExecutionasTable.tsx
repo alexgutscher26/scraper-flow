@@ -25,6 +25,15 @@ import { useScrollRestoration } from "@/lib/ui/hooks/useScrollRestoration";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 type InitialDataType = Awaited<ReturnType<typeof GetWorkflowExecutions>>;
+/**
+ * Renders a table of workflow executions with infinite scrolling.
+ *
+ * This function utilizes the useInfiniteQuery hook to fetch paginated workflow executions based on the provided workflowId. It manages the loading state and virtualizes the rows for efficient rendering. The table displays execution details such as ID, status, credits consumed, and the start time, with a loading indicator for additional pages.
+ *
+ * @param workflowId - The ID of the workflow for which executions are being fetched.
+ * @param initialData - The initial data to populate the table before fetching more executions.
+ * @returns A JSX element representing the executions table.
+ */
 export default function ExecutionasTable({
   workflowId,
   initialData,

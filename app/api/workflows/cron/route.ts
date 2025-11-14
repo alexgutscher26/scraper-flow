@@ -132,8 +132,12 @@ async function calculateNextRun(
 }
 
 /**
- * Triggers a workflow execution by making a request to the execute endpoint
- * This function is called only after credit check is successful
+ * Triggers a workflow execution by making a request to the execute endpoint.
+ * This function constructs the API URL using the provided workflowId and logs the process of triggering the workflow.
+ * It handles both successful and failed attempts to trigger the workflow, logging appropriate messages for each case.
+ * The function is called only after a credit check is successful.
+ *
+ * @param {string} workflowId - The ID of the workflow to be triggered.
  */
 async function triggerWorkflow(workflowId: string) {
   const triggerApiUrl = getAppUrl(

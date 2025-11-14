@@ -13,6 +13,15 @@ function isValidSecret(secret: string): boolean {
   }
 }
 
+/**
+ * Handles the POST request for validating candidate selectors against HTML.
+ *
+ * The function first checks for a valid Bearer token in the authorization header. If the token is invalid or missing, it returns a 401 Unauthorized response. It then parses the request body to extract the HTML and candidates, ensuring both are provided. Each candidate is validated against the HTML, and the results are logged and returned in the response.
+ *
+ * @param req - The incoming request object containing headers and body.
+ * @returns A JSON response containing the validation results or an error message.
+ * @throws Response If the authorization header is missing or invalid, or if the required fields are not present in the request body.
+ */
 export async function POST(req: Request) {
   const logger = createLogger("api/selectors/validate");
   const authHeader = req.headers.get("authorization");

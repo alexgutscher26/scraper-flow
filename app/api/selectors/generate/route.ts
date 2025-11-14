@@ -4,6 +4,15 @@ import { generateSelectors, rerankWithOverride } from "@/lib/selector/generator"
 import { validateAgainstHtml } from "@/lib/selector/validator";
 import { GenerationInput, GenerationOptions } from "@/lib/selector/types";
 
+/**
+ * Validates a secret against the API secret stored in the environment.
+ *
+ * This function retrieves the API_SECRET from the environment variables and checks if it exists.
+ * If it does, it uses the timingSafeEqual function to compare the provided secret with the API_SECRET
+ * in a secure manner. If the API_SECRET is not set or an error occurs during comparison, it returns false.
+ *
+ * @param secret - The secret string to validate against the API secret.
+ */
 function isValidSecret(secret: string): boolean {
   const API_SECRET = process.env.API_SECRET;
   if (!API_SECRET) return false;
@@ -14,6 +23,15 @@ function isValidSecret(secret: string): boolean {
   }
 }
 
+/**
+ * Handles the POST request for generating selectors based on provided HTML and options.
+ *
+ * The function first validates the authorization token from the request headers. If the token is valid, it processes the request body to extract necessary parameters such as html, description, mode, specificityLevel, strategy, preferredAttributes, and override. It then generates selector candidates, validates them against the provided HTML, and logs the number of candidates generated. Finally, it returns the candidates and their validations in the response.
+ *
+ * @param req - The incoming request object containing headers and body.
+ * @returns A JSON response containing the generated selector candidates and their validations.
+ * @throws Error If the request is unauthorized, the HTML is missing, or if the request body is invalid.
+ */
 export async function POST(req: Request) {
   const logger = createLogger("api/selectors/generate");
   const authHeader = req.headers.get("authorization");
