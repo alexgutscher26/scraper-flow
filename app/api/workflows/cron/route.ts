@@ -7,6 +7,17 @@ import { createLogger } from "@/lib/log";
 import { http } from "@/lib/http";
 import { rateLimit, applyRateLimitHeaders } from "@/lib/rateLimit";
 
+/**
+ * Handles the GET request to trigger scheduled workflows based on their cron expressions.
+ *
+ * The function first checks the rate limit for the user and applies the appropriate headers.
+ * It retrieves published workflows that are due to run, checks if they can be executed based on available credits,
+ * and triggers them if sufficient credits are available. It also logs any skipped workflows and updates their next run time.
+ *
+ * @param req - The incoming request object containing headers and other request data.
+ * @param res - The response object used to send back the desired HTTP response.
+ * @returns A JSON response containing details about the workflows scheduled, run, and skipped.
+ */
 export async function GET(req: Request, res: Response) {
   const logger = createLogger("api/workflows/cron");
   const userId = req.headers.get("x-user-id");
