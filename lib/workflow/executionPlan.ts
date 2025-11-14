@@ -20,6 +20,16 @@ type FlowToExecutionPlanType = {
   };
 };
 
+/**
+ * Generate an execution plan for a workflow based on the provided nodes and edges.
+ *
+ * The function identifies the entry point of the workflow and validates inputs for each node. It constructs the execution plan in phases, ensuring that all nodes are processed while handling invalid inputs. If any node has invalid inputs, it logs the errors and returns them. The function continues until all nodes are planned or no further nodes can be processed.
+ *
+ * @param nodes - An array of AppNode objects representing the nodes in the workflow.
+ * @param edges - An array of Edge objects representing the connections between nodes.
+ * @param options - Optional configuration for the execution plan, including a retry policy.
+ * @returns A FlowToExecutionPlanType object containing the execution plan or an error if validation fails.
+ */
 export function FlowToExecutionPlan(
   nodes: AppNode[],
   edges: Edge[],
