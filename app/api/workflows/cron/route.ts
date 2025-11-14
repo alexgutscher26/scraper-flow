@@ -9,6 +9,15 @@ import { rateLimit, applyRateLimitHeaders } from '@/lib/rateLimit';
 import { getEnv } from '@/lib/env';
 import { reserveIdempotencyKey } from '@/lib/idempotency';
 
+/**
+ * Handles the GET request for executing scheduled workflows.
+ *
+ * This function retrieves the user ID and IP address from the request headers, applies rate limiting, and checks for sufficient credits to execute workflows. It then triggers eligible workflows, logs the results, and updates their next run times based on their cron schedules. If any workflows cannot be executed due to insufficient credits, it logs the failures accordingly.
+ *
+ * @param req - The incoming request object.
+ * @param res - The response object to send back the results.
+ * @returns A JSON response containing details about the scheduled, run, and skipped workflows.
+ */
 export async function GET(req: Request, res: Response) {
   const logger = createLogger('api/workflows/cron');
   const userId = req.headers.get('x-user-id');

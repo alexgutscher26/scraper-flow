@@ -28,6 +28,19 @@ function isValidSecret(secret: string): boolean {
   }
 }
 
+/**
+ * Handles the execution of a workflow based on the incoming request.
+ *
+ * This function validates the request headers for authorization and rate limiting, retrieves the workflow by its ID,
+ * and creates a workflow execution record. It also manages idempotency to prevent duplicate executions and handles
+ * cron-triggered workflows by calculating the next run time. Errors are logged and appropriate responses are returned
+ * based on the execution status and validation checks.
+ *
+ * @param req - The incoming request object containing headers and URL parameters.
+ * @param res - The response object used to send back the desired HTTP response.
+ * @returns A JSON response indicating the status of the workflow execution.
+ * @throws Error If there are issues with the workflow execution or validation.
+ */
 export async function GET(req: Request, res: Response) {
   const logger = createLogger('api/workflows/execute');
   try {

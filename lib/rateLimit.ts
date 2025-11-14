@@ -26,6 +26,16 @@ type Config = {
 const memoryStore: Map<string, { count: number; expiresAt: number }> = new Map();
 const memoryPrefix = Math.random().toString(36).slice(2);
 
+/**
+ * Sends a command to the Upstash Redis REST API and returns the response.
+ *
+ * This function constructs a POST request to the Upstash API using the provided command.
+ * It checks for the necessary configuration values (UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN)
+ * and throws an error if they are not set. After sending the request, it verifies the response
+ * status and throws an error for any unsuccessful responses before returning the parsed JSON result.
+ *
+ * @param cmd - An array of commands to be sent to the Upstash API, which can be strings, numbers, or objects.
+ */
 async function upstash<T = any>(cmd: (string | number | Record<string, any>)[]): Promise<T> {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -39,6 +49,9 @@ async function upstash<T = any>(cmd: (string | number | Record<string, any>)[]):
   return (await res.json()) as T;
 }
 
+/**
+ * Returns the current timestamp in milliseconds.
+ */
 function nowMs() {
   return Date.now();
 }
@@ -95,6 +108,16 @@ function loadConfig(): Config {
   };
 }
 
+/**
+ * Increment the count for a given key within a specified time window.
+ *
+ * The function checks if Upstash is configured and, if so, increments the count in Upstash and sets an expiration time if necessary.
+ * If Upstash is not used, it manages the count in a local memory store, setting the count and expiration if the key is new or expired.
+ *
+ * @param key - The key for which the count is to be incremented.
+ * @param windowSeconds - The time window in seconds for which the count should be maintained.
+ * @returns The updated count for the specified key.
+ */
 async function incrWindow(key: string, windowSeconds: number): Promise<number> {
   const hasUpstash = !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
   if (hasUpstash) {
@@ -115,6 +138,15 @@ async function incrWindow(key: string, windowSeconds: number): Promise<number> {
   return existing.count;
 }
 
+/**
+ * Retrieves the number of violations associated with a given key.
+ *
+ * The function first checks if Upstash credentials are available in the environment variables.
+ * If they are, it fetches the result from Upstash using the provided key and converts it to a number, defaulting to 0 if the result is null or invalid.
+ * If Upstash is not used, it retrieves the count from a local memory store.
+ *
+ * @param key - The key for which to retrieve the number of violations.
+ */
 async function getViolations(key: string): Promise<number> {
   const hasUpstash = !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
   if (hasUpstash) {
@@ -135,6 +167,17 @@ async function setViolations(key: string, value: number, ttlSec: number): Promis
   memoryStore.set(key, { count: value, expiresAt: now + ttlSec * 1000 });
 }
 
+/**
+ * Enforces rate limiting based on user, global, and IP criteria.
+ *
+ * The function calculates limits for a given scope, considering user authentication and tier assignments. It increments counters for user, global, and IP limits, checks if the requests exceed the allowed limits, and applies penalties if necessary. The results include the allowed status, remaining requests, and reset time for each limit type, along with the effective limit source.
+ *
+ * @param scope - The scope for which the rate limit is being applied.
+ * @param userId - The ID of the user, if available.
+ * @param ip - The IP address of the requester, if available.
+ * @param isAuthenticated - A boolean indicating if the user is authenticated.
+ * @returns A promise that resolves to an object containing rate limit results for user, global, IP, and the effective limit source.
+ */
 export async function rateLimit(
   scope: Scope,
   userId?: string | null,
@@ -214,6 +257,9 @@ export async function rateLimit(
   return { user: userRes, global: globalRes, ip: ipRes, effective };
 }
 
+/**
+ * Sets rate limit headers based on the provided result.
+ */
 export function applyRateLimitHeaders(headers: Headers, result: RateLimitResult) {
   headers.set('X-RateLimit-Limit', String(result.limit));
   headers.set('X-RateLimit-Remaining', String(result.remaining));

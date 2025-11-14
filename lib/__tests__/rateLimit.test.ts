@@ -1,10 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { rateLimit, applyRateLimitHeaders, RateLimitResult } from '../rateLimit';
 
+/**
+ * Sets environment variables from the provided object.
+ */
 function setEnv(vars: Record<string, string>) {
   Object.entries(vars).forEach(([k, v]) => (process.env[k] = v));
 }
 
+/**
+ * Retrieves rate limit headers from a response.
+ */
 function headerValues(res: RateLimitResult) {
   const h = new Headers();
   applyRateLimitHeaders(h, res);
