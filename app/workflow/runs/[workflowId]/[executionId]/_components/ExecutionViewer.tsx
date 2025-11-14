@@ -343,9 +343,23 @@ function ParamaterViews({
   );
 }
 
+/**
+ * Renders a log viewer component displaying execution logs.
+ *
+ * The component checks if logs are provided and renders a table with log details, including time, phase, task type, level, and message.
+ * It allows users to toggle the visibility of additional metadata for each log entry.
+ * If no logs are available, it returns null.
+ *
+ * @param {Object} props - The component props.
+ * @param {ExecutionLog[] | undefined} props.logs - An array of execution logs or undefined.
+ * @returns {JSX.Element | null} The rendered log viewer component or null if no logs are provided.
+ */
 function LogViewer({ logs }: { logs: ExecutionLog[] | undefined }) {
   if (!logs || logs.length === 0) return null;
   const [openRows, setOpenRows] = useState<Record<string, boolean>>({});
+  /**
+   * Toggles the open state of a row identified by the given id.
+   */
   const toggleRow = (id: string) => setOpenRows((s) => ({ ...s, [id]: !s[id] }));
   return (
     <Card>
