@@ -4,6 +4,15 @@ import { generateSelectors, rerankWithOverride } from "@/lib/selector/generator"
 import { validateAgainstHtml } from "@/lib/selector/validator";
 import { GenerationInput, GenerationOptions } from "@/lib/selector/types";
 
+/**
+ * Validates a secret against the API secret stored in the environment.
+ *
+ * This function retrieves the API_SECRET from the environment variables and checks if it exists.
+ * If it does, it uses the timingSafeEqual function to compare the provided secret with the API_SECRET
+ * in a secure manner. If the API_SECRET is not set or an error occurs during comparison, it returns false.
+ *
+ * @param secret - The secret string to validate against the API secret.
+ */
 function isValidSecret(secret: string): boolean {
   const API_SECRET = process.env.API_SECRET;
   if (!API_SECRET) return false;
