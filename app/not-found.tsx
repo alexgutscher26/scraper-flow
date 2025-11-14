@@ -1,23 +1,22 @@
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
 
 function NotFoundPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
-        <h2 className="text-2xl font-semibold mb-4"> Not Found</h2>
-        <p className=" text-muted-foreground mb-8 max-w-md">
-          Don&apos;t worry, even the best data sometimes gets lost in the
-          internet.
+        <h1 className="mb-4 text-6xl font-bold text-primary">404</h1>
+        <h2 className="mb-4 text-2xl font-semibold"> Not Found</h2>
+        <p className=" mb-8 max-w-md text-muted-foreground">
+          Don&apos;t worry, even the best data sometimes gets lost in the internet.
         </p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
+        <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
-            href={"/"}
-            className="flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/80 transition-colors"
+            href={'/'}
+            className="flex items-center justify-center rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/80"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Link>
         </div>

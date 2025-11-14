@@ -1,14 +1,14 @@
-import { NodeProps } from "@xyflow/react";
-import NodeCard from "./NodeCard";
-import { memo } from "react";
-import NodeHeader from "./NodeHeader";
-import { AppNodeData } from "@/types/appNode";
-import { TaskRegistry } from "@/lib/workflow/task/registry";
-import NodeInputs from "./NodeInputs";
-import NodeInput from "./NodeInput";
-import NodeOutputs, { NodeOutput } from "./NodeOutputs";
+import { NodeProps } from '@xyflow/react';
+import NodeCard from './NodeCard';
+import { memo } from 'react';
+import NodeHeader from './NodeHeader';
+import { AppNodeData } from '@/types/appNode';
+import { TaskRegistry } from '@/lib/workflow/task/registry';
+import NodeInputs from './NodeInputs';
+import NodeInput from './NodeInput';
+import NodeOutputs, { NodeOutput } from './NodeOutputs';
 
-const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === "true";
+const DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true';
 const NodeComponent = memo((props: NodeProps) => {
   const nodeData = props.data as AppNodeData;
   const task = TaskRegistry[nodeData.type];
@@ -30,4 +30,4 @@ const NodeComponent = memo((props: NodeProps) => {
 });
 
 export default NodeComponent;
-NodeComponent.displayName = "NodeComponent";
+NodeComponent.displayName = 'NodeComponent';

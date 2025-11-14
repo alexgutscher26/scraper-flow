@@ -1,5 +1,5 @@
-import prisma from "../prisma";
-import crypto from "crypto";
+import prisma from '../prisma';
+import crypto from 'crypto';
 
 export type CredentialAccessContext = {
   requester: string;
@@ -11,10 +11,10 @@ export type CredentialAccessContext = {
  * Generates a SHA-256 fingerprint for the given value.
  */
 function fingerprint(value: string): string {
-  const key = process.env.LOG_HASH_KEY || "";
+  const key = process.env.LOG_HASH_KEY || '';
   return key
-    ? crypto.createHmac("sha256", key).update(value).digest("hex").slice(0, 24)
-    : crypto.createHash("sha256").update(value).digest("hex").slice(0, 24);
+    ? crypto.createHmac('sha256', key).update(value).digest('hex').slice(0, 24)
+    : crypto.createHash('sha256').update(value).digest('hex').slice(0, 24);
 }
 
 /**
@@ -27,12 +27,14 @@ export async function logCredentialAccess(args: {
   credentialType: string;
   requester: string;
   method: string;
-  outcome: "success" | "failure";
+  outcome: 'success' | 'failure';
   correlationId?: string;
   accessedValue?: string;
   errorMessage?: string;
 }) {
-  const fp = args.accessedValue ? fingerprint(args.accessedValue) : fingerprint(`${args.userId}:${args.credentialId}:${args.credentialName}`);
+  const fp = args.accessedValue
+    ? fingerprint(args.accessedValue)
+    : fingerprint(`${args.userId}:${args.credentialId}:${args.credentialName}`);
   await prisma.credentialAudit.create({
     data: {
       userId: args.userId,

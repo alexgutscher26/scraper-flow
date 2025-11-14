@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import puppeteer from "puppeteer";
-import { SelectExecutor } from "@/lib/workflow/executor/SelectExecutor";
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import puppeteer from 'puppeteer';
+import { SelectExecutor } from '@/lib/workflow/executor/SelectExecutor';
 
 function env(page: any, inputs: Record<string, any>) {
   const outputs: Record<string, any> = {};
@@ -24,7 +24,7 @@ function env(page: any, inputs: Record<string, any>) {
   } as any;
 }
 
-describe("SelectExecutor", () => {
+describe('SelectExecutor', () => {
   let browser: any;
   let page: any;
   beforeAll(async () => {
@@ -35,17 +35,19 @@ describe("SelectExecutor", () => {
     await browser.close();
   });
 
-  it("selects native select", async () => {
-    await page.setContent(`<select id='s'><option value='a'>A</option><option value='b'>B</option></select>`);
-    const inputs = { "Selector": "#s", "Mode": "single", "Values": "b" };
+  it('selects native select', async () => {
+    await page.setContent(
+      `<select id='s'><option value='a'>A</option><option value='b'>B</option></select>`
+    );
+    const inputs = { Selector: '#s', Mode: 'single', Values: 'b' };
     const e = env(page, inputs);
     const ok = await SelectExecutor(e);
     expect(ok).toBe(true);
-    const v = await page.$eval("#s", (el: any) => el.value);
-    expect(v).toBe("b");
+    const v = await page.$eval('#s', (el: any) => el.value);
+    expect(v).toBe('b');
   });
 
-  it("selects custom dropdown via click", async () => {
+  it('selects custom dropdown via click', async () => {
     await page.setContent(`
       <div id='dd'>
         <div id='trigger'>open</div>
@@ -53,10 +55,15 @@ describe("SelectExecutor", () => {
         <div class='opt'>Beta</div>
       </div>
     `);
-    const inputs = { "Selector": "#dd", "Mode": "single", "Values": "Beta", "OpenTriggerSelector": "#trigger", "OptionSelector": ".opt" };
+    const inputs = {
+      Selector: '#dd',
+      Mode: 'single',
+      Values: 'Beta',
+      OpenTriggerSelector: '#trigger',
+      OptionSelector: '.opt',
+    };
     const e = env(page, inputs);
     const ok = await SelectExecutor(e);
     expect(ok).toBe(true);
   });
 });
-

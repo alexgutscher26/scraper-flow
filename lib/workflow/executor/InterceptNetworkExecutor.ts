@@ -1,5 +1,5 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { InterceptNetworkTask } from "../task/InterceptNetwork";
+import { ExecutionEnvironment } from '@/types/executor';
+import { InterceptNetworkTask } from '../task/InterceptNetwork';
 
 /**
  * Intercepts network requests and responses based on specified criteria.
@@ -16,17 +16,17 @@ export async function InterceptNetworkExecutor(
 ): Promise<boolean> {
   const page = environment.getPage();
   if (!page) {
-    environment.log.error("Web page not found");
+    environment.log.error('Web page not found');
     return false;
   }
 
   try {
-    const urlPattern = environment.getInput("URL pattern");
-    const resourceType = environment.getInput("Resource type") || "any";
-    const method = environment.getInput("Method") || "ANY";
-    const duration = Number(environment.getInput("Duration (ms)"));
-    const max = Number(environment.getInput("Max responses")) || Infinity;
-    const includeBody = environment.getInput("Include body") === "true";
+    const urlPattern = environment.getInput('URL pattern');
+    const resourceType = environment.getInput('Resource type') || 'any';
+    const method = environment.getInput('Method') || 'ANY';
+    const duration = Number(environment.getInput('Duration (ms)'));
+    const max = Number(environment.getInput('Max responses')) || Infinity;
+    const includeBody = environment.getInput('Include body') === 'true';
 
     const matches: any[] = [];
     const isRegex = urlPattern && /^\/.+\/$/.test(urlPattern);
@@ -39,8 +39,8 @@ export async function InterceptNetworkExecutor(
       seen.add(key);
       matches.push(item);
       if (matches.length >= max) {
-        page.off("response", handlerResponse);
-        page.off("requestfinished", handlerFinished);
+        page.off('response', handlerResponse);
+        page.off('requestfinished', handlerFinished);
       }
     };
 
@@ -58,10 +58,10 @@ export async function InterceptNetworkExecutor(
         const req = response.request();
         const url = response.url();
         const type = req.resourceType();
-        const m = (req.method && req.method()) || "GET";
+        const m = (req.method && req.method()) || 'GET';
 
-        if (resourceType !== "any" && type !== resourceType) return;
-        if (method !== "ANY" && m !== method) return;
+        if (resourceType !== 'any' && type !== resourceType) return;
+        if (method !== 'ANY' && m !== method) return;
         if (urlPattern) {
           if (regex) {
             if (!regex.test(url)) return;
@@ -79,9 +79,9 @@ export async function InterceptNetworkExecutor(
         };
 
         if (includeBody) {
-          const ct = (await response.headers())["content-type"] || "";
+          const ct = (await response.headers())['content-type'] || '';
           try {
-            if (ct.includes("application/json")) {
+            if (ct.includes('application/json')) {
               item.body = await response.json();
             } else {
               item.body = await response.text();
@@ -115,9 +115,9 @@ export async function InterceptNetworkExecutor(
       try {
         const url = request.url();
         const type = request.resourceType();
-        const m = (request.method && request.method()) || "GET";
-        if (resourceType !== "any" && type !== resourceType) return;
-        if (method !== "ANY" && m !== method) return;
+        const m = (request.method && request.method()) || 'GET';
+        if (resourceType !== 'any' && type !== resourceType) return;
+        if (method !== 'ANY' && m !== method) return;
         if (urlPattern) {
           if (regex) {
             if (!regex.test(url)) return;
@@ -135,9 +135,9 @@ export async function InterceptNetworkExecutor(
           headers: resp.headers(),
         };
         if (includeBody) {
-          const ct = resp.headers()["content-type"] || "";
+          const ct = resp.headers()['content-type'] || '';
           try {
-            if (ct.includes("application/json")) {
+            if (ct.includes('application/json')) {
               item.body = await resp.json();
             } else {
               item.body = await resp.text();
@@ -158,23 +158,26 @@ export async function InterceptNetworkExecutor(
       }
     };
 
-    page.on("response", handlerResponse);
-    page.on("requestfinished", handlerFinished);
+    page.on('response', handlerResponse);
+    page.on('requestfinished', handlerFinished);
 
     await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        page.off("response", handlerResponse);
-        page.off("requestfinished", handlerFinished);
-        resolve();
-      }, Number.isFinite(duration) ? duration : 2000);
+      setTimeout(
+        () => {
+          page.off('response', handlerResponse);
+          page.off('requestfinished', handlerFinished);
+          resolve();
+        },
+        Number.isFinite(duration) ? duration : 2000
+      );
     });
 
-    environment.setOutput("Responses JSON", JSON.stringify(matches));
-    environment.setOutput("Web page", page);
+    environment.setOutput('Responses JSON', JSON.stringify(matches));
+    environment.setOutput('Web page', page);
     return true;
   } catch (e: any) {
     try {
-      page.off("response", () => {});
+      page.off('response', () => {});
     } catch {}
     environment.log.error(e.message);
     return false;

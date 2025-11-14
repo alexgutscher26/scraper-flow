@@ -1,6 +1,6 @@
-import { TaskParamType, TaskType } from "@/types/TaskType";
-import { WorkflowTask } from "@/types/workflow";
-import { CameraIcon, LucideProps } from "lucide-react";
+import { TaskParamType, TaskType } from '@/types/TaskType';
+import { WorkflowTask } from '@/types/workflow';
+import { CameraIcon, LucideProps } from 'lucide-react';
 
 /**
  * Take Screenshot Task
@@ -11,65 +11,63 @@ import { CameraIcon, LucideProps } from "lucide-react";
  */
 export const TakeScreenshotTask = {
   type: TaskType.TAKE_SCREENSHOT,
-  label: "Take Screenshot",
-  icon: (props: LucideProps) => (
-    <CameraIcon className="stroke-indigo-400" {...props} />
-  ),
+  label: 'Take Screenshot',
+  icon: (props: LucideProps) => <CameraIcon className="stroke-indigo-400" {...props} />,
   isEntryPoint: false,
   credits: 3,
   inputs: [
     {
-      name: "Web page",
+      name: 'Web page',
       type: TaskParamType.BROWSER_INSTANCE,
       required: true,
     },
     {
-      name: "Full page",
+      name: 'Full page',
       type: TaskParamType.SELECT,
       required: true,
       hideHandle: true,
       options: [
-        { value: "true", label: "Yes (Entire page)" },
-        { value: "false", label: "No (Visible area only)" },
+        { value: 'true', label: 'Yes (Entire page)' },
+        { value: 'false', label: 'No (Visible area only)' },
       ],
     },
     {
-      name: "Screenshot name",
+      name: 'Screenshot name',
       type: TaskParamType.STRING,
       required: false,
-      helperText: "Name for the screenshot (optional)",
+      helperText: 'Name for the screenshot (optional)',
       hideHandle: true,
     },
     {
-      name: "Quality",
+      name: 'Quality',
       type: TaskParamType.SELECT,
       required: false,
       hideHandle: true,
-      helperText: "Image quality (only for JPEG format)",
+      helperText: 'Image quality (only for JPEG format)',
       options: [
-        { value: "0", label: "Default" },
-        { value: "50", label: "Low (50%)" },
-        { value: "75", label: "Medium (75%)" },
-        { value: "90", label: "High (90%)" },
-        { value: "100", label: "Maximum (100%)" },
+        { value: '0', label: 'Default' },
+        { value: '50', label: 'Low (50%)' },
+        { value: '75', label: 'Medium (75%)' },
+        { value: '90', label: 'High (90%)' },
+        { value: '100', label: 'Maximum (100%)' },
       ],
     },
   ] as const,
   outputs: [
     {
-      name: "Screenshot",
+      name: 'Screenshot',
       type: TaskParamType.STRING,
     },
     {
-      name: "Screenshot name",
+      name: 'Screenshot name',
       type: TaskParamType.STRING,
     },
     {
-      name: "Download URL",
+      name: 'Download URL',
       type: TaskParamType.STRING,
     },
     {
-      name: "Web page",
+      name: 'Web page',
       type: TaskParamType.BROWSER_INSTANCE,
     },
   ] as const,

@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
 // import prisma from "../prisma";
-import prisma from "@/lib/prisma";
-import { createLogger } from "@/lib/log";
+import prisma from '@/lib/prisma';
+import { createLogger } from '@/lib/log';
 
 /**
  * Checks if a user has sufficient credits to run a workflow
@@ -12,11 +12,8 @@ import { createLogger } from "@/lib/log";
  * @param requiredCredits The number of credits required to run the workflow
  * @returns Boolean indicating if user has sufficient credits
  */
-export async function hasEnoughCredits(
-  userId: string,
-  requiredCredits: number
-): Promise<boolean> {
-  const logger = createLogger("workflow/credits");
+export async function hasEnoughCredits(userId: string, requiredCredits: number): Promise<boolean> {
+  const logger = createLogger('workflow/credits');
   try {
     // Find the user's balance
     const balance = await prisma.userBalance.findUnique({
@@ -50,7 +47,7 @@ export async function checkWorkflowCredits(workflowId: string): Promise<{
   userCredits?: number;
   reason?: string;
 }> {
-  const logger = createLogger("workflow/credits");
+  const logger = createLogger('workflow/credits');
   try {
     // Get workflow details with creditsCost
     const workflow = await prisma.workflow.findUnique({
@@ -66,7 +63,7 @@ export async function checkWorkflowCredits(workflowId: string): Promise<{
     if (!workflow) {
       return {
         canExecute: false,
-        reason: "workflow_not_found",
+        reason: 'workflow_not_found',
       };
     }
 
@@ -81,7 +78,7 @@ export async function checkWorkflowCredits(workflowId: string): Promise<{
         canExecute: false,
         workflow,
         userCredits: 0,
-        reason: "no_user_balance",
+        reason: 'no_user_balance',
       };
     }
 
@@ -91,7 +88,7 @@ export async function checkWorkflowCredits(workflowId: string): Promise<{
         canExecute: false,
         workflow,
         userCredits: balance.credits,
-        reason: "insufficient_credits",
+        reason: 'insufficient_credits',
       };
     }
 
@@ -107,7 +104,7 @@ export async function checkWorkflowCredits(workflowId: string): Promise<{
     );
     return {
       canExecute: false,
-      reason: "error_checking_credits",
+      reason: 'error_checking_credits',
     };
   }
 }
@@ -131,7 +128,7 @@ export async function checkAndReserveWorkflowCredits(
   errorReason?: string;
   reserved?: boolean;
 }> {
-  const logger = createLogger("workflow/credits");
+  const logger = createLogger('workflow/credits');
   try {
     // First check if user has enough credits
     const balance = await prisma.userBalance.findUnique({
@@ -142,7 +139,7 @@ export async function checkAndReserveWorkflowCredits(
     if (!balance) {
       return {
         success: false,
-        errorReason: "no_user_balance",
+        errorReason: 'no_user_balance',
       };
     }
 
@@ -150,7 +147,7 @@ export async function checkAndReserveWorkflowCredits(
       return {
         success: false,
         userCredits: balance.credits,
-        errorReason: "insufficient_credits",
+        errorReason: 'insufficient_credits',
       };
     }
 
@@ -167,7 +164,7 @@ export async function checkAndReserveWorkflowCredits(
     );
     return {
       success: false,
-      errorReason: "error_checking_credits",
+      errorReason: 'error_checking_credits',
     };
   }
 }
@@ -186,7 +183,7 @@ export async function logWorkflowCreditFailure(
   creditsCost: number,
   availableCredits: number
 ) {
-  const logger = createLogger("workflow/credits");
+  const logger = createLogger('workflow/credits');
   try {
     // Record the credit failure in a format that could be used for analytics
     // This doesn't exist in the current schema, but could be added if needed

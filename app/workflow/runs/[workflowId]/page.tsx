@@ -1,8 +1,8 @@
-import React, { Suspense } from "react";
-import Topbar from "../../_components/topbar/Topbar";
-import { GetWorkflowExecutions } from "@/actions/workflows/getWorkflowExecutions";
-import { InboxIcon, Loader2Icon } from "lucide-react";
-import ExecutionasTable from "./_components/ExecutionasTable";
+import React, { Suspense } from 'react';
+import Topbar from '../../_components/topbar/Topbar';
+import { GetWorkflowExecutions } from '@/actions/workflows/getWorkflowExecutions';
+import { InboxIcon, Loader2Icon } from 'lucide-react';
+import ExecutionasTable from './_components/ExecutionasTable';
 
 export default function ExecutionPage({
   params,
@@ -21,7 +21,7 @@ export default function ExecutionPage({
       />
       <Suspense
         fallback={
-          <div className="flex justify-center items-center w-full h-full">
+          <div className="flex h-full w-full items-center justify-center">
             <Loader2Icon size={30} className="animate-spin stroke-primary" />
           </div>
         }
@@ -40,14 +40,12 @@ async function ExecutionasTableWrapper({ workflowId }: { workflowId: string }) {
   if (executions.length === 0) {
     return (
       <div className="container w-full py-6">
-        <div className="flex items-center flex-col gap-2 justify-center w-full h-full">
-          <div className="rounded-full bg-accent w-20 h-20 flex items-center justify-center">
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent">
             <InboxIcon size={40} className="stroke-primary" />
           </div>
           <div className="flex flex-col gap-1 text-center">
-            <p className="font-bold">
-              No runs have been triggered yet for this workflow
-            </p>
+            <p className="font-bold">No runs have been triggered yet for this workflow</p>
             <p className="text-sm text-muted-foreground">
               You can trigger a new run in the editor page
             </p>
@@ -57,7 +55,7 @@ async function ExecutionasTableWrapper({ workflowId }: { workflowId: string }) {
     );
   }
   return (
-    <div className="container py-6 w-full">
+    <div className="container w-full py-6">
       <ExecutionasTable workflowId={workflowId} initialData={executions} />
     </div>
   );

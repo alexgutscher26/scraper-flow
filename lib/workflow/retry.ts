@@ -1,5 +1,5 @@
-import { LogCollector } from "@/types/log";
-import { BackoffStrategy, RetryPolicy } from "@/types/workflow";
+import { LogCollector } from '@/types/log';
+import { BackoffStrategy, RetryPolicy } from '@/types/workflow';
 
 /**
  * Computes the backoff delay for the given attempt based on a retry policy.
@@ -41,4 +41,3 @@ export async function runWithRetry(
   }
   return { success: false, attempts: policy.maxAttempts };
 }
-

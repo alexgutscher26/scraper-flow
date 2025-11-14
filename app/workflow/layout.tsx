@@ -1,11 +1,11 @@
-import Logo from "@/components/Logo";
-import { ThemeModeToggle } from "@/components/ThemeModeToggle";
-import { Separator } from "@/components/ui/separator";
-import React from "react";
+import Logo from '@/components/Logo';
+import { ThemeModeToggle } from '@/components/ThemeModeToggle';
+import { Separator } from '@/components/ui/separator';
+import React from 'react';
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col w-full h-screen">
+    <div className="flex h-screen w-full flex-col">
       {children}
       <Separator />
       <footer className="flex items-center justify-between p-2">

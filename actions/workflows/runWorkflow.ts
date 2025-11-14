@@ -1,58 +1,54 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { FlowToExecutionPlan } from "@/lib/workflow/executionPlan";
-import { RetryPolicy, defaultRetryPolicy } from "@/types/workflow";
-import { ExecutionWorkflow } from "@/lib/workflow/executionWorkflow";
-import { TaskRegistry } from "@/lib/workflow/task/registry";
+import prisma from '@/lib/prisma';
+import { FlowToExecutionPlan } from '@/lib/workflow/executionPlan';
+import { RetryPolicy, defaultRetryPolicy } from '@/types/workflow';
+import { ExecutionWorkflow } from '@/lib/workflow/executionWorkflow';
+import { TaskRegistry } from '@/lib/workflow/task/registry';
 import {
   WorkflowExecutionStatus,
   WorkflowExcetionTrigger,
   WorkflowExecutionPlan,
   ExecutionPhaseStatus,
   WorkflowStatus,
-} from "@/types/workflow";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+} from '@/types/workflow';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 
-export async function RunWorkflow(form: {
-  workflowId: string;
-  flowDefinition?: string;
-}) {
+export async function RunWorkflow(form: { workflowId: string; flowDefinition?: string }) {
   const { userId } = await auth();
-  if (!userId) throw new Error("unauthorized");
+  if (!userId) throw new Error('unauthorized');
   const { workflowId, flowDefinition } = form;
-  if (!workflowId) throw new Error("workflowId is required");
+  if (!workflowId) throw new Error('workflowId is required');
 
   const workflow = await prisma.workflow.findUnique({
     where: { userId, id: workflowId },
   });
 
-  if (!workflow) throw new Error("workflow not found");
+  if (!workflow) throw new Error('workflow not found');
 
   let executionPlan: WorkflowExecutionPlan;
   let workflowDefinition = flowDefinition;
 
   if (workflow.status === WorkflowStatus.PUBLISHED) {
-    if (!workflow.executionPlan)
-      throw new Error("no execution plan found for published workflow");
+    if (!workflow.executionPlan) throw new Error('no execution plan found for published workflow');
     executionPlan = JSON.parse(workflow.executionPlan);
     workflowDefinition = workflow.definition;
   } else {
     //workflow is draft
     if (!flowDefinition) {
-      throw new Error("flow definition is not defined");
+      throw new Error('flow definition is not defined');
     }
     const flow = JSON.parse(flowDefinition);
     const retry: RetryPolicy = {
       ...defaultRetryPolicy(),
       ...(flow?.settings?.retry || {}),
-      strategy: "EXPONENTIAL",
+      strategy: 'EXPONENTIAL',
     } as RetryPolicy;
     const result = FlowToExecutionPlan(flow.nodes, flow.edges, { retryPolicy: retry });
 
-    if (result.error) throw new Error("flow definition is not valid");
-    if (!result.executionPlan) throw new Error("no execution plan generated");
+    if (result.error) throw new Error('flow definition is not valid');
+    if (!result.executionPlan) throw new Error('no execution plan generated');
 
     executionPlan = result.executionPlan;
   }
@@ -84,7 +80,7 @@ export async function RunWorkflow(form: {
       phases: true,
     },
   });
-  if (!execution) throw new Error("execution not created");
+  if (!execution) throw new Error('execution not created');
   ExecutionWorkflow(execution.id); // run this on background
   redirect(`/workflow/runs/${workflowId}/${execution.id}`);
 }

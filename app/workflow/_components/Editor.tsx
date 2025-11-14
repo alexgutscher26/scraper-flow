@@ -1,14 +1,14 @@
-"use client";
-import { Workflow } from "@prisma/client";
-import React from "react";
-import { ReactFlowProvider } from "@xyflow/react";
-import FlowEditor from "./FlowEditor";
-import Topbar from "./topbar/Topbar";
-import TaskMenu from "./TaskMenu";
-import { FlowValidationContextProvider } from "@/components/context/FlowValidationContext";
-import { WorkflowStatus } from "@/types/workflow";
-import { PolitenessSettingsProvider } from "@/components/context/PolitenessSettingsContext";
-import { defaultPolitenessConfig } from "@/types/politeness";
+'use client';
+import { Workflow } from '@prisma/client';
+import React from 'react';
+import { ReactFlowProvider } from '@xyflow/react';
+import FlowEditor from './FlowEditor';
+import Topbar from './topbar/Topbar';
+import TaskMenu from './TaskMenu';
+import { FlowValidationContextProvider } from '@/components/context/FlowValidationContext';
+import { WorkflowStatus } from '@/types/workflow';
+import { PolitenessSettingsProvider } from '@/components/context/PolitenessSettingsContext';
+import { defaultPolitenessConfig } from '@/types/politeness';
 
 interface Props {
   workflow: Workflow;
@@ -26,12 +26,13 @@ export default function Editor({ workflow }: Props) {
   try {
     const def = JSON.parse(workflow.definition);
     const override = def?.settings?.politeness;
-    if (override && typeof override === "object") {
+    if (override && typeof override === 'object') {
       initialCfg = {
         robots: {
           enabled: override.robots?.enabled ?? initialCfg.robots.enabled,
           enforcement: override.robots?.enforcement ?? initialCfg.robots.enforcement,
-          userAgentOverride: override.robots?.userAgentOverride ?? initialCfg.robots.userAgentOverride,
+          userAgentOverride:
+            override.robots?.userAgentOverride ?? initialCfg.robots.userAgentOverride,
         },
         delays: {
           enabled: override.delays?.enabled ?? initialCfg.delays.enabled,
@@ -45,7 +46,9 @@ export default function Editor({ workflow }: Props) {
           rotateStrategy: override.userAgent?.rotateStrategy ?? initialCfg.userAgent.rotateStrategy,
           pool: override.userAgent?.pool ?? initialCfg.userAgent.pool,
           headers: override.userAgent?.headers ?? initialCfg.userAgent.headers,
-          acceptLanguageRandomization: override.userAgent?.acceptLanguageRandomization ?? initialCfg.userAgent.acceptLanguageRandomization,
+          acceptLanguageRandomization:
+            override.userAgent?.acceptLanguageRandomization ??
+            initialCfg.userAgent.acceptLanguageRandomization,
         },
       } as any;
     }
@@ -54,7 +57,7 @@ export default function Editor({ workflow }: Props) {
     <FlowValidationContextProvider>
       <ReactFlowProvider>
         <PolitenessSettingsProvider initial={initialCfg}>
-          <div className="flex flex-col h-full w-full overflow-auto">
+          <div className="flex h-full w-full flex-col overflow-auto">
             <Topbar
               title="Workflow editor"
               subtitle={workflow.name}

@@ -7,7 +7,7 @@ type Cookie = {
   maxAge?: number;
   secure?: boolean;
   httpOnly?: boolean;
-  sameSite?: "Lax" | "Strict" | "None";
+  sameSite?: 'Lax' | 'Strict' | 'None';
 };
 
 /**
@@ -24,7 +24,7 @@ type Cookie = {
 function parseSetCookie(header: string): Cookie | null {
   const parts = header.split(/;\s*/);
   const [nameValue, ...attrs] = parts;
-  const eqIdx = nameValue.indexOf("=");
+  const eqIdx = nameValue.indexOf('=');
   if (eqIdx < 0) return null;
   const name = nameValue.slice(0, eqIdx).trim();
   const value = nameValue.slice(eqIdx + 1);
@@ -32,18 +32,18 @@ function parseSetCookie(header: string): Cookie | null {
   if (value.length > 4096) return null;
   const cookie: Cookie = { name, value };
   for (const a of attrs) {
-    const [kRaw, vRaw] = a.split("=");
+    const [kRaw, vRaw] = a.split('=');
     const k = kRaw.trim().toLowerCase();
     const v = vRaw?.trim();
-    if (k === "domain" && v) cookie.domain = v.toLowerCase();
-    else if (k === "path" && v) cookie.path = v;
-    else if (k === "expires" && v) {
+    if (k === 'domain' && v) cookie.domain = v.toLowerCase();
+    else if (k === 'path' && v) cookie.path = v;
+    else if (k === 'expires' && v) {
       const d = new Date(v);
       if (!isNaN(d.getTime())) cookie.expires = d;
-    } else if (k === "max-age" && v) cookie.maxAge = Number(v);
-    else if (k === "secure") cookie.secure = true;
-    else if (k === "httponly") cookie.httpOnly = true;
-    else if (k === "samesite" && v) cookie.sameSite = v as any;
+    } else if (k === 'max-age' && v) cookie.maxAge = Number(v);
+    else if (k === 'secure') cookie.secure = true;
+    else if (k === 'httponly') cookie.httpOnly = true;
+    else if (k === 'samesite' && v) cookie.sameSite = v as any;
   }
   return cookie;
 }
@@ -60,12 +60,12 @@ function parseSetCookie(header: string): Cookie | null {
  */
 function domainMatches(host: string, cookieDomain?: string): boolean {
   if (!cookieDomain) return true;
-  const cd = cookieDomain.startsWith(".") ? cookieDomain.slice(1) : cookieDomain;
-  return host === cd || host.endsWith("." + cd);
+  const cd = cookieDomain.startsWith('.') ? cookieDomain.slice(1) : cookieDomain;
+  return host === cd || host.endsWith('.' + cd);
 }
 
 function pathMatches(reqPath: string, cookiePath?: string): boolean {
-  const p = cookiePath || "/";
+  const p = cookiePath || '/';
   return reqPath.startsWith(p);
 }
 
@@ -81,7 +81,7 @@ function pathMatches(reqPath: string, cookiePath?: string): boolean {
  */
 function isExpired(c: Cookie): boolean {
   if (c.expires) return Date.now() > c.expires.getTime();
-  if (typeof c.maxAge === "number") return c.maxAge <= 0;
+  if (typeof c.maxAge === 'number') return c.maxAge <= 0;
   return false;
 }
 
@@ -96,9 +96,11 @@ export class CookieJar {
     for (const h of setCookieHeaders) {
       const parsed = parseSetCookie(h);
       if (!parsed) continue;
-      if (parsed.secure && u.protocol !== "https:") continue;
+      if (parsed.secure && u.protocol !== 'https:') continue;
       const domain = (parsed.domain || host).toLowerCase();
-      const existingIdx = arr.findIndex(c => c.name === parsed.name && (c.domain || host) === domain);
+      const existingIdx = arr.findIndex(
+        (c) => c.name === parsed.name && (c.domain || host) === domain
+      );
       if (existingIdx >= 0) arr.splice(existingIdx, 1);
       arr.push(parsed);
     }
@@ -116,7 +118,7 @@ export class CookieJar {
   cookieHeaderFor(url: string): string | undefined {
     const u = new URL(url);
     const host = u.hostname.toLowerCase();
-    const path = u.pathname || "/";
+    const path = u.pathname || '/';
     const now = Date.now();
     const result: string[] = [];
     // search all domains in store; include those matching host
@@ -125,11 +127,11 @@ export class CookieJar {
         if (c.expires && c.expires.getTime() < now) continue;
         if (!domainMatches(host, c.domain || d)) continue;
         if (!pathMatches(path, c.path)) continue;
-        if (c.secure && u.protocol !== "https:") continue;
+        if (c.secure && u.protocol !== 'https:') continue;
         result.push(`${c.name}=${c.value}`);
       }
     }
-    return result.length ? result.join("; ") : undefined;
+    return result.length ? result.join('; ') : undefined;
   }
 
   toJSON(): any {
@@ -146,7 +148,7 @@ export class CookieJar {
    * @param data - The data to be loaded into the store, expected to be an object.
    */
   load(data: any): void {
-    if (!data || typeof data !== "object") return;
+    if (!data || typeof data !== 'object') return;
     this.store.clear();
     for (const k of Object.keys(data)) {
       const arr = Array.isArray(data[k]) ? data[k] : [];
@@ -160,18 +162,27 @@ export class SessionManager {
   private createdAt = Date.now();
   private ttlMs: number;
 
-  constructor(ttlMs = 30 * 60 * 1000) { this.ttlMs = ttlMs; }
+  constructor(ttlMs = 30 * 60 * 1000) {
+    this.ttlMs = ttlMs;
+  }
 
   /**
    * Checks if the current instance has expired based on its creation time and TTL.
    */
-  isExpired(): boolean { return Date.now() - this.createdAt > this.ttlMs; }
+  isExpired(): boolean {
+    return Date.now() - this.createdAt > this.ttlMs;
+  }
   /**
    * Resets the createdAt timestamp and initializes a new CookieJar.
    */
-  renew(): void { this.createdAt = Date.now(); this.jar = new CookieJar(); }
+  renew(): void {
+    this.createdAt = Date.now();
+    this.jar = new CookieJar();
+  }
   /** Returns the CookieJar instance. */
-  jarRef(): CookieJar { return this.jar; }
+  jarRef(): CookieJar {
+    return this.jar;
+  }
 
   /**
    * Attaches the cookie header to the request initialization object.
@@ -183,7 +194,7 @@ export class SessionManager {
   }
 
   captureFromResponse(url: string, headers: Headers): void {
-    const set = headers.get("set-cookie");
+    const set = headers.get('set-cookie');
     const all: string[] = [];
     if (set) {
       // split multiple cookies if comma-separated with attributes handling (basic)

@@ -1,5 +1,5 @@
-import parser from "cron-parser";
-import cronstrue from "cronstrue";
+import parser from 'cron-parser';
+import cronstrue from 'cronstrue';
 
 /**
  * Parses a workflow schedule expression and validates it
@@ -10,7 +10,7 @@ import cronstrue from "cronstrue";
  */
 export function parseWorkflowSchedule(scheduleExpression: string): {
   isValid: boolean;
-  type: "cron" | "interval" | "invalid";
+  type: 'cron' | 'interval' | 'invalid';
   readableDescription: string;
   nextRunDate: Date | null;
 } {
@@ -23,31 +23,31 @@ export function parseWorkflowSchedule(scheduleExpression: string): {
     if (isNaN(value) || value <= 0) {
       return {
         isValid: false,
-        type: "invalid",
-        readableDescription: "Invalid interval value",
+        type: 'invalid',
+        readableDescription: 'Invalid interval value',
         nextRunDate: null,
       };
     }
 
-    let unitLabel = "";
+    let unitLabel = '';
     switch (unit) {
-      case "s":
-        unitLabel = value === 1 ? "second" : "seconds";
+      case 's':
+        unitLabel = value === 1 ? 'second' : 'seconds';
         break;
-      case "m":
-        unitLabel = value === 1 ? "minute" : "minutes";
+      case 'm':
+        unitLabel = value === 1 ? 'minute' : 'minutes';
         break;
-      case "h":
-        unitLabel = value === 1 ? "hour" : "hours";
+      case 'h':
+        unitLabel = value === 1 ? 'hour' : 'hours';
         break;
-      case "d":
-        unitLabel = value === 1 ? "day" : "days";
+      case 'd':
+        unitLabel = value === 1 ? 'day' : 'days';
         break;
     }
 
     return {
       isValid: true,
-      type: "interval",
+      type: 'interval',
       readableDescription: `Every ${value} ${unitLabel}`,
       nextRunDate: calculateNextRunForInterval(value, unit),
     };
@@ -62,15 +62,15 @@ export function parseWorkflowSchedule(scheduleExpression: string): {
 
     return {
       isValid: true,
-      type: "cron",
+      type: 'cron',
       readableDescription: readableDescription,
       nextRunDate: nextDate,
     };
   } catch (error) {
     return {
       isValid: false,
-      type: "invalid",
-      readableDescription: "Invalid schedule expression",
+      type: 'invalid',
+      readableDescription: 'Invalid schedule expression',
       nextRunDate: null,
     };
   }
@@ -84,16 +84,16 @@ function calculateNextRunForInterval(value: number, unit: string): Date {
   let ms = 0;
 
   switch (unit) {
-    case "s":
+    case 's':
       ms = value * 1000;
       break; // seconds
-    case "m":
+    case 'm':
       ms = value * 60 * 1000;
       break; // minutes
-    case "h":
+    case 'h':
       ms = value * 60 * 60 * 1000;
       break; // hours
-    case "d":
+    case 'd':
       ms = value * 24 * 60 * 60 * 1000;
       break; // days
   }

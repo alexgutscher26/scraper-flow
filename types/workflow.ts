@@ -1,11 +1,11 @@
-import { LucideProps } from "lucide-react";
-import React from "react";
-import { TaskParam, TaskType, TaskCategory } from "./TaskType";
-import { AppNode } from "./appNode";
+import { LucideProps } from 'lucide-react';
+import React from 'react';
+import { TaskParam, TaskType, TaskCategory } from './TaskType';
+import { AppNode } from './appNode';
 
 export enum WorkflowStatus {
-  DRAFT = "DRAFT",
-  PUBLISHED = "PUBLISHED",
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
 }
 
 export type WorkflowTask = {
@@ -30,31 +30,31 @@ export type WorkflowExecutionPlanPhase = {
 export type WorkflowExecutionPlan = WorkflowExecutionPlanPhase[];
 
 export enum WorkflowExcetionTrigger {
-  MANUAL = "MANUAL",
-  CRON = "CRON",
-  SCHEDULED = "SCHEDULED",
+  MANUAL = 'MANUAL',
+  CRON = 'CRON',
+  SCHEDULED = 'SCHEDULED',
 }
 
 export enum WorkflowExecutionStatus {
-  PENDING = "PENDING",
-  RUNNING = "RUNNING",
-  COMPLETED = "COMPLETED",
-  FAILED = "FAILED",
+  PENDING = 'PENDING',
+  RUNNING = 'RUNNING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
 }
 
 export enum ExecutionPhaseStatus {
-  CREATED = "CREATED",
-  PENDING = "PENDING",
-  RUNNING = "RUNNING",
-  COMPLETED = "COMPLETED",
-  FAILED = "FAILED",
+  CREATED = 'CREATED',
+  PENDING = 'PENDING',
+  RUNNING = 'RUNNING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
 }
 
 /**
  * Describes the backoff algorithm to use for retries.
  */
 export enum BackoffStrategy {
-  EXPONENTIAL = "EXPONENTIAL",
+  EXPONENTIAL = 'EXPONENTIAL',
 }
 
 /**

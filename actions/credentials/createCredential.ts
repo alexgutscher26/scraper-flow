@@ -1,23 +1,23 @@
-"use server";
+'use server';
 
-import { symmetricEncrypt } from "@/lib/encryption";
-import prisma from "@/lib/prisma";
+import { symmetricEncrypt } from '@/lib/encryption';
+import prisma from '@/lib/prisma';
 import {
   createCredentialSchema,
   createCredentialSchemaType,
   CredentialType,
-} from "@/schema/credential";
-import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+} from '@/schema/credential';
+import { auth } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
 
 export async function CreateCredential(form: createCredentialSchemaType) {
   const { success, data } = createCredentialSchema.safeParse(form);
   if (!success) {
-    throw new Error("Invalid form data");
+    throw new Error('Invalid form data');
   }
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("unauthorized");
+    throw new Error('unauthorized');
   }
 
   // Prepare credential payload with secure processing for 2FA
@@ -26,15 +26,15 @@ export async function CreateCredential(form: createCredentialSchemaType) {
     const maybeCodes: string[] | undefined = (processedData?.recoveryCodes as any) || [];
     if (maybeCodes && maybeCodes.length) {
       const hashed = maybeCodes.map((code) =>
-        require("node:crypto").createHash("sha256").update(code).digest("hex")
+        require('node:crypto').createHash('sha256').update(code).digest('hex')
       );
       processedData = { ...processedData, recoveryCodes: hashed };
     }
   }
   if (data.credentialData.type === CredentialType.SMTP_EMAIL) {
     const p = processedData?.password as string;
-    if (typeof p === "string") {
-      processedData = { ...processedData, password: p.replace(/\s+/g, "") };
+    if (typeof p === 'string') {
+      processedData = { ...processedData, password: p.replace(/\s+/g, '') };
     }
   }
   // Convert the structured credential data to JSON string
@@ -51,7 +51,7 @@ export async function CreateCredential(form: createCredentialSchemaType) {
     },
   });
   if (!result) {
-    throw new Error("Failed to create credential");
+    throw new Error('Failed to create credential');
   }
-  revalidatePath("/credentials");
+  revalidatePath('/credentials');
 }

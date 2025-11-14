@@ -1,9 +1,9 @@
-import { Log, LogCollector, LogFunction, LogLevel, LogLevels, LogContext } from "@/types/log";
-import { sanitizeString } from "./logSecure/sanitizer";
-import { initSecureConsole } from "./logSecure/console";
+import { Log, LogCollector, LogFunction, LogLevel, LogLevels, LogContext } from '@/types/log';
+import { sanitizeString } from './logSecure/sanitizer';
+import { initSecureConsole } from './logSecure/console';
 
 try {
-  if (process.env.LOG_SECURE_ENABLED !== "false") initSecureConsole();
+  if (process.env.LOG_SECURE_ENABLED !== 'false') initSecureConsole();
 } catch {}
 
 /**
@@ -45,7 +45,7 @@ function getEnvLogLevel(): LogLevel {
   if (raw && (LogLevels as readonly string[]).includes(raw)) {
     return raw as LogLevel;
   }
-  return "info";
+  return 'info';
 }
 
 function shouldLog(level: LogLevel, current: LogLevel): boolean {
@@ -53,8 +53,8 @@ function shouldLog(level: LogLevel, current: LogLevel): boolean {
 }
 
 function consoleMethod(level: LogLevel): (...args: any[]) => void {
-  if (level === "error") return console.error;
-  if (level === "warning") return console.warn;
+  if (level === 'error') return console.error;
+  if (level === 'warning') return console.warn;
   return console.log;
 }
 
@@ -92,14 +92,14 @@ export function createLogger(scope?: string, collector?: LogCollector) {
     const fn = consoleMethod(level);
     const sanitized = sanitizeString(message);
     fn(format(level, sanitized));
-    if (collector && typeof collector[level] === "function") {
+    if (collector && typeof collector[level] === 'function') {
       collector[level](sanitized);
     }
   };
 
   return {
-    info: (message: string) => log("info", message),
-    error: (message: string) => log("error", message),
-    warning: (message: string) => log("warning", message),
+    info: (message: string) => log('info', message),
+    error: (message: string) => log('error', message),
+    warning: (message: string) => log('warning', message),
   } as Record<LogLevel, LogFunction>;
 }

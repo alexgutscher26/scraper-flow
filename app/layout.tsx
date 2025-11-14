@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { AppProviders } from "@/components/providers/AppProviders";
-import { Toaster } from "sonner";
+import type { Metadata } from 'next';
+import { ClerkProvider } from '@clerk/nextjs';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { AppProviders } from '@/components/providers/AppProviders';
+import { Toaster } from 'sonner';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "ScrapeFlow",
+  title: 'ScrapeFlow',
   description:
-    "Next.js, TypeScript, React-Flow, Prisma, and React-Query to build a scalable SaaS platform for web scraping and automation.",
+    'Next.js, TypeScript, React-Flow, Prisma, and React-Query to build a scalable SaaS platform for web scraping and automation.',
 };
 
 export default function RootLayout({
@@ -20,11 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider
-      afterSignOutUrl={"/sign-in"}
+      afterSignOutUrl={'/sign-in'}
       appearance={{
         elements: {
-          formButtonPrimary:
-            "bg-primary hover:bg-primary/90 text-sm !shadow-none",
+          formButtonPrimary: 'bg-primary hover:bg-primary/90 text-sm !shadow-none',
         },
       }}
     >

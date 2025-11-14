@@ -1,7 +1,7 @@
-import Topbar from "@/app/workflow/_components/topbar/Topbar";
-import { Loader2Icon } from "lucide-react";
-import React, { Suspense } from "react";
-import ExecutionViewerWrapper from "./_components/ExecutionViewerWrapper";
+import Topbar from '@/app/workflow/_components/topbar/Topbar';
+import { Loader2Icon } from 'lucide-react';
+import React, { Suspense } from 'react';
+import ExecutionViewerWrapper from './_components/ExecutionViewerWrapper';
 
 export default function ExecutionViewerPage({
   params,
@@ -12,7 +12,7 @@ export default function ExecutionViewerPage({
   };
 }) {
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full flex-col overflow-hidden">
       <Topbar
         workflowId={params.workflowId}
         title="Workflow run details"
@@ -22,7 +22,7 @@ export default function ExecutionViewerPage({
       <section className="flex h-full overflow-auto">
         <Suspense
           fallback={
-            <div className="flex items-center justify-center w-full h-full">
+            <div className="flex h-full w-full items-center justify-center">
               <Loader2Icon className="size-10 animate-spin stroke-primary" />
             </div>
           }

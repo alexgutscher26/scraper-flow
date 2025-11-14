@@ -1,16 +1,13 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { WorkflowStatus } from "@/types/workflow";
-import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import prisma from '@/lib/prisma';
+import { WorkflowStatus } from '@/types/workflow';
+import { auth } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
 
 export async function UnpublishWorkflow(id: string) {
   const { userId } = await auth();
-  if (!userId)
-    throw new Error(
-      "Authentication required. Please sign in to publish a workflow."
-    );
+  if (!userId) throw new Error('Authentication required. Please sign in to publish a workflow.');
 
   const workflow = await prisma.workflow.findUnique({
     where: {
@@ -25,9 +22,7 @@ export async function UnpublishWorkflow(id: string) {
   }
 
   if (workflow.status !== WorkflowStatus.PUBLISHED) {
-    throw new Error(
-      "Workflow is not published. Only published workflows can be unpublished."
-    );
+    throw new Error('Workflow is not published. Only published workflows can be unpublished.');
   }
   await prisma.workflow.update({
     where: {

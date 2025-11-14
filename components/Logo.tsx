@@ -1,21 +1,15 @@
-import { cn } from "@/lib/utils";
-import { SquareDashedMousePointer } from "lucide-react";
-import Link from "next/link";
-import React from "react";
+import { cn } from '@/lib/utils';
+import { SquareDashedMousePointer } from 'lucide-react';
+import Link from 'next/link';
+import React from 'react';
 
 interface LogoProps {
   fontSize?: string;
   iconSize?: number;
 }
-const Logo = ({ fontSize = "text-2xl", iconSize = 20 }: LogoProps) => {
+const Logo = ({ fontSize = 'text-2xl', iconSize = 20 }: LogoProps) => {
   return (
-    <Link
-      href={"/"}
-      className={cn(
-        "text-2xl font-extrabold flex items-center gap-2",
-        fontSize
-      )}
-    >
+    <Link href={'/'} className={cn('flex items-center gap-2 text-2xl font-extrabold', fontSize)}>
       <div className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 p-2">
         <SquareDashedMousePointer size={iconSize} className="stroke-white" />
       </div>

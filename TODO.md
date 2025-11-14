@@ -29,7 +29,7 @@ High-Impact Improvements
   - Linked files: `app/api/workflows/cron/route.ts:1`, `app/api/workflows/execute/route.ts:1`, `middleware.ts:1`
   - DoD: per-user and global limits; 429 responses with headers; public route scope tightened
 
-- [ ] Add idempotency keys and deduplication for triggers and outputs [P0]
+- [x] Add idempotency keys and deduplication for triggers and outputs [P0]
   - Linked files: `app/api/workflows/cron/route.ts:132`, `app/api/workflows/execute/route.ts:1`, `lib/workflow/executionWorkflow.ts:1`
   - DoD: duplicate requests are safely ignored; outputs deduped via hash/fingerprint
 

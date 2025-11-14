@@ -1,9 +1,11 @@
 ## Overview
+
 - Add robust executors for typing, selection, and file uploads, plus a modular captcha strategy aligned with existing workflow engine, logging, and politeness model.
 - Keep idiomatic placement: executors in `lib/workflow/executor`, tasks in `lib/workflow/task`, register in `lib/workflow/executor/registry.ts`.
 - Adhere to execution environment (`types/executor.ts:21-33`) and logging conventions used by current executors.
 
 ## Reference Architecture
+
 - Executor registry: `lib/workflow/executor/registry.ts:36-58` connects `TaskType` → executor function.
 - Existing input typing (to be enhanced): `lib/workflow/executor/FillInputExecutor.ts:4-22`.
 - Politeness delay utilities: `lib/politeness/delay.ts:14-32` and phase delays: `lib/workflow/executionWorkflow.ts:500-507`.
@@ -11,6 +13,7 @@
 - Phase environment builder: `lib/workflow/executionWorkflow.ts:375-395`.
 
 ## Type Executor (Enhanced)
+
 - Replace current simple typing with a comprehensive executor:
   - Inputs: `Selector` (required), `Value` (required), `Type` (`text|number|email|password|tel|url|search|date|time|datetime-local`), `DebounceMs` (default 50), `ValidatePattern` (optional, regex), `MaxLength` (optional), `ClearBeforeType` (bool), `PressEnter` (bool).
   - Behavior:
@@ -25,6 +28,7 @@
   - Registry: add to `lib/workflow/executor/registry.ts` under new `TaskType.TYPE_INPUT` (extend enum).
 
 ## Select Executor
+
 - Support native `<select>` and custom dropdowns (ARIA, Radix, div-based components):
   - Inputs: `Selector` (container or select element), `Mode` (`single|multiple`), `Value(s)` (string|string[]), `SearchQuery` (optional), `UseKeyboard` (bool), `OptionFilter` (optional regex or predicate string), `OpenTriggerSelector` (optional for custom dropdown), `OptionSelector` (optional).
   - Behavior:
@@ -40,6 +44,7 @@
   - Registry: add `TaskType.SELECT_OPTION`.
 
 ## Upload Executor
+
 - File input handling with validation, progress events, and drag-and-drop:
   - Inputs: `Selector` (file input or dropzone), `Files` (string[] of absolute paths), `AcceptTypes` (mime/extensions), `MaxSizeMB` (number), `UseDragAndDrop` (bool), `DropTargetSelector` (optional).
   - Validation:
@@ -53,6 +58,7 @@
   - Registry: add `TaskType.UPLOAD_FILES`.
 
 ## Captcha Strategy [P2]
+
 - Modular strategy with providers and fallbacks:
   - Structure:
     - Interface: `lib/workflow/executor/captcha/CaptchaStrategy.ts` defines `detect`, `solve`, `fallback`, `rateLimit`.
@@ -72,17 +78,20 @@
   - Registry: add `TaskType.SOLVE_CAPTCHA` (P2 priority).
 
 ## Error Handling & Logging
+
 - Use structured logs via `environment.log` as existing executors do (`FillInputExecutor.ts:7-21`, `ClickElementExecutor.ts:14-25`).
 - Normalize error messages and reasons; include `selector`, `attempt`, and timing.
 - Return `false` on failure; ensure environment outputs are serializable (engine filters browser instances at `lib/workflow/executionWorkflow.ts:276-305`).
 
 ## Performance & Debouncing
+
 - Keep interaction latency under 100ms by:
   - Avoiding extra `sleep` beyond required politeness for network operations (typing/selection usually local DOM).
   - Debounce bursts: small timeout (default 50ms) between chunks of keystrokes; batched insert via `page.evaluate` when safe.
   - Measure elapsed times and log for tests.
 
 ## Testing Plan
+
 - Unit tests (Vitest):
   - Mock `ExecutionEnvironment` (using `createExecutionEnvironment` guidance) and stub `page` methods.
   - Type Executor: validation, clear-before-type, debounce timing, error paths.
@@ -97,12 +106,14 @@
   - Measure interaction time with `performance.now()` around executor calls; assert <100ms for typical inputs on local DOM.
 
 ## Success Criteria Mapping
+
 - Field coverage: Type Executor handles standard input types; Select covers native/custom; Upload supports multi and drag-and-drop; Captcha supports reCAPTCHA/hCaptcha.
 - Sub-100ms interactions: enforced by tests and debouncing strategy; logs include timing to verify.
 - 99% captcha success: multi-provider with retry/backoff plus manual fallback; track success rate via test harness across fixtures.
 - Comprehensive logging and recovery: consistent structured logs and boolean returns; failures surface clear reasons.
 
 ## Files & Changes
+
 - New TaskTypes: extend `types/TaskType.ts` to add `TYPE_INPUT`, `SELECT_OPTION`, `UPLOAD_FILES`, `SOLVE_CAPTCHA`.
 - Executors:
   - `lib/workflow/executor/TypeExecutor.ts` (or enhance `FillInputExecutor.ts:4-22`).
@@ -121,6 +132,7 @@
   - Cross-browser: `tests/e2e/playwright/form.executors.spec.ts` (new harness).
 
 ## Rollout
+
 - Phase 1: Type & Select executors and tests.
 - Phase 2: Upload executor with drag-and-drop and tests.
 - Phase 3 [P2]: Captcha strategy/providers and cross-browser tests.

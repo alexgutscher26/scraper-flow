@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { checkWorkflowEligibility } from "@/lib/workflow/eligibility";
-import { auth } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
+import { checkWorkflowEligibility } from '@/lib/workflow/eligibility';
+import { auth } from '@clerk/nextjs/server';
+import prisma from '@/lib/prisma';
 
 /**
  * Server action to check if a workflow is eligible to run
@@ -13,7 +13,7 @@ import prisma from "@/lib/prisma";
 export async function checkWorkflowRunEligibility(workflowId: string) {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("User not authenticated");
+    throw new Error('User not authenticated');
   }
 
   // Ensure the workflow belongs to the current user
@@ -28,7 +28,7 @@ export async function checkWorkflowRunEligibility(workflowId: string) {
   });
 
   if (!workflow) {
-    throw new Error("Workflow not found or access denied");
+    throw new Error('Workflow not found or access denied');
   }
 
   return checkWorkflowEligibility(workflowId);

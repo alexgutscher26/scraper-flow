@@ -1,16 +1,16 @@
-"use server";
+'use server';
 
-import { PeriodToDateRange } from "@/lib/helper/dates";
-import prisma from "@/lib/prisma";
-import { Period } from "@/types/analytics";
-import { WorkflowExecutionStatus } from "@/types/workflow";
-import { auth } from "@clerk/nextjs/server";
+import { PeriodToDateRange } from '@/lib/helper/dates';
+import prisma from '@/lib/prisma';
+import { Period } from '@/types/analytics';
+import { WorkflowExecutionStatus } from '@/types/workflow';
+import { auth } from '@clerk/nextjs/server';
 const { COMPLETED, FAILED } = WorkflowExecutionStatus;
 
 export const GetStatsCardsValues = async (period: Period) => {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("unauthorized");
+    throw new Error('unauthorized');
   }
   const dateRange = PeriodToDateRange(period);
   const executions = await prisma.workflowExecution.findMany({

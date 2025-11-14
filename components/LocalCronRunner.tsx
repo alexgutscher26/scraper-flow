@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef } from "react";
-import { http } from "@/lib/http";
+import { useEffect, useState, useRef } from 'react';
+import { http } from '@/lib/http';
 
 /**
  * Manages the execution of scheduled workflows through a local cron runner.
@@ -25,11 +25,10 @@ export function LocalCronRunner() {
     // Always enable in development, conditionally in production
     // NEXT_PUBLIC_LOCAL_CRON_FREQUENCY sets polling interval in milliseconds (default: 60000ms/1min)
     const shouldEnableRunner =
-      process.env.NODE_ENV === "development" ||
-      process.env.NEXT_PUBLIC_ENABLE_LOCAL_CRON === "true";
+      process.env.NODE_ENV === 'development' ||
+      process.env.NEXT_PUBLIC_ENABLE_LOCAL_CRON === 'true';
 
-    const pollingInterval =
-      Number(process.env.NEXT_PUBLIC_LOCAL_CRON_FREQUENCY) || 60000;
+    const pollingInterval = Number(process.env.NEXT_PUBLIC_LOCAL_CRON_FREQUENCY) || 60000;
 
     if (shouldEnableRunner) {
       setIsRunnerActive(true);
@@ -46,10 +45,10 @@ export function LocalCronRunner() {
           // Add a unique timestamp to prevent any API route caching
           const timestamp = Date.now();
           const response = await http.get(`/api/workflows/cron?ts=${timestamp}`, {
-            cache: "no-store",
+            cache: 'no-store',
             headers: {
-              pragma: "no-cache",
-              "cache-control": "no-cache",
+              pragma: 'no-cache',
+              'cache-control': 'no-cache',
             },
           });
           if (response) {
@@ -68,7 +67,7 @@ export function LocalCronRunner() {
           }
         } catch (error) {
           failedAttemptsRef.current += 1;
-          console.error("Error checking cron:", error);
+          console.error('Error checking cron:', error);
 
           // If we've had multiple consecutive failures, implement exponential backoff
           if (failedAttemptsRef.current > 3) {
@@ -77,9 +76,7 @@ export function LocalCronRunner() {
               900000
             ); // Max 15 minutes
             console.log(
-              `Backing off cron checks for ${
-                backoffTime / 1000
-              }s due to repeated failures`
+              `Backing off cron checks for ${backoffTime / 1000}s due to repeated failures`
             );
 
             // Clear current interval and set a one-time timeout with backoff

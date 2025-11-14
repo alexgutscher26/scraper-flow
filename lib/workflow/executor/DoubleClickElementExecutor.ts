@@ -1,5 +1,5 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { DoubleClickElementTask } from "../task/DoubleClickElement";
+import { ExecutionEnvironment } from '@/types/executor';
+import { DoubleClickElementTask } from '../task/DoubleClickElement';
 
 /**
  * Executes a double-click action on a specified element within a web page.
@@ -15,17 +15,16 @@ export async function DoubleClickElementExecutor(
 ): Promise<boolean> {
   try {
     const page = environment.getPage();
-    const selector = environment.getInput("Selector");
+    const selector = environment.getInput('Selector');
     if (!page || !selector) {
-      environment.log.error("Web page and Selector are required");
+      environment.log.error('Web page and Selector are required');
       return false;
     }
     await page.click(selector, { clickCount: 2 });
-    environment.setOutput("Web page", page);
+    environment.setOutput('Web page', page);
     return true;
   } catch (e: any) {
     environment.log.error(e.message);
     return false;
   }
 }
-

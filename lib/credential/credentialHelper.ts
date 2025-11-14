@@ -1,6 +1,6 @@
-import { symmetricDecrypt } from "@/lib/encryption";
-import { CredentialType, CredentialTypeValue } from "@/schema/credential";
-import { generateTOTP } from "./totp";
+import { symmetricDecrypt } from '@/lib/encryption';
+import { CredentialType, CredentialTypeValue } from '@/schema/credential';
+import { generateTOTP } from './totp';
 
 export interface DecryptedCredential {
   id: string;
@@ -36,19 +36,17 @@ export function decryptCredential(credential: {
  * This function now only supports Gmail for simplified setup
  */
 function getSmtpSettings(email: string) {
-  const domain = email.split("@")[1]?.toLowerCase();
+  const domain = email.split('@')[1]?.toLowerCase();
 
   // Only Gmail is supported - validate email domain
-  if (!domain || !["gmail.com", "googlemail.com"].includes(domain)) {
-    throw new Error(
-      "Only Gmail addresses (@gmail.com) are supported for SMTP configuration"
-    );
+  if (!domain || !['gmail.com', 'googlemail.com'].includes(domain)) {
+    throw new Error('Only Gmail addresses (@gmail.com) are supported for SMTP configuration');
   }
 
   // Gmail SMTP settings
   return {
-    host: "smtp.gmail.com",
-    service: "gmail",
+    host: 'smtp.gmail.com',
+    service: 'gmail',
     port: 465,
     secure: true,
   };
@@ -58,9 +56,7 @@ function getSmtpSettings(email: string) {
  * Formats credential data for executor usage
  * Maintains backwards compatibility with existing executors
  */
-export function formatCredentialForExecutor(
-  credential: DecryptedCredential
-): string {
+export function formatCredentialForExecutor(credential: DecryptedCredential): string {
   switch (credential.type) {
     case CredentialType.SMTP_EMAIL:
       // Auto-detect SMTP settings from email and format for SendEmailExecutor
@@ -89,13 +85,13 @@ export function formatCredentialForExecutor(
 
     case CredentialType.TWO_FACTOR:
       // Provide method details; executors can generate codes for TOTP
-      if (credential.data.method === "totp") {
+      if (credential.data.method === 'totp') {
         // Include a freshly generated code for convenience
         const code = generateTOTP(credential.data.secret, {
           period: credential.data.period || 30,
           digits: credential.data.digits || 6,
         });
-        return JSON.stringify({ method: "totp", code });
+        return JSON.stringify({ method: 'totp', code });
       }
       // SMS/EMAIL carry meta; generation/verification handled by executor or external service
       return JSON.stringify({ method: credential.data.method });
@@ -113,36 +109,36 @@ export function getCredentialDisplayInfo(credential: DecryptedCredential) {
   switch (credential.type) {
     case CredentialType.SMTP_EMAIL:
       return {
-        icon: "Mail",
-        subtitle: "Gmail Account",
-        fields: ["Gmail Address"],
+        icon: 'Mail',
+        subtitle: 'Gmail Account',
+        fields: ['Gmail Address'],
       };
 
     case CredentialType.API_KEY:
       return {
-        icon: "Key",
-        subtitle: credential.data.baseUrl || "API Credentials",
-        fields: ["API Key", "Base URL"],
+        icon: 'Key',
+        subtitle: credential.data.baseUrl || 'API Credentials',
+        fields: ['API Key', 'Base URL'],
       };
 
     case CredentialType.CUSTOM:
       return {
-        icon: "Settings",
-        subtitle: "Custom Format",
-        fields: ["Custom Value"],
+        icon: 'Settings',
+        subtitle: 'Custom Format',
+        fields: ['Custom Value'],
       };
 
     case CredentialType.TWO_FACTOR:
       return {
-        icon: "Shield",
+        icon: 'Shield',
         subtitle: `2FA (${credential.data.method.toUpperCase()})`,
-        fields: ["Method"],
+        fields: ['Method'],
       };
 
     default:
       return {
-        icon: "Settings",
-        subtitle: "Unknown Type",
+        icon: 'Settings',
+        subtitle: 'Unknown Type',
         fields: [],
       };
   }

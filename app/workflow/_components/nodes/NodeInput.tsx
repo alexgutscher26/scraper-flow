@@ -1,10 +1,10 @@
-import React from "react";
-import { cn } from "@/lib/utils";
-import { TaskParam } from "@/types/TaskType";
-import { Handle, Position, useEdges } from "@xyflow/react";
-import NodeParamField from "./NodeParamField";
-import { ColorForHandle } from "./common";
-import useFlowValidation from "@/components/hooks/useFlowValidation";
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { TaskParam } from '@/types/TaskType';
+import { Handle, Position, useEdges } from '@xyflow/react';
+import NodeParamField from './NodeParamField';
+import { ColorForHandle } from './common';
+import useFlowValidation from '@/components/hooks/useFlowValidation';
 
 interface Props {
   input: TaskParam;
@@ -25,8 +25,8 @@ function NodeInput(props: Props) {
   return (
     <div
       className={cn(
-        "flex justify-start relative p-3 bg-secondary w-full",
-        hasErrors && "bg-destructive/30"
+        'relative flex w-full justify-start bg-secondary p-3',
+        hasErrors && 'bg-destructive/30'
       )}
     >
       <NodeParamField param={input} nodeId={nodeId} disabled={isConnected} />
@@ -37,7 +37,7 @@ function NodeInput(props: Props) {
           type="target"
           position={Position.Left}
           className={cn(
-            "!bg-muted-foreground !border-2 !border-background !-left-2 !w-4 !h-4",
+            '!-left-2 !h-4 !w-4 !border-2 !border-background !bg-muted-foreground',
             ColorForHandle[input.type]
           )}
         />

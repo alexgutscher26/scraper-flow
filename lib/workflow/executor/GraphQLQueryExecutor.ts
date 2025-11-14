@@ -1,8 +1,8 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { GraphQLQueryTask } from "../task/GraphQLQuery";
-import { applyHeaders } from "@/lib/politeness/userAgent";
-import { http } from "@/lib/http";
-import { ProxyManager } from "@/lib/network/proxyManager";
+import { ExecutionEnvironment } from '@/types/executor';
+import { GraphQLQueryTask } from '../task/GraphQLQuery';
+import { applyHeaders } from '@/lib/politeness/userAgent';
+import { http } from '@/lib/http';
+import { ProxyManager } from '@/lib/network/proxyManager';
 
 /**
  * Executes a GraphQL query against a specified endpoint.
@@ -19,13 +19,13 @@ export async function GraphQLQueryExecutor(
 ): Promise<boolean> {
   try {
     const page = environment.getPage();
-    const endpoint = environment.getInput("Endpoint URL");
-    const query = environment.getInput("Query");
-    const varsRaw = environment.getInput("Variables JSON");
-    const useBrowser = environment.getInput("Use browser context") === "true";
+    const endpoint = environment.getInput('Endpoint URL');
+    const query = environment.getInput('Query');
+    const varsRaw = environment.getInput('Variables JSON');
+    const useBrowser = environment.getInput('Use browser context') === 'true';
 
     if (!endpoint || !query) {
-      environment.log.error("Endpoint URL and Query are required");
+      environment.log.error('Endpoint URL and Query are required');
       return false;
     }
 
@@ -34,7 +34,7 @@ export async function GraphQLQueryExecutor(
       try {
         variables = JSON.parse(varsRaw);
       } catch (e: any) {
-        environment.log.warning("Variables JSON is invalid; ignoring");
+        environment.log.warning('Variables JSON is invalid; ignoring');
       }
     }
 
@@ -43,24 +43,27 @@ export async function GraphQLQueryExecutor(
 
     if (useBrowser) {
       if (!page || !politenessConfig || !politenessState) {
-        environment.log.error("Browser context requires Web page and politeness config/state");
+        environment.log.error('Browser context requires Web page and politeness config/state');
         return false;
       }
       await applyHeaders(page as any, politenessConfig, politenessState, endpoint);
-      const data = await page.evaluate(async ({ endpoint, query, variables }) => {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ query, variables }),
-        });
-        const ct = res.headers.get("content-type") || "";
-        if (ct.includes("application/json")) return await res.json();
-        return await res.text();
-      }, { endpoint, query, variables });
-      environment.setOutput("Response JSON", JSON.stringify(data));
-      environment.setOutput("Web page", page);
+      const data = await page.evaluate(
+        async ({ endpoint, query, variables }) => {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ query, variables }),
+          });
+          const ct = res.headers.get('content-type') || '';
+          if (ct.includes('application/json')) return await res.json();
+          return await res.text();
+        },
+        { endpoint, query, variables }
+      );
+      environment.setOutput('Response JSON', JSON.stringify(data));
+      environment.setOutput('Web page', page);
       return true;
-  } else {
+    } else {
       const net = environment.getNetwork?.();
       const proxyMgr = net?.proxy as ProxyManager | undefined;
       const session = net?.session as any | undefined;
@@ -72,15 +75,15 @@ export async function GraphQLQueryExecutor(
       try {
         const dispatcher = proxyMgr ? proxyMgr.dispatcherFor(selection) : undefined;
         const data = await http.post(endpoint, {
-          headers: { "content-type": "application/json" },
+          headers: { 'content-type': 'application/json' },
           body: { query, variables },
           dispatcher: dispatcher as any,
           cookieJar: session,
           signal: controller.signal,
           timeoutMs: 30000,
         });
-        environment.setOutput("Response JSON", JSON.stringify(data));
-        if (page) environment.setOutput("Web page", page);
+        environment.setOutput('Response JSON', JSON.stringify(data));
+        if (page) environment.setOutput('Web page', page);
         proxyMgr?.recordSuccess(selection, (performance.now?.() ?? Date.now()) - start);
         return true;
       } catch (e: any) {
@@ -90,14 +93,14 @@ export async function GraphQLQueryExecutor(
             selection = await proxyMgr.select(endpoint);
             const dispatcher = proxyMgr.dispatcherFor(selection);
             const data = await http.post(endpoint, {
-              headers: { "content-type": "application/json" },
+              headers: { 'content-type': 'application/json' },
               body: { query, variables },
               dispatcher: dispatcher as any,
               cookieJar: session,
               timeoutMs: 30000,
             });
-            environment.setOutput("Response JSON", JSON.stringify(data));
-            if (page) environment.setOutput("Web page", page);
+            environment.setOutput('Response JSON', JSON.stringify(data));
+            if (page) environment.setOutput('Web page', page);
             proxyMgr.recordSuccess(selection, (performance.now?.() ?? Date.now()) - start);
             return true;
           } catch (err2: any) {

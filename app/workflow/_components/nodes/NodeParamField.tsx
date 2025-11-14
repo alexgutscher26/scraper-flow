@@ -1,16 +1,16 @@
-"use client";
-import { TaskParam, TaskParamType } from "@/types/TaskType";
-import React, { useCallback } from "react";
-import StringParam from "./param/StringParam";
-import { useReactFlow } from "@xyflow/react";
-import { AppNode } from "@/types/appNode";
-import BrowserInstanceParam from "./param/BrowserInstanceParam";
-import SelectParam from "./param/SelectParam";
-import CredentialsParam from "./param/CredentialsParam";
-import NumberParam from "./param/NumberParam";
-import BooleanParam from "./param/BooleanParam";
-import TextareaParam from "./param/TextareaParam";
-import JsonParam from "./param/JsonParam";
+'use client';
+import { TaskParam, TaskParamType } from '@/types/TaskType';
+import React, { useCallback } from 'react';
+import StringParam from './param/StringParam';
+import { useReactFlow } from '@xyflow/react';
+import { AppNode } from '@/types/appNode';
+import BrowserInstanceParam from './param/BrowserInstanceParam';
+import SelectParam from './param/SelectParam';
+import CredentialsParam from './param/CredentialsParam';
+import NumberParam from './param/NumberParam';
+import BooleanParam from './param/BooleanParam';
+import TextareaParam from './param/TextareaParam';
+import JsonParam from './param/JsonParam';
 
 interface Props {
   param: TaskParam;
@@ -48,7 +48,7 @@ function NodeParamField({ param, nodeId, disabled }: Props) {
       return (
         <BrowserInstanceParam
           param={param}
-          value={""}
+          value={''}
           updateNodeParamValue={updateNodeParamValue}
         />
       );

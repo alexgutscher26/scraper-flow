@@ -1,6 +1,6 @@
-import prisma from "@/lib/prisma";
-import { createLogger } from "@/lib/log";
-import { getEnv } from "@/lib/env";
+import prisma from '@/lib/prisma';
+import { createLogger } from '@/lib/log';
+import { getEnv } from '@/lib/env';
 
 export type RateLimitResult = {
   allowed: boolean;
@@ -9,7 +9,7 @@ export type RateLimitResult = {
   reset: number; // unix epoch seconds
 };
 
-type Scope = "cron" | "execute";
+type Scope = 'cron' | 'execute';
 
 function nowMs() {
   return Date.now();
@@ -26,7 +26,7 @@ export async function rateLimit(
   scope: Scope,
   userId?: string | null
 ): Promise<{ user: RateLimitResult; global: RateLimitResult }> {
-  const logger = createLogger("rate-limit");
+  const logger = createLogger('rate-limit');
   const env = getEnv();
   const windowSeconds = Number(env.RATE_LIMIT_WINDOW_SECONDS);
 
@@ -104,9 +104,7 @@ export async function rateLimit(
     );
   }
   if (!globalAllowed) {
-    logger.warning(
-      `Global rate limit exceeded: scope=${scope} count=${globalCount}/${gLimit}`
-    );
+    logger.warning(`Global rate limit exceeded: scope=${scope} count=${globalCount}/${gLimit}`);
   }
 
   return {
@@ -125,11 +123,8 @@ export async function rateLimit(
   };
 }
 
-export function applyRateLimitHeaders(
-  headers: Headers,
-  result: RateLimitResult
-) {
-  headers.set("X-RateLimit-Limit", String(result.limit));
-  headers.set("X-RateLimit-Remaining", String(result.remaining));
-  headers.set("X-RateLimit-Reset", String(result.reset));
+export function applyRateLimitHeaders(headers: Headers, result: RateLimitResult) {
+  headers.set('X-RateLimit-Limit', String(result.limit));
+  headers.set('X-RateLimit-Remaining', String(result.remaining));
+  headers.set('X-RateLimit-Reset', String(result.reset));
 }

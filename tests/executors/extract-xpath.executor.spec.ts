@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import puppeteer from "puppeteer";
-import { ExtractXPathFromPageExecutor } from "@/lib/workflow/executor/ExtractXPathFromPageExecutor";
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import puppeteer from 'puppeteer';
+import { ExtractXPathFromPageExecutor } from '@/lib/workflow/executor/ExtractXPathFromPageExecutor';
 
 function env(page: any, inputs: Record<string, any>) {
   const outputs: Record<string, any> = {};
@@ -24,7 +24,7 @@ function env(page: any, inputs: Record<string, any>) {
   } as any;
 }
 
-describe("ExtractXPathFromPageExecutor", () => {
+describe('ExtractXPathFromPageExecutor', () => {
   let browser: any;
   let page: any;
   beforeAll(async () => {
@@ -35,14 +35,13 @@ describe("ExtractXPathFromPageExecutor", () => {
     await browser.close();
   });
 
-  it("extracts innerText via XPath", async () => {
+  it('extracts innerText via XPath', async () => {
     await page.setContent(`<div><span id='x'>Hello</span></div>`);
-    const inputs = { "XPath": "//*[@id='x']", "Attribute": "innerText", "All elements": "false" };
+    const inputs = { XPath: "//*[@id='x']", Attribute: 'innerText', 'All elements': 'false' };
     const e = env(page, inputs);
     const ok = await ExtractXPathFromPageExecutor(e);
     expect(ok).toBe(true);
-    const data = JSON.parse(e.outputs["Extracted data"]);
-    expect(data).toBe("Hello");
+    const data = JSON.parse(e.outputs['Extracted data']);
+    expect(data).toBe('Hello');
   });
 });
-

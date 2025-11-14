@@ -1,15 +1,18 @@
 ## Overview
+
 - Implement infinite scrolling with loading UI, scroll restoration, and configurable thresholds.
 - Add a centralized fetch middleware for interception, TTL caching, retries, metrics, and debouncing.
 - Optimize performance with virtualization, lazy media loading, and minimized DOM reflows.
 - Use existing Next.js App Router, server actions, and `@tanstack/react-query`.
 
 ## Stack Alignment
+
 - Frontend: Next.js App Router with React.
 - Data: Server actions + `@tanstack/react-query` via `components/providers/AppProviders.tsx:12`.
 - Current fetch usage: Direct `fetch` calls across client/server and executors.
 
 ## New Modules
+
 - `lib/http.ts`: `httpFetch` wrapper providing:
   - Response interception (normalize errors, collect metrics, attach auth headers when applicable).
   - TTL cache (in-memory Map with `ttl`, `maxSize`, `sweepInterval`, cache key = URL + method + body + headers hash; cache JSON bodies not raw `Response`).
@@ -22,6 +25,7 @@
 - `lib/ui/hooks/useScrollRestoration.ts`: Store/restore per-route scroll via `sessionStorage`, use `history.scrollRestoration = 'manual'`.
 
 ## Infinite Scroll
+
 - Target view: executions table `app/workflow/runs/[workflowId]/_components/ExecutionasTable.tsx:23–118`.
 - Replace `useQuery` with `useInfiniteQuery`:
   - `queryKey`: `["executions", workflowId]`.
@@ -43,6 +47,7 @@
   - Apply `useScrollRestoration` keyed by `usePathname()`; restore on mount, save on unmount or visibility change.
 
 ## Network Interception
+
 - Centralize all first-party `fetch` calls via `lib/http.ts` to reach near-100% coverage:
   - `components/LocalCronRunner.tsx:35` → `http.get('/api/workflows/cron', { cache: 'no-store' })`.
   - `lib/workflow/executor/GraphQLQueryExecutor.ts:52–59` → `http.post(endpoint, { body: { query, variables } })`.
@@ -55,6 +60,7 @@
   - Configure `QueryClient` defaults in `components/providers/AppProviders.tsx:10–19` (`retry`, `staleTime`, `cacheTime`, `refetchOnWindowFocus=false`).
 
 ## Performance
+
 - Debounce network triggers:
   - Inside `useInfiniteScroll`, coalesce triggers to a single call per `N` ms (e.g., 250ms).
   - In `httpFetch`, dedupe identical inflight requests.
@@ -67,15 +73,18 @@
   - Batch new page appends with `startTransition` to keep UI responsive.
 
 ## Error Handling & Retries
+
 - Standardize error objects (`{ message, status, code }`).
 - Automatic retries for transient errors (429/502/503/504) with exponential backoff and max cap.
 - Surface human-readable messages and toasts where appropriate.
 
 ## Mobile & Touch Support
+
 - Use passive scroll listeners (`{ passive: true }`) and IntersectionObserver for touch-friendly behavior.
 - Ensure hit targets and loading indicators are accessible and responsive.
 
 ## Unit Tests (Vitest)
+
 - `lib/ui/hooks/useInfiniteScroll.test.ts`:
   - Threshold crossing at 80% invokes callback once; debouncing verified.
   - Loading flags and disable behavior when `hasNextPage=false`.
@@ -92,6 +101,7 @@
   - Virtualization renders only visible subset; scroll causes rendering changes.
 
 ## Rollout & Migration
+
 - Phase 1: Introduce `lib/http.ts` and integrate in `LocalCronRunner.tsx:35`, `robots.ts:3–7`.
 - Phase 2: Update executors (`GraphQLQueryExecutor.ts:52–59`, `DownloadFileExecutor.ts:166–177`, `DeliverViaWebhookExecutor.ts:16–22`).
 - Phase 3: Add `useInfiniteScroll` and refactor `ExecutionasTable.tsx` to `useInfiniteQuery` with paginated server action.
@@ -99,16 +109,19 @@
 - Phase 5: Add tests; tune `QueryClient` defaults.
 
 ## Success Verification
+
 - Infinite scroll feels seamless with spinners and no jank; virtualization ensures smoothness.
 - Interception coverage: All first-party fetches route through `lib/http.ts` (list above).
 - Metrics show sub-100ms median time-to-fetch-start for scroll-triggered loads; when cached, sub-100ms end-to-end.
 - No memory leaks: No accumulating listeners; aborted in-flight on unmount; LRU+TTL sweeps.
 
 ## Notes on API Compatibility
+
 - `GetWorkflowExecutions` extension is backward-compatible (optional params). Existing calls remain functional.
 - No changes to public API routes required; all client logic remains within app components/hooks.
 
 ## File References (entry points)
+
 - `app/workflow/runs/[workflowId]/_components/ExecutionasTable.tsx:31–36` — current polling-based query.
 - `components/providers/AppProviders.tsx:10–19` — `QueryClientProvider` setup.
 - `components/LocalCronRunner.tsx:35–43` — direct `fetch` polling.
@@ -118,5 +131,6 @@
 - `lib/politeness/robots.ts:3–7` — robots fetch.
 
 ## Dependencies
+
 - Add `@tanstack/react-virtual` for virtualization.
 - Keep existing `@tanstack/react-query`; no axios introduced.

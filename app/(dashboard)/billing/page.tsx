@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense } from 'react';
 import {
   Card,
   CardContent,
@@ -6,41 +6,41 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { GetAvailableCredits } from "@/actions/billing/getAvailableCredits";
-import ReactCountUpWrapper from "@/components/ReactCountUpWrapper";
-import { 
-  ArrowLeftRight, 
-  Coins, 
-  CreditCard, 
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { GetAvailableCredits } from '@/actions/billing/getAvailableCredits';
+import ReactCountUpWrapper from '@/components/ReactCountUpWrapper';
+import {
+  ArrowLeftRight,
+  Coins,
+  CreditCard,
   AlertTriangle,
   TrendingUp,
   Receipt,
-  Sparkles
-} from "lucide-react";
-import CreditsPurchase from "./_components/CreditsPurchase";
-import { Period } from "@/types/analytics";
-import { GetCreditUsageInPeriod } from "@/actions/analytics/getCreditUsageInPeriod";
-import CreditUsageChat from "./_components/CreditUsageChat";
-import { GetUserPurchaseHistory } from "@/actions/billing/getUserPurchaseHistory";
-import InvoiceBtn from "./_components/InvoiceBtn";
-import { formatDate, formatAmount } from "@/lib/format";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+  Sparkles,
+} from 'lucide-react';
+import CreditsPurchase from './_components/CreditsPurchase';
+import { Period } from '@/types/analytics';
+import { GetCreditUsageInPeriod } from '@/actions/analytics/getCreditUsageInPeriod';
+import CreditUsageChat from './_components/CreditUsageChat';
+import { GetUserPurchaseHistory } from '@/actions/billing/getUserPurchaseHistory';
+import InvoiceBtn from './_components/InvoiceBtn';
+import { formatDate, formatAmount } from '@/lib/format';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 function BillingPage() {
   return (
-    <div className="flex flex-1 flex-col h-full">
+    <div className="flex h-full flex-1 flex-col">
       {/* Enhanced Header */}
-      <div className="flex flex-col gap-2 pb-6 border-b">
+      <div className="flex flex-col gap-2 border-b pb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <CreditCard className="w-6 h-6 text-primary" />
+          <div className="rounded-lg bg-primary/10 p-2">
+            <CreditCard className="h-6 w-6 text-primary" />
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Billing & Credits</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="mt-1 text-sm text-muted-foreground">
               Manage your credits, view usage, and purchase history
             </p>
           </div>
@@ -48,7 +48,7 @@ function BillingPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 py-6 space-y-6">
+      <div className="flex-1 space-y-6 py-6">
         {/* Balance Card */}
         <Suspense fallback={<BalanceCardSkeleton />}>
           <BalanceCard />
@@ -57,7 +57,7 @@ function BillingPage() {
         {/* Two Column Layout for Purchase and Usage */}
         <div className="grid gap-6 lg:grid-cols-2">
           <CreditsPurchase />
-          
+
           <Suspense fallback={<ChartSkeleton />}>
             <CreditUsageCard />
           </Suspense>
@@ -83,7 +83,7 @@ async function BalanceCard() {
     <Card className="relative overflow-hidden border-2 transition-all hover:shadow-lg">
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-background" />
-      
+
       {/* Decorative background icon */}
       <Coins
         size={200}
@@ -95,34 +95,36 @@ async function BalanceCard() {
         <div className="flex items-start justify-between">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+              <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
                 Available Credits
               </h3>
               {isLowBalance && (
-                <Badge 
-                  variant={isCritical ? "destructive" : "secondary"}
-                  className="text-xs"
-                >
-                  {isCritical ? "Critical" : "Low"}
+                <Badge variant={isCritical ? 'destructive' : 'secondary'} className="text-xs">
+                  {isCritical ? 'Critical' : 'Low'}
                 </Badge>
               )}
             </div>
-            
+
             <div className="flex items-baseline gap-2">
               <p className="text-5xl font-bold text-primary">
                 <ReactCountUpWrapper value={Math.max(0, userBalance)} />
               </p>
-              <Sparkles className="w-6 h-6 text-primary/60" />
+              <Sparkles className="h-6 w-6 text-primary/60" />
             </div>
 
             {isLowBalance && (
-              <Alert className={`mt-4 ${isCritical ? 'border-destructive bg-destructive/10' : 'border-amber-500 bg-amber-500/10'}`}>
-                <AlertTriangle className={`h-4 w-4 ${isCritical ? 'text-destructive' : 'text-amber-600'}`} />
-                <AlertDescription className={isCritical ? 'text-destructive' : 'text-amber-900 dark:text-amber-100'}>
-                  {isCritical 
+              <Alert
+                className={`mt-4 ${isCritical ? 'border-destructive bg-destructive/10' : 'border-amber-500 bg-amber-500/10'}`}
+              >
+                <AlertTriangle
+                  className={`h-4 w-4 ${isCritical ? 'text-destructive' : 'text-amber-600'}`}
+                />
+                <AlertDescription
+                  className={isCritical ? 'text-destructive' : 'text-amber-900 dark:text-amber-100'}
+                >
+                  {isCritical
                     ? 'Your credit balance is critically low. Workflows will stop working when credits reach zero.'
-                    : 'Your credit balance is running low. Consider purchasing more credits to avoid interruptions.'
-                  }
+                    : 'Your credit balance is running low. Consider purchasing more credits to avoid interruptions.'}
                 </AlertDescription>
               </Alert>
             )}
@@ -130,16 +132,24 @@ async function BalanceCard() {
 
           {/* Status indicator */}
           <div className="flex flex-col items-end gap-2">
-            <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${
-              isCritical 
-                ? 'bg-red-500/10 text-red-700 dark:text-red-400 border border-red-500/20' 
-                : isLowBalance 
-                ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20'
-                : 'bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${
-                isCritical ? 'bg-red-500 animate-pulse' : isLowBalance ? 'bg-amber-500' : 'bg-green-500'
-              }`} />
+            <div
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ${
+                isCritical
+                  ? 'border border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-400'
+                  : isLowBalance
+                    ? 'border border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                    : 'border border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-400'
+              }`}
+            >
+              <div
+                className={`h-2 w-2 rounded-full ${
+                  isCritical
+                    ? 'animate-pulse bg-red-500'
+                    : isLowBalance
+                      ? 'bg-amber-500'
+                      : 'bg-green-500'
+                }`}
+              />
               {isCritical ? 'Critical' : isLowBalance ? 'Low Balance' : 'Healthy'}
             </div>
           </div>
@@ -147,9 +157,9 @@ async function BalanceCard() {
       </CardContent>
 
       {!isLowBalance && (
-        <CardFooter className="relative border-t bg-muted/20 text-muted-foreground text-sm py-3">
+        <CardFooter className="relative border-t bg-muted/20 py-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
+            <TrendingUp className="h-4 w-4" />
             <span>Your workflows are running smoothly with sufficient credits</span>
           </div>
         </CardFooter>
@@ -175,12 +185,12 @@ async function CreditUsageCard() {
 
 async function TransactionHistoryCard() {
   const purchases = await GetUserPurchaseHistory();
-  
+
   return (
     <Card>
       <CardHeader className="bg-gradient-to-br from-background to-muted/20">
-        <CardTitle className="text-2xl font-bold flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-primary/10">
+        <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+          <div className="rounded-lg bg-primary/10 p-2">
             <ArrowLeftRight className="h-5 w-5 text-primary" />
           </div>
           Transaction History
@@ -189,16 +199,14 @@ async function TransactionHistoryCard() {
           View your transaction history and download invoices for your records
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="pt-6">
         {purchases.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="p-4 rounded-full bg-muted/50 mb-4">
-              <Receipt className="w-8 h-8 text-muted-foreground" />
+            <div className="mb-4 rounded-full bg-muted/50 p-4">
+              <Receipt className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-base font-medium text-muted-foreground mb-1">
-              No transactions yet
-            </p>
+            <p className="mb-1 text-base font-medium text-muted-foreground">No transactions yet</p>
             <p className="text-sm text-muted-foreground/70">
               Your purchase history will appear here once you buy credits
             </p>
@@ -208,25 +216,21 @@ async function TransactionHistoryCard() {
             {purchases.map((purchase, index) => (
               <div
                 key={purchase.id}
-                className="flex items-center justify-between py-4 px-4 rounded-lg transition-colors hover:bg-muted/50 border border-transparent hover:border-border"
+                className="flex items-center justify-between rounded-lg border border-transparent px-4 py-4 transition-colors hover:border-border hover:bg-muted/50"
               >
                 <div className="flex items-center gap-4">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Receipt className="w-4 h-4 text-primary" />
+                  <div className="rounded-lg bg-primary/10 p-2">
+                    <Receipt className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">
-                      {formatDate(purchase.date)}
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-0.5">
-                      {purchase.description}
-                    </p>
+                    <p className="text-sm font-semibold">{formatDate(purchase.date)}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{purchase.description}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="font-bold text-lg">
+                    <p className="text-lg font-bold">
                       {formatAmount(purchase.amount, purchase.currency)}
                     </p>
                     <InvoiceBtn id={purchase.id} />
@@ -239,7 +243,7 @@ async function TransactionHistoryCard() {
       </CardContent>
 
       {purchases.length > 0 && (
-        <CardFooter className="border-t bg-muted/20 text-xs text-muted-foreground justify-center py-3">
+        <CardFooter className="justify-center border-t bg-muted/20 py-3 text-xs text-muted-foreground">
           <span>All transactions are securely processed through Stripe</span>
         </CardFooter>
       )}
@@ -251,7 +255,7 @@ async function TransactionHistoryCard() {
 function BalanceCardSkeleton() {
   return (
     <Card className="h-[180px]">
-      <CardContent className="p-6 space-y-4">
+      <CardContent className="space-y-4 p-6">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-12 w-40" />
         <Skeleton className="h-16 w-full" />
@@ -263,7 +267,7 @@ function BalanceCardSkeleton() {
 function ChartSkeleton() {
   return (
     <Card className="h-[500px]">
-      <div className="p-6 space-y-4">
+      <div className="space-y-4 p-6">
         <Skeleton className="h-6 w-48" />
         <Skeleton className="h-4 w-64" />
         <Skeleton className="h-[380px] w-full" />
@@ -277,7 +281,7 @@ function TransactionHistorySkeleton() {
     <Card>
       <CardHeader>
         <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-4 w-96 mt-2" />
+        <Skeleton className="mt-2 h-4 w-96" />
       </CardHeader>
       <CardContent className="space-y-4">
         {[1, 2, 3].map((i) => (

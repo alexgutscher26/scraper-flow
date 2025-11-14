@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import puppeteer from "puppeteer";
-import { TypeInputTask } from "@/lib/workflow/task/TypeInput";
-import { TypeInputExecutor } from "@/lib/workflow/executor/TypeInputExecutor";
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import puppeteer from 'puppeteer';
+import { TypeInputTask } from '@/lib/workflow/task/TypeInput';
+import { TypeInputExecutor } from '@/lib/workflow/executor/TypeInputExecutor';
 
 function env(page: any, inputs: Record<string, any>) {
   const outputs: Record<string, any> = {};
@@ -25,7 +25,7 @@ function env(page: any, inputs: Record<string, any>) {
   } as any;
 }
 
-describe("TypeInputExecutor", () => {
+describe('TypeInputExecutor', () => {
   let browser: any;
   let page: any;
   beforeAll(async () => {
@@ -36,20 +36,19 @@ describe("TypeInputExecutor", () => {
     await browser.close();
   });
 
-  it("types value with debounce and validation", async () => {
+  it('types value with debounce and validation', async () => {
     await page.setContent(`<input id='x' type='text' maxlength='100'>`);
     const inputs = {
-      "Selector": "#x",
-      "Value": "hello world",
-      "Type": "text",
-      "DebounceMs": 30,
-      "ClearBeforeType": true,
+      Selector: '#x',
+      Value: 'hello world',
+      Type: 'text',
+      DebounceMs: 30,
+      ClearBeforeType: true,
     };
     const e = env(page, inputs);
     const ok = await TypeInputExecutor(e);
     expect(ok).toBe(true);
-    const v = await page.$eval("#x", (el: any) => el.value);
-    expect(v).toBe("hello world");
+    const v = await page.$eval('#x', (el: any) => el.value);
+    expect(v).toBe('hello world');
   });
 });
-

@@ -1,43 +1,35 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogTrigger,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import {
-  CalendarIcon,
-  ClockIcon,
-  TriangleAlertIcon,
-  TimerIcon,
-} from "lucide-react";
-import CustomDialogHeader from "@/components/CustomDialogHeader";
-import { Input } from "@/components/ui/input";
-import { DialogClose } from "@radix-ui/react-dialog";
-import { useMutation } from "@tanstack/react-query";
-import { UpdateWorkflowCron } from "@/actions/workflows/updateWorkflowCron";
-import { toast } from "sonner";
-import cronstrue from "cronstrue";
-import { RemoveWorkflowSchedule } from "@/actions/workflows/removeWorkflowSchedule";
-import { Separator } from "@radix-ui/react-separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { parseWorkflowSchedule } from "@/lib/cron/scheduleParser";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { CalendarIcon, ClockIcon, TriangleAlertIcon, TimerIcon } from 'lucide-react';
+import CustomDialogHeader from '@/components/CustomDialogHeader';
+import { Input } from '@/components/ui/input';
+import { DialogClose } from '@radix-ui/react-dialog';
+import { useMutation } from '@tanstack/react-query';
+import { UpdateWorkflowCron } from '@/actions/workflows/updateWorkflowCron';
+import { toast } from 'sonner';
+import cronstrue from 'cronstrue';
+import { RemoveWorkflowSchedule } from '@/actions/workflows/removeWorkflowSchedule';
+import { Separator } from '@radix-ui/react-separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { parseWorkflowSchedule } from '@/lib/cron/scheduleParser';
 
-export default function SchedulerDialog(props: {
-  cron: string | null;
-  workflowId: string;
-}) {
-  const [schedule, setSchedule] = useState(props.cron || "");
-  const [scheduleType, setScheduleType] = useState<"cron" | "interval">("cron");
+export default function SchedulerDialog(props: { cron: string | null; workflowId: string }) {
+  const [schedule, setSchedule] = useState(props.cron || '');
+  const [scheduleType, setScheduleType] = useState<'cron' | 'interval'>('cron');
   const [validSchedule, setValidSchedule] = useState(false);
-  const [readableSchedule, setReadableSchedule] = useState("");
-  const [intervalValue, setIntervalValue] = useState("");
-  const [intervalUnit, setIntervalUnit] = useState("m");
+  const [readableSchedule, setReadableSchedule] = useState('');
+  const [intervalValue, setIntervalValue] = useState('');
+  const [intervalUnit, setIntervalUnit] = useState('m');
 
   useEffect(() => {
     if (!schedule) {
@@ -54,7 +46,7 @@ export default function SchedulerDialog(props: {
         if (parsedSchedule.isValid) {
           setValidSchedule(true);
           setReadableSchedule(parsedSchedule.readableDescription);
-          setScheduleType("interval");
+          setScheduleType('interval');
           setIntervalValue(value);
           setIntervalUnit(unit);
         } else {
@@ -68,10 +60,10 @@ export default function SchedulerDialog(props: {
     try {
       // Use the common parseWorkflowSchedule function for cron expressions too
       const parsedCronSchedule = parseWorkflowSchedule(schedule);
-      if (parsedCronSchedule.isValid && parsedCronSchedule.type === "cron") {
+      if (parsedCronSchedule.isValid && parsedCronSchedule.type === 'cron') {
         setValidSchedule(true);
         setReadableSchedule(parsedCronSchedule.readableDescription);
-        setScheduleType("cron");
+        setScheduleType('cron');
       } else {
         setValidSchedule(false);
       }
@@ -83,25 +75,25 @@ export default function SchedulerDialog(props: {
   const mutation = useMutation({
     mutationFn: UpdateWorkflowCron,
     onSuccess: () => {
-      toast.success("Workflow scheduled successfully", { id: "cron" });
+      toast.success('Workflow scheduled successfully', { id: 'cron' });
     },
     onError: (error) => {
-      toast.error(error.message, { id: "cron" });
+      toast.error(error.message, { id: 'cron' });
     },
   });
 
   const removeScheduleMutation = useMutation({
     mutationFn: RemoveWorkflowSchedule,
     onSuccess: () => {
-      toast.success("Workflow updated successfully", { id: "cron" });
+      toast.success('Workflow updated successfully', { id: 'cron' });
     },
     onError: (error) => {
-      toast.error(error.message, { id: "cron" });
+      toast.error(error.message, { id: 'cron' });
     },
   });
   const workflowHasSchedule = props.cron && props.cron.length > 0;
 
-  let savedScheduleDescription = "";
+  let savedScheduleDescription = '';
   if (workflowHasSchedule) {
     try {
       // Check if it's an interval expression (e.g., "2m", "1h", "30s")
@@ -133,7 +125,7 @@ export default function SchedulerDialog(props: {
   }, [intervalValue, intervalUnit, setSchedule]);
 
   useEffect(() => {
-    if (scheduleType === "interval") {
+    if (scheduleType === 'interval') {
       updateIntervalSchedule();
     }
   }, [scheduleType, updateIntervalSchedule]);
@@ -145,8 +137,8 @@ export default function SchedulerDialog(props: {
           variant="link"
           size="sm"
           className={cn(
-            "text-sm p-0 h-auto text-orange-500",
-            workflowHasSchedule && "text-primary"
+            'h-auto p-0 text-sm text-orange-500',
+            workflowHasSchedule && 'text-primary'
           )}
         >
           {workflowHasSchedule && (
@@ -164,19 +156,16 @@ export default function SchedulerDialog(props: {
         </Button>
       </DialogTrigger>
       <DialogContent className="px-0">
-        <CustomDialogHeader
-          title="Schedule workflow execution"
-          icon={CalendarIcon}
-        />
-        <div className="p-6 space-y-4">
-          <DialogDescription className="text-muted-foreground text-sm">
-            Set up automatic execution of your workflow using a simple interval
-            or cron expression. All times are in UTC.
+        <CustomDialogHeader title="Schedule workflow execution" icon={CalendarIcon} />
+        <div className="space-y-4 p-6">
+          <DialogDescription className="text-sm text-muted-foreground">
+            Set up automatic execution of your workflow using a simple interval or cron expression.
+            All times are in UTC.
           </DialogDescription>
 
           <Tabs
             defaultValue={scheduleType}
-            onValueChange={(v) => setScheduleType(v as "cron" | "interval")}
+            onValueChange={(v) => setScheduleType(v as 'cron' | 'interval')}
           >
             <TabsList className="w-full">
               <TabsTrigger value="interval" className="flex-1">
@@ -193,7 +182,7 @@ export default function SchedulerDialog(props: {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="interval" className="pt-4 space-y-4">
+            <TabsContent value="interval" className="space-y-4 pt-4">
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
@@ -225,10 +214,10 @@ export default function SchedulerDialog(props: {
               </p>
             </TabsContent>
 
-            <TabsContent value="cron" className="pt-4 space-y-4">
+            <TabsContent value="cron" className="space-y-4 pt-4">
               <Input
                 placeholder="Cron expression (e.g. */5 * * * *)"
-                value={scheduleType === "cron" ? schedule : ""}
+                value={scheduleType === 'cron' ? schedule : ''}
                 onChange={(e) => setSchedule(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
@@ -242,23 +231,21 @@ export default function SchedulerDialog(props: {
 
           <div
             className={cn(
-              "bg-accent rounded-md p-4 border text-sm border-destructive",
-              validSchedule && "border-primary text-primary"
+              'rounded-md border border-destructive bg-accent p-4 text-sm',
+              validSchedule && 'border-primary text-primary'
             )}
           >
-            {validSchedule ? readableSchedule : "Invalid schedule format"}
+            {validSchedule ? readableSchedule : 'Invalid schedule format'}
           </div>
           {workflowHasSchedule && (
             <DialogClose asChild>
               <div className="px-0">
                 <Button
-                  className="w-full text-destructive border-destructive hover:text-destructive"
-                  variant={"outline"}
-                  disabled={
-                    mutation.isPending || removeScheduleMutation.isPending
-                  }
+                  className="w-full border-destructive text-destructive hover:text-destructive"
+                  variant={'outline'}
+                  disabled={mutation.isPending || removeScheduleMutation.isPending}
                   onClick={() => {
-                    toast.loading("Removing schedule...", { id: "cron" });
+                    toast.loading('Removing schedule...', { id: 'cron' });
                     removeScheduleMutation.mutate(props.workflowId);
                   }}
                 >
@@ -269,9 +256,9 @@ export default function SchedulerDialog(props: {
             </DialogClose>
           )}
         </div>
-        <DialogFooter className="px-6 gap-2">
+        <DialogFooter className="gap-2 px-6">
           <DialogClose asChild>
-            <Button className="w-full" variant={"secondary"}>
+            <Button className="w-full" variant={'secondary'}>
               Cancel
             </Button>
           </DialogClose>
@@ -280,7 +267,7 @@ export default function SchedulerDialog(props: {
               className="w-full"
               disabled={mutation.isPending || !validSchedule}
               onClick={() => {
-                toast.loading("Saving schedule...", { id: "cron" });
+                toast.loading('Saving schedule...', { id: 'cron' });
                 mutation.mutate({ id: props.workflowId, cron: schedule });
               }}
             >

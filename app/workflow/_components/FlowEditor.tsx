@@ -1,5 +1,5 @@
-"use client";
-import { Workflow } from "@prisma/client";
+'use client';
+import { Workflow } from '@prisma/client';
 import {
   addEdge,
   Background,
@@ -12,15 +12,15 @@ import {
   useEdgesState,
   useNodesState,
   useReactFlow,
-} from "@xyflow/react";
-import React, { useCallback, useEffect } from "react";
-import "@xyflow/react/dist/style.css";
-import { CreateFlowNode } from "@/lib/workflow/createFlowNode";
-import { TaskType } from "@/types/TaskType";
-import NodeComponent from "./nodes/NodeComponent";
-import { AppNode } from "@/types/appNode";
-import DeletableEdge from "./edges/DeletableEdge";
-import { TaskRegistry } from "@/lib/workflow/task/registry";
+} from '@xyflow/react';
+import React, { useCallback, useEffect } from 'react';
+import '@xyflow/react/dist/style.css';
+import { CreateFlowNode } from '@/lib/workflow/createFlowNode';
+import { TaskType } from '@/types/TaskType';
+import NodeComponent from './nodes/NodeComponent';
+import { AppNode } from '@/types/appNode';
+import DeletableEdge from './edges/DeletableEdge';
+import { TaskRegistry } from '@/lib/workflow/task/registry';
 
 interface Props {
   workflow: Workflow;
@@ -55,12 +55,12 @@ function FlowEditor(props: Props) {
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
+    event.dataTransfer.dropEffect = 'move';
   }, []);
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
-      const taskType = event.dataTransfer.getData("application/reactflow");
+      const taskType = event.dataTransfer.getData('application/reactflow');
       if (!taskType) return;
       const position = screenToFlowPosition({
         x: event.clientX,
@@ -89,7 +89,7 @@ function FlowEditor(props: Props) {
       updateNodeData(node.id, {
         inputs: {
           ...nodeInputs,
-          [connection.targetHandle]: "",
+          [connection.targetHandle]: '',
         },
       });
     },
@@ -105,22 +105,18 @@ function FlowEditor(props: Props) {
       const source = nodes.find((node) => node.id === connection.source);
       const target = nodes.find((node) => node.id === connection.target);
       if (!source || !target) {
-        console.error("invalid connection:some source or target not found");
+        console.error('invalid connection:some source or target not found');
         return false;
       }
 
       const sourceTask = TaskRegistry[source.data.type];
       const targetTask = TaskRegistry[target.data.type];
 
-      const output = sourceTask.outputs.find(
-        (output) => output.name === connection.sourceHandle
-      );
-      const input = targetTask.inputs.find(
-        (input) => input.name === connection.targetHandle
-      );
+      const output = sourceTask.outputs.find((output) => output.name === connection.sourceHandle);
+      const input = targetTask.inputs.find((input) => input.name === connection.targetHandle);
 
       if (input?.type !== output?.type) {
-        console.error("invalid connection:input and output types do not match");
+        console.error('invalid connection:input and output types do not match');
         return false;
       }
 

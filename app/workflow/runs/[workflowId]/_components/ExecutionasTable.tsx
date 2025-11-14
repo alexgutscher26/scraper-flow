@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { GetWorkflowExecutions } from "@/actions/workflows/getWorkflowExecutions";
-import { GetWorkflowExecutionsPaginated } from "@/actions/workflows/getWorkflowExecutionsPaginated";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import React from 'react';
+import { GetWorkflowExecutions } from '@/actions/workflows/getWorkflowExecutions';
+import { GetWorkflowExecutionsPaginated } from '@/actions/workflows/getWorkflowExecutionsPaginated';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import {
   Table,
   TableBody,
@@ -11,18 +11,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { DatesToDurationString } from "@/lib/helper/dates";
-import { Badge } from "@/components/ui/badge";
-import ExecutionStatusIndicator from "./ExecutionStatusIndicator";
-import { WorkflowExecutionStatus } from "@/types/workflow";
-import { CoinsIcon } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { useRouter } from "next/navigation";
-import { useRef, useMemo } from "react";
-import { useInfiniteScroll } from "@/lib/ui/hooks/useInfiniteScroll";
-import { useScrollRestoration } from "@/lib/ui/hooks/useScrollRestoration";
-import { useVirtualizer } from "@tanstack/react-virtual";
+} from '@/components/ui/table';
+import { DatesToDurationString } from '@/lib/helper/dates';
+import { Badge } from '@/components/ui/badge';
+import ExecutionStatusIndicator from './ExecutionStatusIndicator';
+import { WorkflowExecutionStatus } from '@/types/workflow';
+import { CoinsIcon } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import { useRef, useMemo } from 'react';
+import { useInfiniteScroll } from '@/lib/ui/hooks/useInfiniteScroll';
+import { useScrollRestoration } from '@/lib/ui/hooks/useScrollRestoration';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 type InitialDataType = Awaited<ReturnType<typeof GetWorkflowExecutions>>;
 /**
@@ -42,16 +42,20 @@ export default function ExecutionasTable({
   initialData: InitialDataType;
 }) {
   const router = useRouter();
-  const containerRef = useRef<HTMLDivElement | null>(null)
-  useScrollRestoration(containerRef.current || undefined)
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useScrollRestoration(containerRef.current || undefined);
 
-  const PAGE_SIZE = 50
-  const initialCursor = initialData.length === PAGE_SIZE ? initialData[initialData.length - 1]?.id : undefined
+  const PAGE_SIZE = 50;
+  const initialCursor =
+    initialData.length === PAGE_SIZE ? initialData[initialData.length - 1]?.id : undefined;
   const inf = useInfiniteQuery({
-    queryKey: ["executions", workflowId],
+    queryKey: ['executions', workflowId],
     queryFn: async ({ pageParam }: { pageParam?: string }) => {
-      const { items, nextCursorId } = await GetWorkflowExecutionsPaginated(workflowId, { cursorId: pageParam, take: PAGE_SIZE })
-      return { items, nextCursorId }
+      const { items, nextCursorId } = await GetWorkflowExecutionsPaginated(workflowId, {
+        cursorId: pageParam,
+        take: PAGE_SIZE,
+      });
+      return { items, nextCursorId };
     },
     initialPageParam: undefined,
     getNextPageParam: (last) => last.nextCursorId,
@@ -59,23 +63,26 @@ export default function ExecutionasTable({
       pages: [{ items: initialData, nextCursorId: initialCursor }],
       pageParams: [undefined],
     }),
-  })
+  });
 
-  const flatItems = useMemo(() => inf.data?.pages.flatMap(p => p.items) ?? [], [inf.data])
-  const { loading } = useInfiniteScroll(() => {
-    if (inf.isFetchingNextPage || !inf.hasNextPage) return
-    return inf.fetchNextPage()
-  }, { threshold: 0.8, root: containerRef.current, debounceMs: 250, disabled: inf.isFetching })
+  const flatItems = useMemo(() => inf.data?.pages.flatMap((p) => p.items) ?? [], [inf.data]);
+  const { loading } = useInfiniteScroll(
+    () => {
+      if (inf.isFetchingNextPage || !inf.hasNextPage) return;
+      return inf.fetchNextPage();
+    },
+    { threshold: 0.8, root: containerRef.current, debounceMs: 250, disabled: inf.isFetching }
+  );
 
   const rowVirtualizer = useVirtualizer({
     count: flatItems.length,
     getScrollElement: () => containerRef.current,
     estimateSize: () => 72,
     overscan: 10,
-  })
+  });
 
   return (
-    <div ref={containerRef} className="border rounded-lg shadow-md overflow-auto">
+    <div ref={containerRef} className="overflow-auto rounded-lg border shadow-md">
       <Table className="h-full">
         <TableHeader className="bg-muted">
           <TableRow>
@@ -87,13 +94,13 @@ export default function ExecutionasTable({
             </TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody className="gap-2 h-full overflow-auto" style={{ position: 'relative', height: rowVirtualizer.getTotalSize() }}>
+        <TableBody
+          className="h-full gap-2 overflow-auto"
+          style={{ position: 'relative', height: rowVirtualizer.getTotalSize() }}
+        >
           {rowVirtualizer.getVirtualItems().map((vi) => {
-            const execution = flatItems[vi.index]
-            const duration = DatesToDurationString(
-              execution.completedAt,
-              execution.startedAt
-            );
+            const execution = flatItems[vi.index];
+            const duration = DatesToDurationString(execution.completedAt, execution.startedAt);
             const formattedStartedAt =
               execution.startedAt &&
               formatDistanceToNow(execution.startedAt, {
@@ -112,38 +119,30 @@ export default function ExecutionasTable({
                 <TableCell>
                   <div className="flex flex-col">
                     <span className="font-semibold">{execution.id}</span>
-                    <div className="text-muted-foreground text-xs">
+                    <div className="text-xs text-muted-foreground">
                       <span>Triggered via</span>
-                      <Badge variant={"outline"}>{execution.trigger}</Badge>
+                      <Badge variant={'outline'}>{execution.trigger}</Badge>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <div className="flex gap-2 items-center">
+                    <div className="flex items-center gap-2">
                       <ExecutionStatusIndicator
                         status={execution.status as WorkflowExecutionStatus}
                       />
-                      <span className="font-semibold capitalize">
-                        {execution.status}
-                      </span>
+                      <span className="font-semibold capitalize">{execution.status}</span>
                     </div>
-                    <div className="text-muted-foreground text-xs mx-5">
-                      {duration}
-                    </div>
+                    <div className="mx-5 text-xs text-muted-foreground">{duration}</div>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col">
-                    <div className="flex gap-2 items-center">
+                    <div className="flex items-center gap-2">
                       <CoinsIcon size={16} className="text-primary" />
-                      <span className="font-semibold capitalize">
-                        {execution.creditsConsumed}
-                      </span>
+                      <span className="font-semibold capitalize">{execution.creditsConsumed}</span>
                     </div>
-                    <div className="text-muted-foreground text-xs mx-5">
-                      Credits
-                    </div>
+                    <div className="mx-5 text-xs text-muted-foreground">Credits</div>
                   </div>
                 </TableCell>
                 <TableCell className="text-right text-muted-foreground">
@@ -154,7 +153,7 @@ export default function ExecutionasTable({
           })}
           {inf.isFetchingNextPage && (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-2 text-muted-foreground">
+              <TableCell colSpan={4} className="py-2 text-center text-muted-foreground">
                 Loading more...
               </TableCell>
             </TableRow>

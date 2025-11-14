@@ -1,8 +1,8 @@
-import { Browser, Page } from "puppeteer";
-import { Browser as BrowserCore, Page as PageCore } from "puppeteer-core";
-import { WorkflowTask } from "./workflow";
-import { LogCollector } from "./log";
-import { PolitenessConfig, PolitenessState } from "@/types/politeness";
+import { Browser, Page } from 'puppeteer';
+import { Browser as BrowserCore, Page as PageCore } from 'puppeteer-core';
+import { WorkflowTask } from './workflow';
+import { LogCollector } from './log';
+import { PolitenessConfig, PolitenessState } from '@/types/politeness';
 
 export type Environment = {
   browser?: Browser | BrowserCore;
@@ -16,12 +16,12 @@ export type Environment = {
   >;
   politenessConfig?: PolitenessConfig;
   politenessState?: PolitenessState;
-  network?: import("./network").NetworkState;
+  network?: import('./network').NetworkState;
 };
 
 export type ExecutionEnvironment<T extends WorkflowTask> = {
-  getInput(name: T["inputs"][number]["name"]): string;
-  setOutput(name: T["outputs"][number]["name"], value: any): void;
+  getInput(name: T['inputs'][number]['name']): string;
+  setOutput(name: T['outputs'][number]['name'], value: any): void;
 
   getBrowser(): Browser | BrowserCore | undefined;
   setBrowser(browser: Browser | BrowserCore): void;
@@ -31,5 +31,5 @@ export type ExecutionEnvironment<T extends WorkflowTask> = {
   log: LogCollector;
   getPolitenessConfig(): PolitenessConfig | undefined;
   getPolitenessState(): PolitenessState | undefined;
-  getNetwork(): import("./network").NetworkState | undefined;
+  getNetwork(): import('./network').NetworkState | undefined;
 };

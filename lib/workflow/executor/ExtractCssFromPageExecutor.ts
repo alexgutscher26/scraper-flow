@@ -1,6 +1,6 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { ExtractCssFromPageTask } from "../task/ExtractCssFromPage";
-import type { Page } from "puppeteer";
+import { ExecutionEnvironment } from '@/types/executor';
+import { ExtractCssFromPageTask } from '../task/ExtractCssFromPage';
+import type { Page } from 'puppeteer';
 
 const pageCache: WeakMap<any, Map<string, any>> = new WeakMap();
 
@@ -20,15 +20,15 @@ export async function ExtractCssFromPageExecutor(
   try {
     const page = environment.getPage();
     if (!page) {
-      environment.log.error("Web page not found");
+      environment.log.error('Web page not found');
       return false;
     }
-    const selector = environment.getInput("Selector");
-    const attr = environment.getInput("Attribute") || "textContent";
-    const allFlag = environment.getInput("All elements") === "true";
+    const selector = environment.getInput('Selector');
+    const attr = environment.getInput('Attribute') || 'textContent';
+    const allFlag = environment.getInput('All elements') === 'true';
 
     if (!selector) {
-      environment.log.error("Selector not found");
+      environment.log.error('Selector not found');
       return false;
     }
 
@@ -40,8 +40,8 @@ export async function ExtractCssFromPageExecutor(
     }
     if (cache.has(cacheKey)) {
       const cached = cache.get(cacheKey);
-      environment.setOutput("Extracted data", JSON.stringify(cached));
-      environment.setOutput("Web page", page);
+      environment.setOutput('Extracted data', JSON.stringify(cached));
+      environment.setOutput('Web page', page);
       return true;
     }
 
@@ -61,15 +61,15 @@ export async function ExtractCssFromPageExecutor(
          */
         const getVal = (el: Element) => {
           switch (attr) {
-            case "innerText":
+            case 'innerText':
               return (el as HTMLElement).innerText ?? null;
-            case "value":
+            case 'value':
               return (el as any).value ?? null;
-            case "href":
+            case 'href':
               return (el as HTMLAnchorElement).href ?? null;
-            case "src":
+            case 'src':
               return (el as HTMLImageElement).src ?? null;
-            case "html":
+            case 'html':
               return (el as HTMLElement).innerHTML ?? null;
             default:
               return el.textContent ?? null;
@@ -85,16 +85,15 @@ export async function ExtractCssFromPageExecutor(
     );
 
     if (result == null || (Array.isArray(result) && result.length === 0)) {
-      environment.log.warning("No data extracted for selector");
+      environment.log.warning('No data extracted for selector');
     }
 
     cache.set(cacheKey, result);
-    environment.setOutput("Extracted data", JSON.stringify(result));
-    environment.setOutput("Web page", page);
+    environment.setOutput('Extracted data', JSON.stringify(result));
+    environment.setOutput('Web page', page);
     return true;
   } catch (e: any) {
     environment.log.error(e.message);
     return false;
   }
 }
-

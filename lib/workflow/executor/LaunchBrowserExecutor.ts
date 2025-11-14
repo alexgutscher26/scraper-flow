@@ -1,16 +1,16 @@
-import puppeteer, { type Browser } from "puppeteer";
-import { type Browser as BrowserCore } from "puppeteer-core";
-const puppeteerCore = require("puppeteer-core");
-import chromium from "@sparticuz/chromium-min";
-import { ExecutionEnvironment } from "@/types/executor";
-import { LaunchBrowserTask } from "../task/LaunchBrowser";
-import { createLogger } from "@/lib/log";
-import { applyHeaders } from "@/lib/politeness/userAgent";
-import { isAllowed } from "@/lib/politeness/robots";
-import { sleep } from "@/lib/politeness/delay";
-import { ProxyManager } from "@/lib/network/proxyManager";
-import fs from "fs";
-import os from "os";
+import puppeteer, { type Browser } from 'puppeteer';
+import { type Browser as BrowserCore } from 'puppeteer-core';
+const puppeteerCore = require('puppeteer-core');
+import chromium from '@sparticuz/chromium-min';
+import { ExecutionEnvironment } from '@/types/executor';
+import { LaunchBrowserTask } from '../task/LaunchBrowser';
+import { createLogger } from '@/lib/log';
+import { applyHeaders } from '@/lib/politeness/userAgent';
+import { isAllowed } from '@/lib/politeness/robots';
+import { sleep } from '@/lib/politeness/delay';
+import { ProxyManager } from '@/lib/network/proxyManager';
+import fs from 'fs';
+import os from 'os';
 
 type StealthOptions = {
   enabled: boolean;
@@ -41,7 +41,7 @@ type EvasionParams = {
     webglSpoofing?: boolean;
   };
   uaOverride?: string;
-  uaRotateStrategy?: "perNavigation" | "perDomain" | "perSession";
+  uaRotateStrategy?: 'perNavigation' | 'perDomain' | 'perSession';
 };
 
 type CookieSettings = {
@@ -58,35 +58,39 @@ function readStealthEnv(): {
   evasion: EvasionParams;
   cookies: CookieSettings;
 } {
-  const stealthEnabled = process.env.STEALTH_MODE_ENABLED === "true";
-  const randomizedDelaysEnabled = process.env.STEALTH_RANDOM_DELAYS_ENABLED !== "false";
-  const mouseEnabled = process.env.STEALTH_MOUSE_MOVEMENT_ENABLED === "true";
-  const fingerprintEnabled = process.env.STEALTH_FINGERPRINT_SPOOFING_ENABLED !== "false";
-  const userAgentRotationEnabled = process.env.STEALTH_UA_ROTATION_ENABLED !== "false";
-  const cookieManagementEnabled = process.env.STEALTH_COOKIE_MANAGEMENT_ENABLED !== "false";
+  const stealthEnabled = process.env.STEALTH_MODE_ENABLED === 'true';
+  const randomizedDelaysEnabled = process.env.STEALTH_RANDOM_DELAYS_ENABLED !== 'false';
+  const mouseEnabled = process.env.STEALTH_MOUSE_MOVEMENT_ENABLED === 'true';
+  const fingerprintEnabled = process.env.STEALTH_FINGERPRINT_SPOOFING_ENABLED !== 'false';
+  const userAgentRotationEnabled = process.env.STEALTH_UA_ROTATION_ENABLED !== 'false';
+  const cookieManagementEnabled = process.env.STEALTH_COOKIE_MANAGEMENT_ENABLED !== 'false';
 
-  const delaysMin = Number(process.env.STEALTH_DELAY_MIN_MS ?? "50");
-  const delaysMax = Number(process.env.STEALTH_DELAY_MAX_MS ?? "250");
-  const delaysJitter = Number(process.env.STEALTH_DELAY_JITTER_PCT ?? "0.2");
+  const delaysMin = Number(process.env.STEALTH_DELAY_MIN_MS ?? '50');
+  const delaysMax = Number(process.env.STEALTH_DELAY_MAX_MS ?? '250');
+  const delaysJitter = Number(process.env.STEALTH_DELAY_JITTER_PCT ?? '0.2');
 
-  const mousePathPoints = Number(process.env.STEALTH_MOUSE_POINTS ?? "6");
-  const mouseJitterPx = Number(process.env.STEALTH_MOUSE_JITTER_PX ?? "3");
-  const mouseMinSpeed = Number(process.env.STEALTH_MOUSE_MIN_SPEED ?? "300");
-  const mouseMaxSpeed = Number(process.env.STEALTH_MOUSE_MAX_SPEED ?? "800");
+  const mousePathPoints = Number(process.env.STEALTH_MOUSE_POINTS ?? '6');
+  const mouseJitterPx = Number(process.env.STEALTH_MOUSE_JITTER_PX ?? '3');
+  const mouseMinSpeed = Number(process.env.STEALTH_MOUSE_MIN_SPEED ?? '300');
+  const mouseMaxSpeed = Number(process.env.STEALTH_MOUSE_MAX_SPEED ?? '800');
 
-  const languagesPool = (process.env.STEALTH_LANGUAGES_POOL ?? "en-US,en;q=0.9,fr-FR,fr;q=0.8").split(",");
-  const platformPool = (process.env.STEALTH_PLATFORM_POOL ?? "Win32,MacIntel,Linux x86_64").split(",");
-  const deviceMemMin = Number(process.env.STEALTH_DEVICE_MEMORY_MIN ?? "4");
-  const deviceMemMax = Number(process.env.STEALTH_DEVICE_MEMORY_MAX ?? "16");
-  const hwMin = Number(process.env.STEALTH_HW_CONCURRENCY_MIN ?? "4");
-  const hwMax = Number(process.env.STEALTH_HW_CONCURRENCY_MAX ?? "16");
-  const webglSpoofing = process.env.STEALTH_WEBGL_SPOOFING === "true";
+  const languagesPool = (
+    process.env.STEALTH_LANGUAGES_POOL ?? 'en-US,en;q=0.9,fr-FR,fr;q=0.8'
+  ).split(',');
+  const platformPool = (process.env.STEALTH_PLATFORM_POOL ?? 'Win32,MacIntel,Linux x86_64').split(
+    ','
+  );
+  const deviceMemMin = Number(process.env.STEALTH_DEVICE_MEMORY_MIN ?? '4');
+  const deviceMemMax = Number(process.env.STEALTH_DEVICE_MEMORY_MAX ?? '16');
+  const hwMin = Number(process.env.STEALTH_HW_CONCURRENCY_MIN ?? '4');
+  const hwMax = Number(process.env.STEALTH_HW_CONCURRENCY_MAX ?? '16');
+  const webglSpoofing = process.env.STEALTH_WEBGL_SPOOFING === 'true';
 
   const uaOverride = process.env.STEALTH_UA_OVERRIDE;
   const uaRotateStrategy = (process.env.STEALTH_UA_ROTATE_STRATEGY as any) ?? undefined;
 
-  const clearBefore = process.env.STEALTH_COOKIE_CLEAR_BEFORE === "true";
-  const persist = process.env.STEALTH_COOKIE_PERSIST !== "false";
+  const clearBefore = process.env.STEALTH_COOKIE_CLEAR_BEFORE === 'true';
+  const persist = process.env.STEALTH_COOKIE_PERSIST !== 'false';
   const cookieSetRaw = process.env.STEALTH_COOKIE_SET_JSON;
   let set: Array<any> | undefined = undefined;
   try {
@@ -135,49 +139,85 @@ function readStealthEnv(): {
  */
 async function attachFingerprintSpoofing(
   page: any,
-  params: NonNullable<EvasionParams["fingerprint"]>
+  params: NonNullable<EvasionParams['fingerprint']>
 ) {
   /**
    * Returns a random element from the array or a fallback value if the array is empty or not an array.
    */
-  const pick = <T>(arr: T[], fallback: T) => (Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : fallback);
-  const languages = params.languagesPool ?? ["en-US", "en"];
-  const platform = pick(params.platformPool ?? ["Win32"], "Win32");
+  const pick = <T>(arr: T[], fallback: T) =>
+    Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : fallback;
+  const languages = params.languagesPool ?? ['en-US', 'en'];
+  const platform = pick(params.platformPool ?? ['Win32'], 'Win32');
   const deviceMemoryRange = params.deviceMemoryRange ?? [4, 16];
   const hardwareConcurrencyRange = params.hardwareConcurrencyRange ?? [4, 16];
-  const deviceMemory = Math.max(deviceMemoryRange[0], Math.min(deviceMemoryRange[1], Math.round(deviceMemoryRange[0] + Math.random() * (deviceMemoryRange[1] - deviceMemoryRange[0]))));
-  const hardwareConcurrency = Math.max(hardwareConcurrencyRange[0], Math.min(hardwareConcurrencyRange[1], Math.round(hardwareConcurrencyRange[0] + Math.random() * (hardwareConcurrencyRange[1] - hardwareConcurrencyRange[0]))));
+  const deviceMemory = Math.max(
+    deviceMemoryRange[0],
+    Math.min(
+      deviceMemoryRange[1],
+      Math.round(
+        deviceMemoryRange[0] + Math.random() * (deviceMemoryRange[1] - deviceMemoryRange[0])
+      )
+    )
+  );
+  const hardwareConcurrency = Math.max(
+    hardwareConcurrencyRange[0],
+    Math.min(
+      hardwareConcurrencyRange[1],
+      Math.round(
+        hardwareConcurrencyRange[0] +
+          Math.random() * (hardwareConcurrencyRange[1] - hardwareConcurrencyRange[0])
+      )
+    )
+  );
 
-  await page.evaluateOnNewDocument((opts: any) => {
-    try {
-      Object.defineProperty(navigator, "webdriver", { get: () => false });
-      Object.defineProperty(navigator, "languages", { get: () => opts.languages });
-      Object.defineProperty(navigator, "platform", { get: () => opts.platform });
-      Object.defineProperty(navigator, "hardwareConcurrency", { get: () => opts.hardwareConcurrency });
-      Object.defineProperty(navigator, "deviceMemory", { get: () => opts.deviceMemory });
-      // minimal window.chrome
-      // @ts-ignore
-      window.chrome = window.chrome || { runtime: {} };
-      const originalQuery = Notification?.permission ? (navigator.permissions && navigator.permissions.query) : undefined;
-      if ((navigator as any).permissions && typeof (navigator as any).permissions.query === "function") {
-        const query = (navigator as any).permissions.query.bind((navigator as any).permissions);
-        ;(navigator as any).permissions.query = (parameters: any) => {
-          if (parameters && parameters.name === "notifications") {
-            return Promise.resolve({ state: Notification.permission === "granted" ? "granted" : "prompt" });
-          }
-          return query(parameters);
-        };
-      }
-      if (opts.webglSpoofing) {
-        const getParameter = WebGLRenderingContext.prototype.getParameter;
-        WebGLRenderingContext.prototype.getParameter = function (parameter: any) {
-          if (parameter === 37445) return "Intel Inc."; // UNMASKED_VENDOR_WEBGL
-          if (parameter === 37446) return "ANGLE (Intel, Intel(R) UHD Graphics, Direct3D11)"; // UNMASKED_RENDERER_WEBGL
-          return getParameter.call(this, parameter);
-        };
-      }
-    } catch {}
-  }, { languages, platform, hardwareConcurrency, deviceMemory, webglSpoofing: !!params.webglSpoofing });
+  await page.evaluateOnNewDocument(
+    (opts: any) => {
+      try {
+        Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        Object.defineProperty(navigator, 'languages', { get: () => opts.languages });
+        Object.defineProperty(navigator, 'platform', { get: () => opts.platform });
+        Object.defineProperty(navigator, 'hardwareConcurrency', {
+          get: () => opts.hardwareConcurrency,
+        });
+        Object.defineProperty(navigator, 'deviceMemory', { get: () => opts.deviceMemory });
+        // minimal window.chrome
+        // @ts-ignore
+        window.chrome = window.chrome || { runtime: {} };
+        const originalQuery = Notification?.permission
+          ? navigator.permissions && navigator.permissions.query
+          : undefined;
+        if (
+          (navigator as any).permissions &&
+          typeof (navigator as any).permissions.query === 'function'
+        ) {
+          const query = (navigator as any).permissions.query.bind((navigator as any).permissions);
+          (navigator as any).permissions.query = (parameters: any) => {
+            if (parameters && parameters.name === 'notifications') {
+              return Promise.resolve({
+                state: Notification.permission === 'granted' ? 'granted' : 'prompt',
+              });
+            }
+            return query(parameters);
+          };
+        }
+        if (opts.webglSpoofing) {
+          const getParameter = WebGLRenderingContext.prototype.getParameter;
+          WebGLRenderingContext.prototype.getParameter = function (parameter: any) {
+            if (parameter === 37445) return 'Intel Inc.'; // UNMASKED_VENDOR_WEBGL
+            if (parameter === 37446) return 'ANGLE (Intel, Intel(R) UHD Graphics, Direct3D11)'; // UNMASKED_RENDERER_WEBGL
+            return getParameter.call(this, parameter);
+          };
+        }
+      } catch {}
+    },
+    {
+      languages,
+      platform,
+      hardwareConcurrency,
+      deviceMemory,
+      webglSpoofing: !!params.webglSpoofing,
+    }
+  );
 }
 
 /**
@@ -187,7 +227,7 @@ async function attachFingerprintSpoofing(
  *
  * @param {NonNullable<EvasionParams["delays"]>} [params] - Optional parameters to configure the delay settings, including minMs, maxMs, and jitterPct.
  */
-async function applySmallDelay(params?: NonNullable<EvasionParams["delays"]>) {
+async function applySmallDelay(params?: NonNullable<EvasionParams['delays']>) {
   const min = Math.max(0, params?.minMs ?? 50);
   const max = Math.max(min, params?.maxMs ?? 250);
   const jitterPct = params?.jitterPct ?? 0.2;
@@ -207,7 +247,7 @@ async function applySmallDelay(params?: NonNullable<EvasionParams["delays"]>) {
  * @param page - The page object representing the context in which the mouse movement occurs.
  * @param params - Optional parameters for customizing the mouse movement behavior, including path points, jitter, and speed.
  */
-async function simulateMouseMovement(page: any, params?: NonNullable<EvasionParams["mouse"]>) {
+async function simulateMouseMovement(page: any, params?: NonNullable<EvasionParams['mouse']>) {
   const vp = await page.viewport();
   const points = Math.max(2, params?.pathPoints ?? 6);
   const jitter = Math.max(0, params?.jitterPx ?? 3);
@@ -215,8 +255,14 @@ async function simulateMouseMovement(page: any, params?: NonNullable<EvasionPara
   const maxSpeed = Math.max(minSpeed, params?.maxSpeed ?? 800);
   const path: Array<{ x: number; y: number }> = [];
   for (let i = 0; i < points; i++) {
-    const x = Math.floor(Math.random() * (vp.width - 20)) + 10 + Math.floor((Math.random() - 0.5) * 2 * jitter);
-    const y = Math.floor(Math.random() * (vp.height - 20)) + 10 + Math.floor((Math.random() - 0.5) * 2 * jitter);
+    const x =
+      Math.floor(Math.random() * (vp.width - 20)) +
+      10 +
+      Math.floor((Math.random() - 0.5) * 2 * jitter);
+    const y =
+      Math.floor(Math.random() * (vp.height - 20)) +
+      10 +
+      Math.floor((Math.random() - 0.5) * 2 * jitter);
     path.push({ x, y });
   }
   for (let i = 1; i < path.length; i++) {
@@ -243,7 +289,7 @@ async function simulateMouseMovement(page: any, params?: NonNullable<EvasionPara
 async function clearCookies(page: any) {
   try {
     const client = await page.target().createCDPSession();
-    await client.send("Network.clearBrowserCookies");
+    await client.send('Network.clearBrowserCookies');
   } catch {}
 }
 
@@ -260,19 +306,19 @@ async function clearCookies(page: any) {
  */
 async function probeBotDetection(page: any): Promise<{ detected: boolean; signals: string[] }> {
   const signals = await page.evaluate(() => {
-    const text = document.body ? (document.body.innerText || "") : "";
+    const text = document.body ? document.body.innerText || '' : '';
     const marks = [
-      "captcha",
-      "verify you are human",
-      "unusual traffic",
-      "Access Denied",
-      "blocked by bot",
-      "perimeterx",
-      "datadome",
-      "cloudflare",
+      'captcha',
+      'verify you are human',
+      'unusual traffic',
+      'Access Denied',
+      'blocked by bot',
+      'perimeterx',
+      'datadome',
+      'cloudflare',
     ];
     const hits = marks.filter((m) => text.toLowerCase().includes(m));
-    const cf = (window as any).__cf_chl_opt ? "cloudflare_challenge" : undefined;
+    const cf = (window as any).__cf_chl_opt ? 'cloudflare_challenge' : undefined;
     if (cf) hits.push(cf);
     return hits;
   });
@@ -282,39 +328,34 @@ async function probeBotDetection(page: any): Promise<{ detected: boolean; signal
 export async function LaunchBrowserExecutor(
   environment: ExecutionEnvironment<typeof LaunchBrowserTask>
 ): Promise<boolean> {
-  const logger = createLogger("executor/LaunchBrowser");
+  const logger = createLogger('executor/LaunchBrowser');
   try {
-    const websiteUrl = environment.getInput("Website Url");
+    const websiteUrl = environment.getInput('Website Url');
     const net = environment.getNetwork?.();
     const proxyMgr = net?.proxy as ProxyManager | undefined;
-    const selection = proxyMgr ? await proxyMgr.select(websiteUrl) : { url: websiteUrl } as any;
+    const selection = proxyMgr ? await proxyMgr.select(websiteUrl) : ({ url: websiteUrl } as any);
     const { stealth, evasion, cookies } = readStealthEnv();
     let evasionAttempts = 0;
     let evasionFailures = 0;
     let detectionsFound = 0;
     let browser: Browser | BrowserCore;
-    logger.info(
-      `@process.......... ${process.env.NODE_ENV} ${process.env.VERCEL_ENV}`
-    );
-    if (
-      process.env.NODE_ENV === "production" ||
-      process.env.VERCEL_ENV === "production"
-    ) {
-      logger.info("Launching in production mode...");
+    logger.info(`@process.......... ${process.env.NODE_ENV} ${process.env.VERCEL_ENV}`);
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production') {
+      logger.info('Launching in production mode...');
       // Updated production configuration
       const executionPath =
-        "https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar";
+        'https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar';
 
       // "https://github.com/Sparticuz/chromium/releases/download/v119.0.2/chromium-v119.0.2-pack.tar"
       // "/opt/nodejs/node_modules/@sparticuz/chromium/bin"
 
       const launchArgs: string[] = [
         ...chromium.args,
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--hide-scrollbars",
-        "--disable-web-security",
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--hide-scrollbars',
+        '--disable-web-security',
       ];
       if (selection.proxy) launchArgs.push(`--proxy-server=${selection.proxy}`);
       browser = await puppeteerCore.launch({
@@ -326,9 +367,9 @@ export async function LaunchBrowserExecutor(
         ignoreHTTPSErrors: true,
       });
     } else {
-      logger.info("Launching in development mode...");
+      logger.info('Launching in development mode...');
       const execPath = await resolveChromeExecutablePath();
-      const devArgs: string[] = ["--no-sandbox", "--disable-setuid-sandbox"];
+      const devArgs: string[] = ['--no-sandbox', '--disable-setuid-sandbox'];
       if (selection.proxy) devArgs.push(`--proxy-server=${selection.proxy}`);
       browser = await puppeteer.launch({
         headless: true,
@@ -337,39 +378,41 @@ export async function LaunchBrowserExecutor(
       });
     }
 
-    environment.log.info("Browser launched successfully.");
+    environment.log.info('Browser launched successfully.');
     environment.setBrowser(browser);
     const page = await browser.newPage();
     if (selection.auth) {
-      try { await (page as any).authenticate(selection.auth) } catch {}
+      try {
+        await (page as any).authenticate(selection.auth);
+      } catch {}
     }
     await page.setViewport({ width: 1080, height: 1024 });
     if (stealth.enabled && stealth.fingerprintSpoofing && evasion.fingerprint) {
       evasionAttempts++;
       try {
         await attachFingerprintSpoofing(page as any, evasion.fingerprint);
-        environment.log.info("FINGERPRINT_APPLIED");
+        environment.log.info('FINGERPRINT_APPLIED');
       } catch {
         evasionFailures++;
-        environment.log.warning("EVASION_FALLBACK: fingerprint spoofing failed");
+        environment.log.warning('EVASION_FALLBACK: fingerprint spoofing failed');
       }
     }
     const cfg = environment.getPolitenessConfig?.();
     const st = environment.getPolitenessState?.();
     if (cfg && st) {
       const ua = await applyHeaders(page as any, cfg, st, websiteUrl);
-      const usedUA = ua || cfg.robots.userAgentOverride || "*";
+      const usedUA = ua || cfg.robots.userAgentOverride || '*';
       const allowed = await isAllowed(websiteUrl, cfg, st, usedUA);
       if (!allowed) {
         environment.log.error(`Blocked by robots.txt: ${websiteUrl}`);
-        if (cfg.robots.enforcement === "strict") {
+        if (cfg.robots.enforcement === 'strict') {
           return false;
         }
       }
       if (stealth.enabled && evasion.uaOverride) {
         try {
           await (page as any).setUserAgent(evasion.uaOverride);
-          environment.log.info("User-Agent override applied");
+          environment.log.info('User-Agent override applied');
         } catch {}
       }
       if (stealth.enabled && evasion.uaRotateStrategy && cfg.userAgent?.pool?.length) {
@@ -377,7 +420,7 @@ export async function LaunchBrowserExecutor(
           const pool = cfg.userAgent.pool;
           const nextUA = pool[Math.floor(Math.random() * pool.length)];
           await (page as any).setUserAgent(nextUA);
-          environment.log.info("User-Agent rotated (stealth)");
+          environment.log.info('User-Agent rotated (stealth)');
         } catch {}
       }
     }
@@ -385,10 +428,10 @@ export async function LaunchBrowserExecutor(
       evasionAttempts++;
       try {
         await clearCookies(page as any);
-        environment.log.info("COOKIE_CLEAR");
+        environment.log.info('COOKIE_CLEAR');
       } catch {
         evasionFailures++;
-        environment.log.warning("EVASION_FALLBACK: cookie clear failed");
+        environment.log.warning('EVASION_FALLBACK: cookie clear failed');
       }
     }
     // Restore cookies from session manager if configured
@@ -397,8 +440,8 @@ export async function LaunchBrowserExecutor(
         const jar = (net.session as any).jarRef?.();
         const header = jar?.cookieHeaderFor(websiteUrl);
         if (header) {
-          const pairs = header.split(/;\s*/).map(kv => {
-            const [name, value] = kv.split("=");
+          const pairs = header.split(/;\s*/).map((kv) => {
+            const [name, value] = kv.split('=');
             return { name, value, url: websiteUrl } as any;
           });
           if (pairs.length) await (page as any).setCookie(...pairs);
@@ -409,36 +452,36 @@ export async function LaunchBrowserExecutor(
       evasionAttempts++;
       try {
         await (page as any).setCookie(...cookies.set);
-        environment.log.info("COOKIE_SET");
+        environment.log.info('COOKIE_SET');
       } catch {
         evasionFailures++;
-        environment.log.warning("EVASION_FALLBACK: cookie set failed");
+        environment.log.warning('EVASION_FALLBACK: cookie set failed');
       }
     }
     if (stealth.enabled && stealth.randomizedDelays) {
       await applySmallDelay(evasion.delays);
-      environment.log.info("DELAY_APPLIED: pre-navigation");
+      environment.log.info('DELAY_APPLIED: pre-navigation');
     }
     if (stealth.enabled && stealth.mouseMovement) {
       evasionAttempts++;
       try {
         await simulateMouseMovement(page as any, evasion.mouse);
-        environment.log.info("MOUSE_SIMULATION: pre-navigation");
+        environment.log.info('MOUSE_SIMULATION: pre-navigation');
       } catch {
         evasionFailures++;
-        environment.log.warning("EVASION_FALLBACK: mouse simulation failed");
+        environment.log.warning('EVASION_FALLBACK: mouse simulation failed');
       }
     }
-    await page.goto(websiteUrl, { waitUntil: "domcontentloaded" });
+    await page.goto(websiteUrl, { waitUntil: 'domcontentloaded' });
     if (stealth.enabled && stealth.randomizedDelays) {
       await applySmallDelay(evasion.delays);
-      environment.log.info("DELAY_APPLIED: post-navigation");
+      environment.log.info('DELAY_APPLIED: post-navigation');
     }
     if (stealth.enabled) {
       const probe = await probeBotDetection(page as any);
       if (probe.detected) {
         detectionsFound += 1;
-        environment.log.warning(`DETECTION_PROBE: ${probe.signals.join(",")}`);
+        environment.log.warning(`DETECTION_PROBE: ${probe.signals.join(',')}`);
         if (evasion.uaOverride || (cfg && cfg.userAgent?.pool?.length)) {
           try {
             const pool = (cfg && cfg.userAgent?.pool) || [];
@@ -446,16 +489,18 @@ export async function LaunchBrowserExecutor(
               const nextUA = pool[Math.floor(Math.random() * pool.length)];
               await (page as any).setUserAgent(nextUA);
             }
-            await page.reload({ waitUntil: "domcontentloaded" });
+            await page.reload({ waitUntil: 'domcontentloaded' });
             const probe2 = await probeBotDetection(page as any);
             if (probe2.detected) {
               detectionsFound += 1;
-              environment.log.warning(`DETECTION_PROBE: retry still detected ${probe2.signals.join(",")}`);
+              environment.log.warning(
+                `DETECTION_PROBE: retry still detected ${probe2.signals.join(',')}`
+              );
             } else {
-              environment.log.info("EVASION_RETRY: detection cleared after UA change");
+              environment.log.info('EVASION_RETRY: detection cleared after UA change');
             }
           } catch {
-            environment.log.warning("EVASION_FALLBACK: retry failed");
+            environment.log.warning('EVASION_FALLBACK: retry failed');
           }
         }
       }
@@ -471,9 +516,7 @@ export async function LaunchBrowserExecutor(
     return true;
   } catch (e: any) {
     environment.log.error(`Failed to launch browser: ${e.message}`);
-    logger.error(
-      `Error while launching puppeteer: ${e instanceof Error ? e.message : String(e)}`
-    );
+    logger.error(`Error while launching puppeteer: ${e instanceof Error ? e.message : String(e)}`);
     return false;
   }
 }
@@ -483,29 +526,31 @@ export async function resolveChromeExecutablePath(platform?: NodeJS.Platform): P
   if (envPath && fs.existsSync(envPath)) return envPath;
   const p = platform ?? process.platform;
   const candidates: string[] = [];
-  if (p === "win32") {
+  if (p === 'win32') {
     const localAppData = process.env.LOCALAPPDATA || `${os.homedir()}\\AppData\\Local`;
     candidates.push(
-      "C\\\u005c\u005cProgram Files\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe",
-      "C\\\u005c\u005cProgram Files (x86)\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe",
+      'C\\\u005c\u005cProgram Files\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe',
+      'C\\\u005c\u005cProgram Files (x86)\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe',
       `${localAppData}\\\u005c\u005cGoogle\\\u005c\u005cChrome\\\u005c\u005cApplication\\\u005c\u005cchrome.exe`
     );
-  } else if (p === "darwin") {
+  } else if (p === 'darwin') {
     candidates.push(
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      "/Applications/Chromium.app/Contents/MacOS/Chromium"
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      '/Applications/Chromium.app/Contents/MacOS/Chromium'
     );
   } else {
     candidates.push(
-      "/usr/bin/google-chrome",
-      "/usr/bin/google-chrome-stable",
-      "/usr/bin/chromium-browser",
-      "/usr/bin/chromium",
-      "/snap/bin/chromium"
+      '/usr/bin/google-chrome',
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+      '/snap/bin/chromium'
     );
   }
   for (const c of candidates) {
     if (fs.existsSync(c)) return c;
   }
-  throw new Error("Chrome executable not found; set PUPPETEER_EXECUTABLE_PATH or install Chrome/Chromium");
+  throw new Error(
+    'Chrome executable not found; set PUPPETEER_EXECUTABLE_PATH or install Chrome/Chromium'
+  );
 }

@@ -1,19 +1,19 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { ReadPropertyFromJsonTask } from "../task/ReadPropertyFromJson";
+import { ExecutionEnvironment } from '@/types/executor';
+import { ReadPropertyFromJsonTask } from '../task/ReadPropertyFromJson';
 
 export async function ReadPropertyFromJsonExecutor(
   environment: ExecutionEnvironment<typeof ReadPropertyFromJsonTask>
 ): Promise<boolean> {
   try {
-    const jsonData = environment.getInput("JSON");
+    const jsonData = environment.getInput('JSON');
     if (!jsonData) {
-      environment.log.error("Input JSON is required");
+      environment.log.error('Input JSON is required');
       return false;
     }
 
-    const propertyName = environment.getInput("Property name");
+    const propertyName = environment.getInput('Property name');
     if (!propertyName) {
-      environment.log.error("Input Property name is required");
+      environment.log.error('Input Property name is required');
       return false;
     }
 
@@ -35,11 +35,9 @@ export async function ReadPropertyFromJsonExecutor(
 
     // Convert value to string if it's not already
     const stringValue =
-      typeof propertyValue === "string"
-        ? propertyValue
-        : JSON.stringify(propertyValue);
+      typeof propertyValue === 'string' ? propertyValue : JSON.stringify(propertyValue);
 
-    environment.setOutput("Property value", stringValue);
+    environment.setOutput('Property value', stringValue);
     environment.log.info(`Successfully extracted property "${propertyName}"`);
 
     return true;
@@ -51,7 +49,7 @@ export async function ReadPropertyFromJsonExecutor(
 
 // Helper function to get nested properties using dot notation
 function getNestedProperty(obj: any, path: string): any {
-  return path.split(".").reduce((current, key) => {
-    return current && typeof current === "object" ? current[key] : undefined;
+  return path.split('.').reduce((current, key) => {
+    return current && typeof current === 'object' ? current[key] : undefined;
   }, obj);
 }

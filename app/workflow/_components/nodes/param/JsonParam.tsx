@@ -1,23 +1,18 @@
-"use client";
-import React, { useEffect, useId, useState } from "react";
-import { Label } from "@/components/ui/label";
-import { ParamProps } from "@/types/appNode";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+'use client';
+import React, { useEffect, useId, useState } from 'react';
+import { Label } from '@/components/ui/label';
+import { ParamProps } from '@/types/appNode';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
-function JsonParam({
-  param,
-  value,
-  updateNodeParamValue,
-  disabled,
-}: ParamProps) {
-  const [internalValue, setInternalValue] = useState(value || "");
+function JsonParam({ param, value, updateNodeParamValue, disabled }: ParamProps) {
+  const [internalValue, setInternalValue] = useState(value || '');
   const [jsonError, setJsonError] = useState<string | null>(null);
   const id = useId();
 
   useEffect(() => {
-    setInternalValue(value || "");
+    setInternalValue(value || '');
   }, [value]);
 
   const validateJson = (jsonString: string) => {
@@ -31,7 +26,7 @@ function JsonParam({
       setJsonError(null);
       return true;
     } catch (error) {
-      setJsonError("Invalid JSON format");
+      setJsonError('Invalid JSON format');
       return false;
     }
   };
@@ -57,16 +52,16 @@ function JsonParam({
       updateNodeParamValue(formatted);
       setJsonError(null);
     } catch (error) {
-      setJsonError("Cannot format invalid JSON");
+      setJsonError('Cannot format invalid JSON');
     }
   };
 
   return (
-    <div className="space-y-1 p-1 w-full">
+    <div className="w-full space-y-1 p-1">
       <div className="flex items-center justify-between">
-        <Label htmlFor={id} className="text-xs flex">
+        <Label htmlFor={id} className="flex text-xs">
           {param.name}
-          {param.required && <p className="text-red-400 px-2">*</p>}
+          {param.required && <p className="px-2 text-red-400">*</p>}
         </Label>
         {internalValue && !jsonError && (
           <button
@@ -82,8 +77,8 @@ function JsonParam({
       <Textarea
         id={id}
         disabled={disabled}
-        className={`text-xs min-h-[120px] resize-vertical font-mono ${
-          jsonError ? "border-red-500" : ""
+        className={`resize-vertical min-h-[120px] font-mono text-xs ${
+          jsonError ? 'border-red-500' : ''
         }`}
         value={internalValue}
         placeholder='{"key": "value"}'
@@ -97,9 +92,7 @@ function JsonParam({
           <AlertDescription className="text-xs">{jsonError}</AlertDescription>
         </Alert>
       )}
-      {param.helperText && (
-        <p className="text-xs text-muted-foreground">{param.helperText}</p>
-      )}
+      {param.helperText && <p className="text-xs text-muted-foreground">{param.helperText}</p>}
     </div>
   );
 }

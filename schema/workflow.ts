@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const createWorkflowSchema = z.object({
   name: z.string().max(50),
@@ -11,6 +11,4 @@ export const duplicateWorkflowSchema = createWorkflowSchema.extend({
   workflowId: z.string(),
 });
 
-export type duplicateWorkflowSchemaType = z.infer<
-  typeof duplicateWorkflowSchema
->;
+export type duplicateWorkflowSchemaType = z.infer<typeof duplicateWorkflowSchema>;

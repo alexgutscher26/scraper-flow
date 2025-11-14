@@ -1,37 +1,33 @@
-import { HandleCheckoutSessionCompleted } from "@/lib/stripe/handleCheckoutSessionCompleted";
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-import { createLogger } from "@/lib/log";
-import { getEnv, formatEnvError } from "@/lib/env";
-import Stripe from "stripe";
+import { HandleCheckoutSessionCompleted } from '@/lib/stripe/handleCheckoutSessionCompleted';
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { createLogger } from '@/lib/log';
+import { getEnv, formatEnvError } from '@/lib/env';
+import Stripe from 'stripe';
 
 export const maxDuration = 60; // This function can run for a maximum of 60 seconds
 
 export async function POST(req: Request, res: Response) {
-  const logger = createLogger("api/webhooks/stripe");
+  const logger = createLogger('api/webhooks/stripe');
   try {
     const env = getEnv();
     const body = await req.text();
-    const signature = headers().get("stripe-signature") as string;
+    const signature = headers().get('stripe-signature') as string;
 
     if (!signature) {
-      return new NextResponse("No signature found", { status: 400 });
+      return new NextResponse('No signature found', { status: 400 });
     }
     const stripeClient = new Stripe(env.STRIPE_SECRET_KEY, {
-      apiVersion: "2025-01-27.acacia",
+      apiVersion: '2025-01-27.acacia',
       typescript: true,
     });
 
-    const event = stripeClient.webhooks.constructEvent(
-      body,
-      signature,
-      env.STRIPE_WEBHOOK_SECRET
-    );
+    const event = stripeClient.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET);
     logger.info(`@event... ${event.type}`);
 
     switch (event?.type) {
-      case "checkout.session.completed":
-        // handle checkout session completed event      
+      case 'checkout.session.completed':
+        // handle checkout session completed event
         HandleCheckoutSessionCompleted(event.data.object);
         break;
       // case "payment_intent.payment_failed ":
@@ -43,14 +39,14 @@ export async function POST(req: Request, res: Response) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     logger.error(`stripe webhook error: ${message}`);
-    if (message.toLowerCase().includes("aborted") || (error as any)?.name === "AbortError") {
-      return new NextResponse("Request aborted", { status: 408 });
+    if (message.toLowerCase().includes('aborted') || (error as any)?.name === 'AbortError') {
+      return new NextResponse('Request aborted', { status: 408 });
     }
     const envMsg = formatEnvError(error);
-    if (envMsg.includes("Environment validation failed")) {
+    if (envMsg.includes('Environment validation failed')) {
       return new NextResponse(envMsg, { status: 500 });
     }
-    return new NextResponse("Webhook error", { status: 400 });
+    return new NextResponse('Webhook error', { status: 400 });
   }
 }
 

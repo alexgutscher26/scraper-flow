@@ -160,7 +160,7 @@ npm install
 ```
 
 3. Set up environment variables:
-Create a `.env` file in the root directory and add the necessary environment variables (see [Environment Variables](#environment-variables) section)
+   Create a `.env` file in the root directory and add the necessary environment variables (see [Environment Variables](#environment-variables) section)
 
 4. Run database migrations:
 
@@ -601,6 +601,7 @@ See docs/form-automation.md for file upload validation and progress, captcha pro
 
 - ExecutionLog now includes `phaseId`, `taskType`, and `metadata` (`JSONB`). Existing rows are backfilled from `executionPhaseId` and default values.
 - Apply database migrations with `npx prisma migrate dev`. Verify logs render in the Execution Viewer.
+
 ## Rate Limiting
 
 - Endpoints: `/api/workflows/cron` and `/api/workflows/execute`

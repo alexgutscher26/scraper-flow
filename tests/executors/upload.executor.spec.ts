@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import puppeteer from "puppeteer";
-import { UploadExecutor } from "@/lib/workflow/executor/UploadExecutor";
-import fs from "node:fs";
-import path from "node:path";
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import puppeteer from 'puppeteer';
+import { UploadExecutor } from '@/lib/workflow/executor/UploadExecutor';
+import fs from 'node:fs';
+import path from 'node:path';
 
 function env(page: any, inputs: Record<string, any>) {
   const outputs: Record<string, any> = {};
@@ -26,24 +26,24 @@ function env(page: any, inputs: Record<string, any>) {
   } as any;
 }
 
-describe("UploadExecutor", () => {
+describe('UploadExecutor', () => {
   let browser: any;
   let page: any;
   let tmp: string;
   beforeAll(async () => {
     browser = await puppeteer.launch({ headless: true });
     page = await browser.newPage();
-    tmp = path.join(process.cwd(), "tests", "executors", "tmp.txt");
-    fs.writeFileSync(tmp, "data");
+    tmp = path.join(process.cwd(), 'tests', 'executors', 'tmp.txt');
+    fs.writeFileSync(tmp, 'data');
   });
   afterAll(async () => {
     await browser.close();
     if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
   });
 
-  it("uploads file via input", async () => {
+  it('uploads file via input', async () => {
     await page.setContent(`<input id='f' type='file'>`);
-    const inputs = { "Selector": "#f", "Files": tmp };
+    const inputs = { Selector: '#f', Files: tmp };
     const e = env(page, inputs);
     const ok = await UploadExecutor(e);
     expect(ok).toBe(true);
@@ -51,24 +51,35 @@ describe("UploadExecutor", () => {
     expect(e.outputs.UploadProgress).toBe(100);
   });
 
-  it("validates type and size with strictMode off (skips invalid)", async () => {
+  it('validates type and size with strictMode off (skips invalid)', async () => {
     await page.setContent(`<input id='f' type='file'>`);
-    const bad = path.join(process.cwd(), "tests", "executors", "bad.xyz");
-    fs.writeFileSync(bad, "1234567890");
-    const inputs = { "Selector": "#f", "Files": `${tmp},${bad}`, "AcceptTypes": /\.txt$/.source, "MaxSizeMB": 0.0001, "StrictMode": false };
+    const bad = path.join(process.cwd(), 'tests', 'executors', 'bad.xyz');
+    fs.writeFileSync(bad, '1234567890');
+    const inputs = {
+      Selector: '#f',
+      Files: `${tmp},${bad}`,
+      AcceptTypes: /\.txt$/.source,
+      MaxSizeMB: 0.0001,
+      StrictMode: false,
+    };
     const e = env(page, inputs);
     const ok = await UploadExecutor(e);
     expect(ok).toBe(true);
     expect(e.outputs.UploadedCount).toBe(1);
-    expect(e.outputs.ErrorMessage).toBeTypeOf("string");
+    expect(e.outputs.ErrorMessage).toBeTypeOf('string');
     fs.unlinkSync(bad);
   });
 
-  it("fails fast with strictMode on", async () => {
+  it('fails fast with strictMode on', async () => {
     await page.setContent(`<input id='f' type='file'>`);
-    const bad = path.join(process.cwd(), "tests", "executors", "bad.xyz");
-    fs.writeFileSync(bad, "1234567890");
-    const inputs = { "Selector": "#f", "Files": `${tmp},${bad}`, "AcceptTypes": /\.txt$/.source, "StrictMode": true };
+    const bad = path.join(process.cwd(), 'tests', 'executors', 'bad.xyz');
+    fs.writeFileSync(bad, '1234567890');
+    const inputs = {
+      Selector: '#f',
+      Files: `${tmp},${bad}`,
+      AcceptTypes: /\.txt$/.source,
+      StrictMode: true,
+    };
     const e = env(page, inputs);
     const ok = await UploadExecutor(e);
     expect(ok).toBe(false);

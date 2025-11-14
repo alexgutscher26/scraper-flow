@@ -1,7 +1,7 @@
-export type SelectorType = "css" | "xpath";
-export type SpecificityMode = "strict" | "flexible";
+export type SelectorType = 'css' | 'xpath';
+export type SpecificityMode = 'strict' | 'flexible';
 export interface GenerationOptions {
-  type: SelectorType | "both";
+  type: SelectorType | 'both';
   mode: SpecificityMode;
   specificityLevel: number;
   preferredAttributes?: string[];
@@ -19,7 +19,7 @@ export interface CandidateSelector {
     matchCount: number;
     latencyMs?: number;
   };
-  source: "heuristic" | "ai" | "override";
+  source: 'heuristic' | 'ai' | 'override';
 }
 export interface ValidationResult {
   selector: CandidateSelector;

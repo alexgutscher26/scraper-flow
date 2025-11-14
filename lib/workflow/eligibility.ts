@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
 // import prisma from "../prisma";
-import prisma from "@/lib/prisma";
-import { checkWorkflowCredits } from "./creditCheck";
-import { WorkflowExecutionStatus, WorkflowStatus } from "@/types/workflow";
-import { createLogger } from "@/lib/log";
+import prisma from '@/lib/prisma';
+import { checkWorkflowCredits } from './creditCheck';
+import { WorkflowExecutionStatus, WorkflowStatus } from '@/types/workflow';
+import { createLogger } from '@/lib/log';
 
 /**
  * Checks if a workflow with scheduled cron job is eligible to run
@@ -28,7 +28,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
     nextScheduledRun?: Date | null;
   };
 }> {
-  const logger = createLogger("workflow/eligibility");
+  const logger = createLogger('workflow/eligibility');
   try {
     // Check if workflow exists and is published
     const workflow = await prisma.workflow.findUnique({
@@ -47,9 +47,9 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
     if (!workflow) {
       return {
         eligible: false,
-        status: "NOT_FOUND",
+        status: 'NOT_FOUND',
         details: {
-          reason: "Workflow not found",
+          reason: 'Workflow not found',
         },
       };
     }
@@ -58,7 +58,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
     if (workflow.status !== WorkflowStatus.PUBLISHED) {
       return {
         eligible: false,
-        status: "NOT_PUBLISHED",
+        status: 'NOT_PUBLISHED',
         details: {
           workflow: {
             id: workflow.id,
@@ -66,7 +66,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
             creditsCost: workflow.creditsCost,
             status: workflow.status,
           },
-          reason: "Workflow is not published",
+          reason: 'Workflow is not published',
         },
       };
     }
@@ -75,7 +75,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
     if (!workflow.cron) {
       return {
         eligible: false,
-        status: "NO_SCHEDULE",
+        status: 'NO_SCHEDULE',
         details: {
           workflow: {
             id: workflow.id,
@@ -83,7 +83,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
             creditsCost: workflow.creditsCost,
             status: workflow.status,
           },
-          reason: "Workflow has no schedule",
+          reason: 'Workflow has no schedule',
         },
       };
     }
@@ -94,7 +94,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
     if (!creditCheck.canExecute) {
       return {
         eligible: false,
-        status: "INSUFFICIENT_CREDITS",
+        status: 'INSUFFICIENT_CREDITS',
         details: {
           workflow: {
             id: workflow.id,
@@ -103,7 +103,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
             status: workflow.status,
           },
           userCredits: creditCheck.userCredits,
-          reason: creditCheck.reason || "Insufficient credits",
+          reason: creditCheck.reason || 'Insufficient credits',
           nextScheduledRun: workflow.nextRunAt,
         },
       };
@@ -112,7 +112,7 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
     // All checks passed
     return {
       eligible: true,
-      status: "READY",
+      status: 'READY',
       details: {
         workflow: {
           id: workflow.id,
@@ -130,9 +130,9 @@ export async function checkWorkflowEligibility(workflowId: string): Promise<{
     );
     return {
       eligible: false,
-      status: "ERROR",
+      status: 'ERROR',
       details: {
-        reason: "Error checking workflow eligibility",
+        reason: 'Error checking workflow eligibility',
       },
     };
   }

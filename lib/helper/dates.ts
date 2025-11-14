@@ -1,5 +1,5 @@
-import { Period } from "@/types/analytics";
-import { endOfMonth, intervalToDuration, startOfMonth } from "date-fns";
+import { Period } from '@/types/analytics';
+import { endOfMonth, intervalToDuration, startOfMonth } from 'date-fns';
 
 export function DatesToDurationString(
   end: Date | null | undefined,

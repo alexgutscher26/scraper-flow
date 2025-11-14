@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import puppeteer from "puppeteer";
-import http from "http";
-import { InterceptNetworkExecutor } from "@/lib/workflow/executor/InterceptNetworkExecutor";
-import { ExtractCssFromPageExecutor } from "@/lib/workflow/executor/ExtractCssFromPageExecutor";
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import puppeteer from 'puppeteer';
+import http from 'http';
+import { InterceptNetworkExecutor } from '@/lib/workflow/executor/InterceptNetworkExecutor';
+import { ExtractCssFromPageExecutor } from '@/lib/workflow/executor/ExtractCssFromPageExecutor';
 
 function env(page: any, inputs: Record<string, any>) {
   const outputs: Record<string, any> = {};
@@ -26,7 +26,7 @@ function env(page: any, inputs: Record<string, any>) {
   } as any;
 }
 
-describe("Advanced extraction integration", () => {
+describe('Advanced extraction integration', () => {
   let browser: any;
   let page: any;
   let server: any;
@@ -35,11 +35,11 @@ describe("Advanced extraction integration", () => {
     browser = await puppeteer.launch({ headless: true });
     page = await browser.newPage();
     server = http.createServer((req, res) => {
-      if (req.method === "POST" && req.url === "/api") {
-        res.setHeader("content-type", "application/json");
+      if (req.method === 'POST' && req.url === '/api') {
+        res.setHeader('content-type', 'application/json');
         res.end(JSON.stringify({ ok: true }));
       } else {
-        res.end("ok");
+        res.end('ok');
       }
     });
     await new Promise<void>((resolve) => server.listen(0, () => resolve()));
@@ -50,30 +50,30 @@ describe("Advanced extraction integration", () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   });
 
-  it.skip("intercepts network while extracting CSS", async () => {
+  it.skip('intercepts network while extracting CSS', async () => {
     await page.setContent(`<div class='name'>Alpha</div>`);
 
     const netInputs = {
-      "URL pattern": `/api/`,
-      "Resource type": "document",
-      "Method": "GET",
-      "Duration (ms)": 800,
-      "Max responses": 1,
-      "Include body": "true",
+      'URL pattern': `/api/`,
+      'Resource type': 'document',
+      Method: 'GET',
+      'Duration (ms)': 800,
+      'Max responses': 1,
+      'Include body': 'true',
     };
     const e1 = env(page, netInputs);
     const netRun = InterceptNetworkExecutor(e1);
     await page.goto(`http://localhost:${port}/api`);
     const netOk = await netRun;
     expect(netOk).toBe(true);
-    const responses = JSON.parse(e1.outputs["Responses JSON"]);
+    const responses = JSON.parse(e1.outputs['Responses JSON']);
     expect(Array.isArray(responses)).toBe(true);
 
-    const cssInputs = { "Selector": ".name", "Attribute": "textContent", "All elements": "false" };
+    const cssInputs = { Selector: '.name', Attribute: 'textContent', 'All elements': 'false' };
     const e2 = env(page, cssInputs);
     const cssOk = await ExtractCssFromPageExecutor(e2);
     expect(cssOk).toBe(true);
-    const name = JSON.parse(e2.outputs["Extracted data"]);
-    expect(name).toBe("Alpha");
+    const name = JSON.parse(e2.outputs['Extracted data']);
+    expect(name).toBe('Alpha');
   }, 15000);
 });

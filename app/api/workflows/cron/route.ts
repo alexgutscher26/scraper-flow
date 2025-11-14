@@ -1,16 +1,16 @@
-import { getAppUrl } from "@/lib/helper/appUrl";
-import prisma from "@/lib/prisma";
-import { checkWorkflowCredits } from "@/lib/workflow/creditCheck";
-import { WorkflowExecutionStatus, WorkflowStatus } from "@/types/workflow";
-import { parseWorkflowSchedule } from "@/lib/cron/scheduleParser";
-import { createLogger } from "@/lib/log";
-import { http } from "@/lib/http";
-import { rateLimit, applyRateLimitHeaders } from "@/lib/rateLimit";
+import { getAppUrl } from '@/lib/helper/appUrl';
+import prisma from '@/lib/prisma';
+import { checkWorkflowCredits } from '@/lib/workflow/creditCheck';
+import { WorkflowExecutionStatus, WorkflowStatus } from '@/types/workflow';
+import { parseWorkflowSchedule } from '@/lib/cron/scheduleParser';
+import { createLogger } from '@/lib/log';
+import { http } from '@/lib/http';
+import { rateLimit, applyRateLimitHeaders } from '@/lib/rateLimit';
 
 export async function GET(req: Request, res: Response) {
-  const logger = createLogger("api/workflows/cron");
-  const userId = req.headers.get("x-user-id");
-  const rl = await rateLimit("cron", userId);
+  const logger = createLogger('api/workflows/cron');
+  const userId = req.headers.get('x-user-id');
+  const rl = await rateLimit('cron', userId);
   const hdrs = new Headers();
   // Prefer the stricter of user/global (if user present)
   const active = userId ? rl.user.allowed && rl.global.allowed : rl.global.allowed;
@@ -63,13 +63,8 @@ export async function GET(req: Request, res: Response) {
       );
 
       // Import and use the logWorkflowCreditFailure function if the reason is insufficient credits
-      if (
-        creditCheckResult.reason === "insufficient_credits" &&
-        creditCheckResult.workflow
-      ) {
-        const { logWorkflowCreditFailure } = await import(
-          "@/lib/workflow/creditCheck"
-        );
+      if (creditCheckResult.reason === 'insufficient_credits' && creditCheckResult.workflow) {
+        const { logWorkflowCreditFailure } = await import('@/lib/workflow/creditCheck');
         await logWorkflowCreditFailure(
           creditCheckResult.workflow.id,
           creditCheckResult.workflow.userId,
@@ -128,16 +123,14 @@ export async function GET(req: Request, res: Response) {
  * Calculates the next run time based on the schedule expression
  * Supports both standard cron expressions and simplified interval formats
  */
-async function calculateNextRun(
-  scheduleExpression: string
-): Promise<Date | null> {
+async function calculateNextRun(scheduleExpression: string): Promise<Date | null> {
   const parsedSchedule = parseWorkflowSchedule(scheduleExpression);
 
   if (parsedSchedule.isValid && parsedSchedule.nextRunDate) {
     return parsedSchedule.nextRunDate;
   }
 
-  const logger = createLogger("api/workflows/cron");
+  const logger = createLogger('api/workflows/cron');
   logger.error(`Invalid schedule expression: ${scheduleExpression}`);
   return null;
 }
@@ -151,24 +144,22 @@ async function calculateNextRun(
  * @param {string} workflowId - The ID of the workflow to be triggered.
  */
 async function triggerWorkflow(workflowId: string) {
-  const triggerApiUrl = getAppUrl(
-    `api/workflows/execute?workflowId=${workflowId}`
-  );
+  const triggerApiUrl = getAppUrl(`api/workflows/execute?workflowId=${workflowId}`);
 
   try {
-    const logger = createLogger("api/workflows/cron");
+    const logger = createLogger('api/workflows/cron');
     logger.info(`Triggering workflow ${workflowId} (credit check passed)`);
     await http.request(triggerApiUrl, {
       headers: {
         Authorization: `Bearer ${process.env.API_SECRET!}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-      cache: "no-store",
-      method: "GET",
-    })
+      cache: 'no-store',
+      method: 'GET',
+    });
     logger.info(`Successfully triggered workflow ${workflowId}`);
   } catch (err: any) {
-    const logger = createLogger("api/workflows/cron");
+    const logger = createLogger('api/workflows/cron');
     logger.error(
       `Failed to trigger workflow ${workflowId}: ${err instanceof Error ? err.message : String(err)}`
     );

@@ -1,19 +1,16 @@
-import { TaskParamType, TaskType } from "@/types/TaskType";
-import { WorkflowTask } from "@/types/workflow";
-import { MousePointerClick } from "lucide-react";
+import { TaskParamType, TaskType } from '@/types/TaskType';
+import { WorkflowTask } from '@/types/workflow';
+import { MousePointerClick } from 'lucide-react';
 
 export const DoubleClickElementTask = {
   type: TaskType.DOUBLE_CLICK_ELEMENT,
-  label: "Double Click Element",
+  label: 'Double Click Element',
   icon: (props) => <MousePointerClick className="stroke-orange-600" {...props} />,
   isEntryPoint: false,
   credits: 1,
   inputs: [
-    { name: "Web page", type: TaskParamType.BROWSER_INSTANCE, required: true },
-    { name: "Selector", type: TaskParamType.STRING, required: true },
+    { name: 'Web page', type: TaskParamType.BROWSER_INSTANCE, required: true },
+    { name: 'Selector', type: TaskParamType.STRING, required: true },
   ] as const,
-  outputs: [
-    { name: "Web page", type: TaskParamType.BROWSER_INSTANCE },
-  ] as const,
+  outputs: [{ name: 'Web page', type: TaskParamType.BROWSER_INSTANCE }] as const,
 } satisfies WorkflowTask;
-

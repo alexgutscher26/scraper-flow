@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import http from "http";
-import { GraphQLQueryExecutor } from "@/lib/workflow/executor/GraphQLQueryExecutor";
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import http from 'http';
+import { GraphQLQueryExecutor } from '@/lib/workflow/executor/GraphQLQueryExecutor';
 
 function env(inputs: Record<string, any>) {
   const outputs: Record<string, any> = {};
@@ -24,21 +24,21 @@ function env(inputs: Record<string, any>) {
   } as any;
 }
 
-describe("GraphQLQueryExecutor", () => {
+describe('GraphQLQueryExecutor', () => {
   let server: any;
   let port: number;
   beforeAll(async () => {
     server = http.createServer((req, res) => {
-      if (req.method === "POST" && req.url === "/graphql") {
-        let body = "";
-        req.on("data", (chunk) => (body += chunk));
-        req.on("end", () => {
-          res.setHeader("content-type", "application/json");
+      if (req.method === 'POST' && req.url === '/graphql') {
+        let body = '';
+        req.on('data', (chunk) => (body += chunk));
+        req.on('end', () => {
+          res.setHeader('content-type', 'application/json');
           res.end(JSON.stringify({ data: { ok: true } }));
         });
       } else {
-        res.setHeader("content-type", "text/plain");
-        res.end("ok");
+        res.setHeader('content-type', 'text/plain');
+        res.end('ok');
       }
     });
     await new Promise<void>((resolve) => server.listen(0, () => resolve()));
@@ -48,18 +48,17 @@ describe("GraphQLQueryExecutor", () => {
     await new Promise<void>((resolve) => server.close(() => resolve()));
   });
 
-  it("posts query and returns JSON", async () => {
+  it('posts query and returns JSON', async () => {
     const inputs = {
-      "Endpoint URL": `http://localhost:${port}/graphql`,
-      "Query": "query { ok }",
-      "Variables JSON": "{}",
-      "Use browser context": "false",
+      'Endpoint URL': `http://localhost:${port}/graphql`,
+      Query: 'query { ok }',
+      'Variables JSON': '{}',
+      'Use browser context': 'false',
     };
     const e = env(inputs);
     const ok = await GraphQLQueryExecutor(e);
     expect(ok).toBe(true);
-    const data = JSON.parse(e.outputs["Response JSON"]);
+    const data = JSON.parse(e.outputs['Response JSON']);
     expect(data).toEqual({ data: { ok: true } });
   });
 });
-

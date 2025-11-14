@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { checkWorkflowRunEligibility } from "@/actions/workflows/checkWorkflowRunEligibility";
-import { Badge } from "@/components/ui/badge";
-import { CoinsIcon, AlertCircleIcon, CheckCircleIcon } from "lucide-react";
-import  TooltipWrapper  from "@/components/TooltipWrapper";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { checkWorkflowRunEligibility } from '@/actions/workflows/checkWorkflowRunEligibility';
+import { Badge } from '@/components/ui/badge';
+import { CoinsIcon, AlertCircleIcon, CheckCircleIcon } from 'lucide-react';
+import TooltipWrapper from '@/components/TooltipWrapper';
 
 /**
  * Component to display workflow eligibility status
@@ -27,7 +27,7 @@ export function WorkflowEligibilityStatus({
       const result = await checkWorkflowRunEligibility(workflowId);
       setEligibility(result);
     } catch (error) {
-      console.error("Error checking eligibility:", error);
+      console.error('Error checking eligibility:', error);
     } finally {
       setChecking(false);
     }
@@ -36,13 +36,8 @@ export function WorkflowEligibilityStatus({
   // If we haven't checked eligibility yet, show just a check button
   if (!eligibility) {
     return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={checkEligibility}
-        disabled={checking}
-      >
-        {checking ? "Checking..." : "Check Run Eligibility"}
+      <Button variant="outline" size="sm" onClick={checkEligibility} disabled={checking}>
+        {checking ? 'Checking...' : 'Check Run Eligibility'}
       </Button>
     );
   }
@@ -58,10 +53,8 @@ export function WorkflowEligibilityStatus({
         }
       >
         <Badge
-          variant={eligibility.eligible ? "outline" : "destructive"}
-          className={`space-x-2 ${
-            eligibility.eligible ? "text-green-600" : "text-destructive"
-          }`}
+          variant={eligibility.eligible ? 'outline' : 'destructive'}
+          className={`space-x-2 ${eligibility.eligible ? 'text-green-600' : 'text-destructive'}`}
         >
           {eligibility.eligible ? (
             <>

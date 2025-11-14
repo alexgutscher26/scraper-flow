@@ -1,5 +1,5 @@
-import { Node } from "@xyflow/react";
-import { TaskParam, TaskType } from "./TaskType";
+import { Node } from '@xyflow/react';
+import { TaskParam, TaskType } from './TaskType';
 
 export interface AppNodeData {
   type: TaskType;

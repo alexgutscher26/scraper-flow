@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { computeDelayMs } from "../../lib/politeness/delay";
-import { defaultPolitenessConfig } from "../../types/politeness";
+import { describe, it, expect } from 'vitest';
+import { computeDelayMs } from '../../lib/politeness/delay';
+import { defaultPolitenessConfig } from '../../types/politeness';
 
-describe("computeDelayMs", () => {
-  it("respects bounds", () => {
+describe('computeDelayMs', () => {
+  it('respects bounds', () => {
     const cfg = defaultPolitenessConfig();
     cfg.delays.enabled = true;
     cfg.delays.minMs = 100;

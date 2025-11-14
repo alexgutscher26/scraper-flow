@@ -1,4 +1,4 @@
-import { PolitenessConfig } from "@/types/politeness";
+import { PolitenessConfig } from '@/types/politeness';
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -15,7 +15,7 @@ export function computeDelayMs(config: PolitenessConfig) {
   const min = Math.max(0, config.delays.minMs);
   const max = Math.max(min, config.delays.maxMs);
   let base = 0;
-  if (config.delays.strategy === "uniform") {
+  if (config.delays.strategy === 'uniform') {
     base = min + Math.random() * (max - min);
   } else {
     const mean = (min + max) / 2;
@@ -30,4 +30,3 @@ export function computeDelayMs(config: PolitenessConfig) {
 export async function sleep(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
-

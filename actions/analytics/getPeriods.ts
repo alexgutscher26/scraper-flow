@@ -1,12 +1,12 @@
-"use server";
-import prisma from "@/lib/prisma";
-import { Period } from "@/types/analytics";
-import { auth } from "@clerk/nextjs/server";
+'use server';
+import prisma from '@/lib/prisma';
+import { Period } from '@/types/analytics';
+import { auth } from '@clerk/nextjs/server';
 
 export const GetPeriods = async () => {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("unauthorized");
+    throw new Error('unauthorized');
   }
   const years = await prisma.workflowExecution.aggregate({
     where: {

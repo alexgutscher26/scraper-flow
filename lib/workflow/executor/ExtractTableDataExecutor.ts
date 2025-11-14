@@ -1,24 +1,24 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { ExtractTableDataTask } from "../task/ExtractTableData";
-import * as cheerio from "cheerio";
+import { ExecutionEnvironment } from '@/types/executor';
+import { ExtractTableDataTask } from '../task/ExtractTableData';
+import * as cheerio from 'cheerio';
 
 export async function ExtractTableDataExecutor(
   environment: ExecutionEnvironment<typeof ExtractTableDataTask>
 ): Promise<boolean> {
   try {
-    const html = environment.getInput("Html");
+    const html = environment.getInput('Html');
     if (!html) {
-      environment.log.error("Input HTML is required");
+      environment.log.error('Input HTML is required');
       return false;
     }
 
-    const selector = environment.getInput("Table selector");
+    const selector = environment.getInput('Table selector');
     if (!selector) {
-      environment.log.error("Input Table selector is required");
+      environment.log.error('Input Table selector is required');
       return false;
     }
 
-    const outputFormat = environment.getInput("Output format") || "JSON";
+    const outputFormat = environment.getInput('Output format') || 'JSON';
 
     environment.log.info(`Extracting table data with selector: ${selector}`);
 
@@ -35,18 +35,18 @@ export async function ExtractTableDataExecutor(
 
     // Extract headers
     table
-      .find("thead tr, tr")
+      .find('thead tr, tr')
       .first()
-      .find("th, td")
+      .find('th, td')
       .each((_, cell) => {
         headers.push($(cell).text().trim());
       });
 
     // Extract rows
-    table.find("tbody tr, tr:not(:first-child)").each((_, row) => {
+    table.find('tbody tr, tr:not(:first-child)').each((_, row) => {
       const rowData: string[] = [];
       $(row)
-        .find("td, th")
+        .find('td, th')
         .each((_, cell) => {
           rowData.push($(cell).text().trim());
         });
@@ -63,27 +63,25 @@ export async function ExtractTableDataExecutor(
 
     let result: string;
 
-    if (outputFormat === "CSV") {
+    if (outputFormat === 'CSV') {
       // CSV format
       const csvRows = [headers, ...rows];
       result = csvRows
-        .map((row) =>
-          row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(",")
-        )
-        .join("\n");
+        .map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+        .join('\n');
     } else {
       // JSON format
       const jsonData = rows.map((row) => {
         const obj: Record<string, string> = {};
         headers.forEach((header, index) => {
-          obj[header] = row[index] || "";
+          obj[header] = row[index] || '';
         });
         return obj;
       });
       result = JSON.stringify(jsonData, null, 2);
     }
 
-    environment.setOutput("Table data", result);
+    environment.setOutput('Table data', result);
     environment.log.info(
       `Successfully extracted ${rows.length} rows from table in ${outputFormat} format`
     );

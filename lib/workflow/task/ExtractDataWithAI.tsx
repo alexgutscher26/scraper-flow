@@ -1,35 +1,35 @@
-import { TaskParamType, TaskType } from "@/types/TaskType";
-import { WorkflowTask } from "@/types/workflow";
-import { BrainIcon, MousePointerClick } from "lucide-react";
+import { TaskParamType, TaskType } from '@/types/TaskType';
+import { WorkflowTask } from '@/types/workflow';
+import { BrainIcon, MousePointerClick } from 'lucide-react';
 
 export const ExtractDataWithAITask = {
   type: TaskType.EXTRACT_DATA_WITH_AI,
-  label: "Extract Data With AI",
+  label: 'Extract Data With AI',
   icon: (props) => <BrainIcon className="stroke-rose-400" {...props} />,
   isEntryPoint: false,
   credits: 4,
   inputs: [
     {
-      name: "Content",
+      name: 'Content',
       type: TaskParamType.STRING,
       required: true,
     },
     {
-      name: "Credentials",
+      name: 'Credentials',
       type: TaskParamType.CREDENTIAL,
       required: true,
-      helperText: "API credentials for AI service",
+      helperText: 'API credentials for AI service',
     },
     {
-      name: "Prompt",
+      name: 'Prompt',
       type: TaskParamType.STRING,
       required: true,
-      variant: "textarea",
+      variant: 'textarea',
     },
   ] as const,
   outputs: [
     {
-      name: "Extracted data",
+      name: 'Extracted data',
       type: TaskParamType.STRING,
     },
   ] as const,

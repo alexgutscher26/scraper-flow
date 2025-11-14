@@ -1,6 +1,6 @@
-import type { Dispatcher } from "undici";
-import { ProxyAgent } from "undici";
-import { NetworkConfig, ProxyStats, ProxySelection } from "@/types/network";
+import type { Dispatcher } from 'undici';
+import { ProxyAgent } from 'undici';
+import { NetworkConfig, ProxyStats, ProxySelection } from '@/types/network';
 
 type Provider = {
   name: string;
@@ -12,22 +12,31 @@ export class ProxyManager {
   private providers: Provider[] = [];
   private stats = new Map<string, ProxyStats>();
   private healthCheckUrl: string;
-  private rotateStrategy: NonNullable<NetworkConfig["proxy"]>["rotateStrategy"];
+  private rotateStrategy: NonNullable<NetworkConfig['proxy']>['rotateStrategy'];
   private currentByDomain = new Map<string, string>();
   private currentSessionProxy?: string;
   private lock: Promise<void> = Promise.resolve();
   private failoverEnabled: boolean = false;
   private unavailable = new Map<string, number>();
 
-  constructor(cfg: NetworkConfig["proxy"] | undefined) {
-    this.providers = (cfg?.providers || []).map(p => ({ name: p.name, proxies: p.proxies, auth: p.auth }));
-    this.healthCheckUrl = cfg?.healthCheckUrl || "https://example.com";
-    this.rotateStrategy = cfg?.rotateStrategy || "perSession";
+  constructor(cfg: NetworkConfig['proxy'] | undefined) {
+    this.providers = (cfg?.providers || []).map((p) => ({
+      name: p.name,
+      proxies: p.proxies,
+      auth: p.auth,
+    }));
+    this.healthCheckUrl = cfg?.healthCheckUrl || 'https://example.com';
+    this.rotateStrategy = cfg?.rotateStrategy || 'perSession';
     this.failoverEnabled = !!cfg?.failoverEnabled;
   }
 
   private async withLock<T>(fn: () => Promise<T>): Promise<T> {
-    const next = (async () => { try { return await fn(); } finally {} })();
+    const next = (async () => {
+      try {
+        return await fn();
+      } finally {
+      }
+    })();
     this.lock = next.then(() => undefined);
     return next;
   }
@@ -36,7 +45,7 @@ export class ProxyManager {
    * Retrieves a flat array of all proxies from the providers.
    */
   private allProxies(): string[] {
-    return this.providers.flatMap(p => p.proxies);
+    return this.providers.flatMap((p) => p.proxies);
   }
 
   /**
@@ -44,7 +53,9 @@ export class ProxyManager {
    */
   private pickNext(exclude: Set<string> = new Set()): string | undefined {
     const now = Date.now();
-    const pool = this.allProxies().filter(p => !exclude.has(p) && (!this.failoverEnabled || ((this.unavailable.get(p) || 0) < now)));
+    const pool = this.allProxies().filter(
+      (p) => !exclude.has(p) && (!this.failoverEnabled || (this.unavailable.get(p) || 0) < now)
+    );
     if (!pool.length) return undefined;
     return pool[Math.floor(Math.random() * pool.length)];
   }
@@ -82,14 +93,16 @@ export class ProxyManager {
     const domain = u.hostname;
     return this.withLock(async () => {
       let selected: string | undefined;
-      if (this.rotateStrategy === "perDomain") selected = this.currentByDomain.get(domain);
-      if (!selected && this.rotateStrategy === "perSession") selected = this.currentSessionProxy;
+      if (this.rotateStrategy === 'perDomain') selected = this.currentByDomain.get(domain);
+      if (!selected && this.rotateStrategy === 'perSession') selected = this.currentSessionProxy;
       if (!selected) selected = this.pickNext();
       if (!selected) return { url };
       const auth = this.getAuth(selected);
-      if (this.rotateStrategy === "perDomain") this.currentByDomain.set(domain, selected);
-      if (this.rotateStrategy === "perSession") this.currentSessionProxy = selected;
-      const skipValidation = (this.rotateStrategy === "perDomain" && !!this.currentByDomain.get(domain)) || (this.rotateStrategy === "perSession" && !!this.currentSessionProxy)
+      if (this.rotateStrategy === 'perDomain') this.currentByDomain.set(domain, selected);
+      if (this.rotateStrategy === 'perSession') this.currentSessionProxy = selected;
+      const skipValidation =
+        (this.rotateStrategy === 'perDomain' && !!this.currentByDomain.get(domain)) ||
+        (this.rotateStrategy === 'perSession' && !!this.currentSessionProxy);
       if (this.failoverEnabled && !skipValidation) {
         let attempts = 0;
         while (attempts < 3) {
@@ -110,7 +123,10 @@ export class ProxyManager {
     if (!selection.proxy) return undefined;
     try {
       const u = new URL(selection.proxy);
-      if (selection.auth) { u.username = selection.auth.username; u.password = selection.auth.password; }
+      if (selection.auth) {
+        u.username = selection.auth.username;
+        u.password = selection.auth.password;
+      }
       return new ProxyAgent(u.toString());
     } catch {
       return new ProxyAgent(selection.proxy);
@@ -132,7 +148,8 @@ export class ProxyManager {
     const s = this.stats.get(selection.proxy) || { totalRequests: 0, successes: 0, failures: 0 };
     s.totalRequests += 1;
     s.successes += 1;
-    s.avgLatencyMs = s.avgLatencyMs == null ? latencyMs : Math.round((s.avgLatencyMs * 0.9) + (latencyMs * 0.1));
+    s.avgLatencyMs =
+      s.avgLatencyMs == null ? latencyMs : Math.round(s.avgLatencyMs * 0.9 + latencyMs * 0.1);
     this.stats.set(selection.proxy, s);
   }
 
@@ -170,7 +187,12 @@ export class ProxyManager {
       const dispatcher = this.dispatcherFor(selection);
       const controller = new AbortController();
       const t = setTimeout(() => controller.abort(), 1000);
-      const res = await fetch(this.healthCheckUrl, { method: "HEAD", cache: "no-cache", dispatcher: dispatcher as any, signal: controller.signal as any });
+      const res = await fetch(this.healthCheckUrl, {
+        method: 'HEAD',
+        cache: 'no-cache',
+        dispatcher: dispatcher as any,
+        signal: controller.signal as any,
+      });
       clearTimeout(t);
       return res.ok;
     } catch {

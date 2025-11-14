@@ -1,14 +1,14 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { ClickElementTask } from "../task/ClickElement";
-import { computeDelayMs, sleep } from "@/lib/politeness/delay";
+import { ExecutionEnvironment } from '@/types/executor';
+import { ClickElementTask } from '../task/ClickElement';
+import { computeDelayMs, sleep } from '@/lib/politeness/delay';
 
 export async function ClickElementExecutor(
   environment: ExecutionEnvironment<typeof ClickElementTask>
 ): Promise<boolean> {
   try {
-    const selector = environment.getInput("Selector");
+    const selector = environment.getInput('Selector');
     if (!selector) {
-      environment.log.error("Input Selector is required");
+      environment.log.error('Input Selector is required');
     }
 
     const cfg = environment.getPolitenessConfig?.();

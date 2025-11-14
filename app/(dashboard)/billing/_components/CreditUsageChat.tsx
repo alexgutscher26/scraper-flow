@@ -1,34 +1,28 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React, { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import { ChartColumnStacked, TrendingUp, TrendingDown, CoinsIcon, AlertCircle } from "lucide-react";
-import { GetCreditUsageInPeriod } from "@/actions/analytics/getCreditUsageInPeriod";
+} from '@/components/ui/chart';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { ChartColumnStacked, TrendingUp, TrendingDown, CoinsIcon, AlertCircle } from 'lucide-react';
+import { GetCreditUsageInPeriod } from '@/actions/analytics/getCreditUsageInPeriod';
 
 type ChartData = Awaited<ReturnType<typeof GetCreditUsageInPeriod>>;
 
 const chartConfig = {
   success: {
-    label: "Successful Phase Credits",
-    color: "hsl(142, 76%, 36%)",
+    label: 'Successful Phase Credits',
+    color: 'hsl(142, 76%, 36%)',
   },
   failed: {
-    label: "Failed Phase Credits",
-    color: "hsl(0, 84%, 60%)",
+    label: 'Failed Phase Credits',
+    color: 'hsl(0, 84%, 60%)',
   },
 };
 
@@ -60,12 +54,12 @@ export default function CreditUsageChart({
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-lg">
       {/* Header */}
-      <CardHeader className="pb-4 bg-gradient-to-br from-background to-muted/20">
+      <CardHeader className="bg-gradient-to-br from-background to-muted/20 pb-4">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <ChartColumnStacked className="w-5 h-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-2xl font-bold">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <ChartColumnStacked className="h-5 w-5 text-primary" />
               </div>
               {title}
             </CardTitle>
@@ -74,8 +68,8 @@ export default function CreditUsageChart({
 
           {/* Efficiency indicator */}
           {totalCredits > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-              <CoinsIcon className="w-4 h-4 text-primary" />
+            <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5">
+              <CoinsIcon className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold text-primary">{successRate}% Efficient</span>
             </div>
           )}
@@ -85,35 +79,41 @@ export default function CreditUsageChart({
       <CardContent className="pt-6">
         {/* Stats Summary */}
         {data && data.length > 0 && (
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="p-4 rounded-lg bg-muted/50 border border-border transition-all hover:shadow-md hover:border-primary/30">
-              <div className="flex items-center gap-2 mb-1">
-                <CoinsIcon className="w-4 h-4 text-muted-foreground" />
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total</p>
+          <div className="mb-6 grid grid-cols-4 gap-4">
+            <div className="rounded-lg border border-border bg-muted/50 p-4 transition-all hover:border-primary/30 hover:shadow-md">
+              <div className="mb-1 flex items-center gap-2">
+                <CoinsIcon className="h-4 w-4 text-muted-foreground" />
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Total
+                </p>
               </div>
               <p className="text-2xl font-bold">{totalCredits.toLocaleString()}</p>
             </div>
-            
-            <div className="p-4 rounded-lg bg-green-500/5 border border-green-500/20 transition-all hover:shadow-md hover:border-green-500/40">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                <p className="text-xs font-medium text-green-700 uppercase tracking-wide">Successful</p>
+
+            <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 transition-all hover:border-green-500/40 hover:shadow-md">
+              <div className="mb-1 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
+                <p className="text-xs font-medium uppercase tracking-wide text-green-700">
+                  Successful
+                </p>
               </div>
               <p className="text-2xl font-bold text-green-700">{totalSuccess.toLocaleString()}</p>
             </div>
-            
-            <div className="p-4 rounded-lg bg-red-500/5 border border-red-500/20 transition-all hover:shadow-md hover:border-red-500/40">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertCircle className="w-4 h-4 text-red-600" />
-                <p className="text-xs font-medium text-red-700 uppercase tracking-wide">Failed</p>
+
+            <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 transition-all hover:border-red-500/40 hover:shadow-md">
+              <div className="mb-1 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <p className="text-xs font-medium uppercase tracking-wide text-red-700">Failed</p>
               </div>
               <p className="text-2xl font-bold text-red-700">{totalFailed.toLocaleString()}</p>
             </div>
 
-            <div className="p-4 rounded-lg bg-blue-500/5 border border-blue-500/20 transition-all hover:shadow-md hover:border-blue-500/40">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-4 h-4 text-blue-600" />
-                <p className="text-xs font-medium text-blue-700 uppercase tracking-wide">Daily Avg</p>
+            <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 transition-all hover:border-blue-500/40 hover:shadow-md">
+              <div className="mb-1 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <p className="text-xs font-medium uppercase tracking-wide text-blue-700">
+                  Daily Avg
+                </p>
               </div>
               <p className="text-2xl font-bold text-blue-700">{averageDaily}</p>
             </div>
@@ -139,9 +139,9 @@ export default function CreditUsageChart({
                   }}
                   onMouseLeave={() => setHoveredBar(null)}
                 >
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    vertical={false} 
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
                     stroke="hsl(var(--border))"
                     opacity={0.3}
                   />
@@ -154,16 +154,13 @@ export default function CreditUsageChart({
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                     tickFormatter={(value) => {
                       const date = new Date(value);
-                      return date.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
+                      return date.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
                       });
                     }}
                   />
-                  <YAxis 
-                    hide 
-                    domain={[0, "dataMax + 100"]}
-                  />
+                  <YAxis hide domain={[0, 'dataMax + 100']} />
                   <ChartLegend content={<ChartLegendContent />} />
                   <ChartTooltip
                     content={<ChartTooltipContent className="w-[220px]" />}
@@ -188,10 +185,14 @@ export default function CreditUsageChart({
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex flex-col items-center justify-center h-[240px] text-center">
-                <ChartColumnStacked className="w-12 h-12 text-muted-foreground/20 mb-3" />
-                <p className="text-sm font-medium text-muted-foreground">No credit usage data available</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">Data will appear once workflows consume credits</p>
+              <div className="flex h-[240px] flex-col items-center justify-center text-center">
+                <ChartColumnStacked className="mb-3 h-12 w-12 text-muted-foreground/20" />
+                <p className="text-sm font-medium text-muted-foreground">
+                  No credit usage data available
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground/70">
+                  Data will appear once workflows consume credits
+                </p>
               </div>
             )}
           </ChartContainer>
@@ -199,18 +200,19 @@ export default function CreditUsageChart({
 
         {/* Peak usage insight */}
         {peakDay && totalCredits > 0 && (
-          <div className="mt-4 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+          <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
             <div className="flex items-start gap-2">
-              <TrendingUp className="w-4 h-4 text-amber-600 mt-0.5" />
+              <TrendingUp className="mt-0.5 h-4 w-4 text-amber-600" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
                   Peak Usage Day
                 </p>
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
-                  {new Date(peakDay.date).toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                  })} used {((peakDay.success || 0) + (peakDay.failed || 0)).toLocaleString()} credits
+                <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
+                  {new Date(peakDay.date).toLocaleDateString('en-US', {
+                    month: 'long',
+                    day: 'numeric',
+                  })}{' '}
+                  used {((peakDay.success || 0) + (peakDay.failed || 0)).toLocaleString()} credits
                 </p>
               </div>
             </div>

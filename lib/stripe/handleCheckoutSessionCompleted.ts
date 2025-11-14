@@ -1,26 +1,24 @@
-import "server-only";
-import Stripe from "stripe";
-import { getCreditsPack, PackId } from "@/types/billing";
+import 'server-only';
+import Stripe from 'stripe';
+import { getCreditsPack, PackId } from '@/types/billing';
 // import prisma from "../prisma";
-import prisma from "@/lib/prisma";
+import prisma from '@/lib/prisma';
 
-export async function HandleCheckoutSessionCompleted(
-  event: Stripe.Checkout.Session
-) {
-  console.log("Handling checkout session completed event");
+export async function HandleCheckoutSessionCompleted(event: Stripe.Checkout.Session) {
+  console.log('Handling checkout session completed event');
   if (!event.metadata) {
-    throw new Error("No metadata found");
+    throw new Error('No metadata found');
   }
   const { userId, packId } = event.metadata;
   if (!userId) {
-    throw new Error("Missing userId");
+    throw new Error('Missing userId');
   }
   if (!packId) {
-    throw new Error("Missing packId");
+    throw new Error('Missing packId');
   }
   const purchasePack = getCreditsPack(packId as PackId);
   if (!purchasePack) {
-    throw new Error("Invalid Package");
+    throw new Error('Invalid Package');
   }
   await prisma.userBalance.upsert({
     where: { userId },
@@ -44,5 +42,5 @@ export async function HandleCheckoutSessionCompleted(
       currency: event.currency!,
     },
   });
-  console.log("Checkout session completed event handled successfully");
+  console.log('Checkout session completed event handled successfully');
 }

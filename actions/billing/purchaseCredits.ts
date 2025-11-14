@@ -1,23 +1,23 @@
-"use server";
+'use server';
 
-import { getAppUrl } from "@/lib/helper/appUrl";
-import { stripe } from "@/lib/stripe/stripe";
-import { getCreditsPack, PackId } from "@/types/billing";
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { getAppUrl } from '@/lib/helper/appUrl';
+import { stripe } from '@/lib/stripe/stripe';
+import { getCreditsPack, PackId } from '@/types/billing';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 
 export const PurchaseCredits = async (packId: PackId) => {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("unauthorized");
+    throw new Error('unauthorized');
   }
   const selectedPack = getCreditsPack(packId);
   if (!selectedPack) {
-    throw new Error("Invalid pack ");
+    throw new Error('Invalid pack ');
   }
   const priceId = selectedPack.priceId;
   const session = await stripe.checkout.sessions.create({
-    mode: "payment",
+    mode: 'payment',
     invoice_creation: {
       enabled: true,
     },
@@ -32,12 +32,12 @@ export const PurchaseCredits = async (packId: PackId) => {
       userId,
       packId,
     },
-    success_url: getAppUrl("billing"),
-    cancel_url: getAppUrl("billing"),
+    success_url: getAppUrl('billing'),
+    cancel_url: getAppUrl('billing'),
   });
 
   if (!session.url) {
-    throw new Error("Cannot create stripe session");
+    throw new Error('Cannot create stripe session');
   }
 
   redirect(session.url);

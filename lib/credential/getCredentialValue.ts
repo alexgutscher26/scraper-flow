@@ -1,9 +1,6 @@
-import prisma from "@/lib/prisma";
-import {
-  formatCredentialForExecutor,
-  decryptCredential,
-} from "./credentialHelper";
-import { CredentialAccessContext, logCredentialAccess } from "./audit";
+import prisma from '@/lib/prisma';
+import { formatCredentialForExecutor, decryptCredential } from './credentialHelper';
+import { CredentialAccessContext, logCredentialAccess } from './audit';
 
 /**
  * Gets a credential by ID and returns the formatted value for use in executors.
@@ -22,7 +19,7 @@ export async function getCredentialValue(
   context?: CredentialAccessContext
 ): Promise<string> {
   if (!credentialId || !userId) {
-    throw new Error("Credential ID and User ID are required");
+    throw new Error('Credential ID and User ID are required');
   }
   const credential = await prisma.credential.findFirst({
     where: {
@@ -35,15 +32,15 @@ export async function getCredentialValue(
     await logCredentialAccess({
       userId,
       credentialId,
-      credentialName: "",
-      credentialType: "",
-      requester: context?.requester || "workflow/executor",
-      method: context?.method || "db",
-      outcome: "failure",
+      credentialName: '',
+      credentialType: '',
+      requester: context?.requester || 'workflow/executor',
+      method: context?.method || 'db',
+      outcome: 'failure',
       correlationId: context?.correlationId,
-      errorMessage: "Credential not found",
+      errorMessage: 'Credential not found',
     });
-    throw new Error("Credential not found");
+    throw new Error('Credential not found');
   }
 
   const decryptedCredential = decryptCredential({
@@ -56,9 +53,9 @@ export async function getCredentialValue(
     credentialId,
     credentialName: credential.name,
     credentialType: credential.type,
-    requester: context?.requester || "workflow/executor",
-    method: context?.method || "db",
-    outcome: "success",
+    requester: context?.requester || 'workflow/executor',
+    method: context?.method || 'db',
+    outcome: 'success',
     correlationId: context?.correlationId,
     accessedValue: formatted,
   });
@@ -74,7 +71,7 @@ export async function getCredentialValueByName(
   context?: CredentialAccessContext
 ): Promise<string> {
   if (!credentialName || !userId) {
-    throw new Error("Credential name and User ID are required");
+    throw new Error('Credential name and User ID are required');
   }
   const credential = await prisma.credential.findFirst({
     where: {
@@ -86,16 +83,16 @@ export async function getCredentialValueByName(
   if (!credential) {
     await logCredentialAccess({
       userId,
-      credentialId: "",
+      credentialId: '',
       credentialName: credentialName,
-      credentialType: "",
-      requester: context?.requester || "workflow/executor",
-      method: context?.method || "db",
-      outcome: "failure",
+      credentialType: '',
+      requester: context?.requester || 'workflow/executor',
+      method: context?.method || 'db',
+      outcome: 'failure',
       correlationId: context?.correlationId,
-      errorMessage: "Credential not found",
+      errorMessage: 'Credential not found',
     });
-    throw new Error("Credential not found");
+    throw new Error('Credential not found');
   }
 
   const decryptedCredential = decryptCredential({
@@ -108,9 +105,9 @@ export async function getCredentialValueByName(
     credentialId: credential.id,
     credentialName: credential.name,
     credentialType: credential.type,
-    requester: context?.requester || "workflow/executor",
-    method: context?.method || "db",
-    outcome: "success",
+    requester: context?.requester || 'workflow/executor',
+    method: context?.method || 'db',
+    outcome: 'success',
     correlationId: context?.correlationId,
     accessedValue: formatted,
   });

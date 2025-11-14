@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
-import Image from "next/image";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
+import Image from 'next/image';
 
 interface ScreenshotDownloadProps {
   dataUrl: string;
@@ -15,17 +15,17 @@ interface ScreenshotDownloadProps {
  */
 export const ScreenshotDownload = ({
   dataUrl,
-  fileName = "screenshot",
+  fileName = 'screenshot',
 }: ScreenshotDownloadProps) => {
   // Add proper file extension based on image type
   const getFileNameWithExtension = () => {
-    const extension = dataUrl.startsWith("data:image/jpeg") ? ".jpg" : ".png";
+    const extension = dataUrl.startsWith('data:image/jpeg') ? '.jpg' : '.png';
     return `${fileName}${extension}`;
   };
 
   const handleDownload = () => {
     // Create an anchor element
-    const downloadLink = document.createElement("a");
+    const downloadLink = document.createElement('a');
 
     // Set the href to the data URL
     downloadLink.href = dataUrl;
@@ -44,7 +44,7 @@ export const ScreenshotDownload = ({
   };
   return (
     <div className="flex flex-col items-center space-y-2">
-      <div className="relative border rounded-lg overflow-hidden shadow-sm">
+      <div className="relative overflow-hidden rounded-lg border shadow-sm">
         {/* 
           We must use the regular img tag here because Next.js Image component
           doesn't support data URLs. This is a specific use case for screenshots
@@ -54,8 +54,8 @@ export const ScreenshotDownload = ({
         <img
           src={dataUrl}
           alt={`Screenshot: ${fileName}`}
-          className="max-w-full h-auto"
-          style={{ maxHeight: "300px" }}
+          className="h-auto max-w-full"
+          style={{ maxHeight: '300px' }}
         />
         <Button
           variant="outline"
@@ -63,7 +63,7 @@ export const ScreenshotDownload = ({
           className="absolute bottom-2 right-2 bg-background/80 hover:bg-background"
           onClick={handleDownload}
         >
-          <Download className="h-4 w-4 mr-1" />
+          <Download className="mr-1 h-4 w-4" />
           Download
         </Button>
       </div>

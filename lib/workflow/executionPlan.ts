@@ -1,16 +1,12 @@
-import { AppNode, AppNodeMissingInputs } from "@/types/appNode";
-import {
-  WorkflowExecutionPlan,
-  WorkflowExecutionPlanPhase,
-  RetryPolicy,
-} from "@/types/workflow";
-import { Edge } from "@xyflow/react";
-import { TaskRegistry } from "./task/registry";
-import { createLogger } from "@/lib/log";
+import { AppNode, AppNodeMissingInputs } from '@/types/appNode';
+import { WorkflowExecutionPlan, WorkflowExecutionPlanPhase, RetryPolicy } from '@/types/workflow';
+import { Edge } from '@xyflow/react';
+import { TaskRegistry } from './task/registry';
+import { createLogger } from '@/lib/log';
 
 export enum FlowToExecutionPlanValidationError {
-  "NO_ENTRY_POINT",
-  "INVALID_INPUTS",
+  'NO_ENTRY_POINT',
+  'INVALID_INPUTS',
 }
 type FlowToExecutionPlanType = {
   executionPlan?: WorkflowExecutionPlan;
@@ -25,10 +21,8 @@ export function FlowToExecutionPlan(
   edges: Edge[],
   options?: { retryPolicy?: RetryPolicy }
 ): FlowToExecutionPlanType {
-  const logger = createLogger("workflow/executionPlan");
-  const entryPoint = nodes.find(
-    (node) => TaskRegistry[node.data.type].isEntryPoint
-  );
+  const logger = createLogger('workflow/executionPlan');
+  const entryPoint = nodes.find((node) => TaskRegistry[node.data.type].isEntryPoint);
   if (!entryPoint) {
     return {
       error: {
@@ -54,11 +48,7 @@ export function FlowToExecutionPlan(
     },
   ];
   planned.add(entryPoint.id);
-  for (
-    let phase = 2;
-    phase <= nodes.length && planned.size < nodes.length;
-    phase++
-  ) {
+  for (let phase = 2; phase <= nodes.length && planned.size < nodes.length; phase++) {
     const nextPhase: WorkflowExecutionPlanPhase = {
       phase,
       nodes: [],
@@ -121,13 +111,9 @@ function getInvalidInputs(node: AppNode, edges: Edge[], planned: Set<string>) {
     }
     // If the input value is not provided then we need to check if it is connected
     const incommingEdge = edges.filter((edge) => edge.target === node.id);
-    const inputLinkedToOutput = incommingEdge.find(
-      (edge) => edge.targetHandle === input.name
-    );
+    const inputLinkedToOutput = incommingEdge.find((edge) => edge.targetHandle === input.name);
     const requiredInputProvidedByVisitedOutput =
-      input.required &&
-      inputLinkedToOutput &&
-      planned.has(inputLinkedToOutput.source);
+      input.required && inputLinkedToOutput && planned.has(inputLinkedToOutput.source);
 
     if (requiredInputProvidedByVisitedOutput) {
       // If the required input is provided by a visited output then it is valid
@@ -148,11 +134,7 @@ function getInvalidInputs(node: AppNode, edges: Edge[], planned: Set<string>) {
   return invalidInputs;
 }
 
-export const getIncomers = (
-  node: AppNode,
-  nodes: AppNode[],
-  edges: Edge[]
-): AppNode[] => {
+export const getIncomers = (node: AppNode, nodes: AppNode[], edges: Edge[]): AppNode[] => {
   if (!node.id) {
     return [];
   }

@@ -1,7 +1,7 @@
-import useFlowValidation from "@/components/hooks/useFlowValidation";
-import { cn } from "@/lib/utils";
-import { useReactFlow } from "@xyflow/react";
-import React from "react";
+import useFlowValidation from '@/components/hooks/useFlowValidation';
+import { cn } from '@/lib/utils';
+import { useReactFlow } from '@xyflow/react';
+import React from 'react';
 
 interface Props {
   nodeId: string;
@@ -12,9 +12,7 @@ function NodeCard(props: Props) {
   const { nodeId, children, isSelected } = props;
   const { getNode, setCenter } = useReactFlow();
   const { invalidInputs } = useFlowValidation();
-  const hasInvalidInputs = invalidInputs.some(
-    (input) => input.nodeId === nodeId
-  );
+  const hasInvalidInputs = invalidInputs.some((input) => input.nodeId === nodeId);
   return (
     <div
       onDoubleClick={(e) => {
@@ -32,9 +30,9 @@ function NodeCard(props: Props) {
         });
       }}
       className={cn(
-        "rounded-md cursor-pointer bg-background border-2 border-separate w-[420px] text-xs gap-1 flex flex-col",
-        isSelected && "border-primary",
-        hasInvalidInputs && "border-destructive border-2"
+        'flex w-[420px] border-separate cursor-pointer flex-col gap-1 rounded-md border-2 bg-background text-xs',
+        isSelected && 'border-primary',
+        hasInvalidInputs && 'border-2 border-destructive'
       )}
       id={nodeId}
     >

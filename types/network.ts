@@ -5,7 +5,7 @@ export type ProxyConfig = {
     proxies: string[];
     auth?: Record<string, { username: string; password: string }>;
   }>;
-  rotateStrategy?: "perSession" | "perDomain" | "perRequest";
+  rotateStrategy?: 'perSession' | 'perDomain' | 'perRequest';
   healthCheckUrl?: string;
   failoverEnabled?: boolean;
 };
@@ -48,13 +48,13 @@ export type NetworkState = {
 };
 
 export function defaultNetworkConfig(): NetworkConfig {
-  const enabled = process.env.NETWORK_PROXY_ENABLED === "true";
-  const rotateStrategy = (process.env.NETWORK_PROXY_ROTATE_STRATEGY as any) || "perSession";
-  const healthCheckUrl = process.env.NETWORK_PROXY_HEALTHCHECK_URL || "https://example.com";
-  const cookiesEnabled = process.env.NETWORK_COOKIES_ENABLED !== "false";
-  const persist = process.env.NETWORK_COOKIES_PERSIST !== "false";
-  const sessionTtlMs = Number(process.env.NETWORK_SESSION_TTL_MS || "1800000");
-  const httpUseJar = process.env.NETWORK_HTTP_USE_JAR !== "false";
+  const enabled = process.env.NETWORK_PROXY_ENABLED === 'true';
+  const rotateStrategy = (process.env.NETWORK_PROXY_ROTATE_STRATEGY as any) || 'perSession';
+  const healthCheckUrl = process.env.NETWORK_PROXY_HEALTHCHECK_URL || 'https://example.com';
+  const cookiesEnabled = process.env.NETWORK_COOKIES_ENABLED !== 'false';
+  const persist = process.env.NETWORK_COOKIES_PERSIST !== 'false';
+  const sessionTtlMs = Number(process.env.NETWORK_SESSION_TTL_MS || '1800000');
+  const httpUseJar = process.env.NETWORK_HTTP_USE_JAR !== 'false';
   return {
     proxy: {
       enabled,

@@ -1,19 +1,19 @@
-import { ExecutionEnvironment } from "@/types/executor";
-import { WaitDelayTask } from "../task/WaitDelay";
+import { ExecutionEnvironment } from '@/types/executor';
+import { WaitDelayTask } from '../task/WaitDelay';
 
 export async function WaitDelayExecutor(
   environment: ExecutionEnvironment<typeof WaitDelayTask>
 ): Promise<boolean> {
   try {
-    const seconds = environment.getInput("Delay (seconds)");
+    const seconds = environment.getInput('Delay (seconds)');
     if (!seconds) {
-      environment.log.error("Input Delay (seconds) is required");
+      environment.log.error('Input Delay (seconds) is required');
       return false;
     }
 
     const numericSeconds = Number(seconds);
     if (isNaN(numericSeconds) || numericSeconds < 0) {
-      environment.log.error("Seconds must be a valid non-negative number");
+      environment.log.error('Seconds must be a valid non-negative number');
       return false;
     }
 

@@ -31,4 +31,3 @@
 
 - Provide captcha provider secret via a credential (API Key type or custom with `secret`).
 - No external solver integration included; token extraction relies on page token availability.
-

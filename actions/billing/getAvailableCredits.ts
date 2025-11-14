@@ -1,12 +1,12 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import prisma from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
 
 export async function GetAvailableCredits() {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
   const balance = await prisma.userBalance.upsert({
     where: { userId },

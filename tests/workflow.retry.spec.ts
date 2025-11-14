@@ -1,10 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
-import { BackoffStrategy, defaultRetryPolicy, RetryPolicy } from "@/types/workflow";
-vi.mock("server-only", () => ({}));
-import * as ew from "@/lib/workflow/retry";
+import { describe, it, expect, vi } from 'vitest';
+import { BackoffStrategy, defaultRetryPolicy, RetryPolicy } from '@/types/workflow';
+vi.mock('server-only', () => ({}));
+import * as ew from '@/lib/workflow/retry';
 
-describe("computeRetryBackoffMs", () => {
-  it("computes exponential backoff without jitter", async () => {
+describe('computeRetryBackoffMs', () => {
+  it('computes exponential backoff without jitter', async () => {
     const policy: RetryPolicy = {
       ...defaultRetryPolicy(),
       initialDelayMs: 1000,
@@ -21,8 +21,8 @@ describe("computeRetryBackoffMs", () => {
   }, 10000);
 });
 
-describe("runWithRetry", () => {
-  it("succeeds without retries when attempt function returns true", async () => {
+describe('runWithRetry', () => {
+  it('succeeds without retries when attempt function returns true', async () => {
     const policy = { ...defaultRetryPolicy(), jitterPct: 0 };
     const sleepFn = vi.fn(async (_ms: number) => {});
     const attemptFn = vi.fn(async () => true);
@@ -33,7 +33,7 @@ describe("runWithRetry", () => {
     expect(sleepFn).not.toHaveBeenCalled();
   }, 10000);
 
-  it("retries up to maxAttempts and fails", async () => {
+  it('retries up to maxAttempts and fails', async () => {
     const policy: RetryPolicy = { ...defaultRetryPolicy(), maxAttempts: 3, jitterPct: 0 };
     const sleepFn = vi.fn(async (_ms: number) => {});
     let count = 0;
@@ -48,9 +48,16 @@ describe("runWithRetry", () => {
     expect(sleepFn).toHaveBeenCalledTimes(2); // between attempts
   });
 
-  it("observes backoff timing with fake timers", async () => {
+  it('observes backoff timing with fake timers', async () => {
     vi.useFakeTimers();
-    const policy: RetryPolicy = { ...defaultRetryPolicy(), maxAttempts: 4, initialDelayMs: 500, multiplier: 2, maxDelayMs: 5000, jitterPct: 0 };
+    const policy: RetryPolicy = {
+      ...defaultRetryPolicy(),
+      maxAttempts: 4,
+      initialDelayMs: 500,
+      multiplier: 2,
+      maxDelayMs: 5000,
+      jitterPct: 0,
+    };
     const sleepFn = async (ms: number) => {
       await vi.advanceTimersByTimeAsync(ms);
     };
@@ -71,16 +78,21 @@ describe("runWithRetry", () => {
   });
 });
 
-describe("concurrent runWithRetry stress", () => {
-  it("runs multiple independent retry loops without shared state", async () => {
+describe('concurrent runWithRetry stress', () => {
+  it('runs multiple independent retry loops without shared state', async () => {
     const policy: RetryPolicy = { ...defaultRetryPolicy(), maxAttempts: 2, jitterPct: 0 };
     const sleepFn = vi.fn(async (_ms: number) => {});
     const mkJob = (successOn: number) => {
       let call = 0;
-      return ew.runWithRetry(async () => {
-        call++;
-        return call >= successOn;
-      }, policy, sleepFn, { warn: vi.fn() } as any);
+      return ew.runWithRetry(
+        async () => {
+          call++;
+          return call >= successOn;
+        },
+        policy,
+        sleepFn,
+        { warn: vi.fn() } as any
+      );
     };
     const [a, b, c] = await Promise.all([mkJob(1), mkJob(2), mkJob(3)]);
     expect(a.success).toBe(true);

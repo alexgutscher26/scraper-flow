@@ -1,14 +1,14 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import prisma from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
 
 export async function DeleteWorkflow(id: string) {
   const { userId } = await auth();
 
   if (!userId) {
-    throw new Error("Unauthorized");
+    throw new Error('Unauthorized');
   }
   await prisma.workflow.delete({
     where: {
@@ -16,5 +16,5 @@ export async function DeleteWorkflow(id: string) {
       userId,
     },
   });
-  revalidatePath("/workflows");
+  revalidatePath('/workflows');
 }

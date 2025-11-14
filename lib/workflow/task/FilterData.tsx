@@ -1,30 +1,30 @@
-import {  TaskParamType, TaskType } from "@/types/TaskType";
-import { WorkflowTask } from "@/types/workflow";
-import { Filter } from "lucide-react";
+import { TaskParamType, TaskType } from '@/types/TaskType';
+import { WorkflowTask } from '@/types/workflow';
+import { Filter } from 'lucide-react';
 
 export const FilterDataTask = {
- type:TaskType.FILTER_DATA,
-  label: "Extract Table Data",
+  type: TaskType.FILTER_DATA,
+  label: 'Extract Table Data',
   icon: (props) => <Filter {...props} />,
   isEntryPoint: false,
   credits: 3,
   inputs: [
     {
-      name: "data",
+      name: 'data',
       type: TaskParamType.JSON,
-      label: "Data",
+      label: 'Data',
     },
     {
-      name: "query",
+      name: 'query',
       type: TaskParamType.STRING,
-      label: "Query",
+      label: 'Query',
     },
   ] as const,
   outputs: [
     {
-      name: "filteredData",
+      name: 'filteredData',
       type: TaskParamType.JSON,
-      label: "Filtered Data",
+      label: 'Filtered Data',
     },
   ] as const,
-}satisfies WorkflowTask;
+} satisfies WorkflowTask;

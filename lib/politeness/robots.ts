@@ -1,13 +1,15 @@
-import { PolitenessConfig, PolitenessState, RobotsRules } from "@/types/politeness";
-import { http } from "@/lib/http";
+import { PolitenessConfig, PolitenessState, RobotsRules } from '@/types/politeness';
+import { http } from '@/lib/http';
 
 async function fetchRobots(domain: string, ua?: string) {
   try {
-    const text = await http.request<string>(`https://${domain}/robots.txt`, { headers: ua ? { "user-agent": ua } : undefined });
-    if (!text) return "";
+    const text = await http.request<string>(`https://${domain}/robots.txt`, {
+      headers: ua ? { 'user-agent': ua } : undefined,
+    });
+    if (!text) return '';
     return text;
   } catch {
-    return "";
+    return '';
   }
 }
 
@@ -16,39 +18,44 @@ export function parseRobots(content: string): RobotsRules {
   const groups: { agents: string[]; allow: string[]; disallow: string[] }[] = [];
   let current: { agents: string[]; allow: string[]; disallow: string[] } | null = null;
   for (const line of lines) {
-    if (!line || line.startsWith("#")) continue;
-    const [rawKey, ...rest] = line.split(":");
+    if (!line || line.startsWith('#')) continue;
+    const [rawKey, ...rest] = line.split(':');
     if (!rawKey || rest.length === 0) continue;
     const key = rawKey.toLowerCase().trim();
-    const value = rest.join(":").trim();
-    if (key === "user-agent") {
+    const value = rest.join(':').trim();
+    if (key === 'user-agent') {
       current = { agents: [value.toLowerCase()], allow: [], disallow: [] };
       groups.push(current);
       continue;
     }
     if (!current) continue;
-    if (key === "allow") current.allow.push(value);
-    if (key === "disallow") current.disallow.push(value);
+    if (key === 'allow') current.allow.push(value);
+    if (key === 'disallow') current.disallow.push(value);
   }
-  if (groups.length === 0) groups.push({ agents: ["*"], allow: [], disallow: [] });
+  if (groups.length === 0) groups.push({ agents: ['*'], allow: [], disallow: [] });
   return { groups };
 }
 
 function pathMatchesRule(path: string, rule: string) {
   if (!rule) return false;
-  if (rule === "/") return true;
+  if (rule === '/') return true;
   return path.startsWith(rule);
 }
 
 function pickGroup(rules: RobotsRules, ua: string) {
   const lowerUA = ua.toLowerCase();
-  let best = rules.groups.find((g) => g.agents.some((a) => a !== "*" && lowerUA.includes(a)));
+  let best = rules.groups.find((g) => g.agents.some((a) => a !== '*' && lowerUA.includes(a)));
   if (best) return best;
-  best = rules.groups.find((g) => g.agents.includes("*"));
-  return best ?? { agents: ["*"], allow: [], disallow: [] };
+  best = rules.groups.find((g) => g.agents.includes('*'));
+  return best ?? { agents: ['*'], allow: [], disallow: [] };
 }
 
-export async function isAllowed(url: string, config: PolitenessConfig, state: PolitenessState, ua: string) {
+export async function isAllowed(
+  url: string,
+  config: PolitenessConfig,
+  state: PolitenessState,
+  ua: string
+) {
   if (!config.robots.enabled) return true;
   let domain: string;
   let path: string;

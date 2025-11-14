@@ -1,20 +1,14 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
-import { parseWorkflowSchedule } from "@/lib/cron/scheduleParser";
-import { revalidatePath } from "next/cache";
+import prisma from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
+import { parseWorkflowSchedule } from '@/lib/cron/scheduleParser';
+import { revalidatePath } from 'next/cache';
 
-export async function UpdateWorkflowCron({
-  id,
-  cron,
-}: {
-  id: string;
-  cron: string;
-}) {
+export async function UpdateWorkflowCron({ id, cron }: { id: string; cron: string }) {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
 
   // Parse and validate the schedule expression
@@ -40,7 +34,7 @@ export async function UpdateWorkflowCron({
       },
     });
   } catch (error: any) {
-    throw new Error("Failed to update workflow schedule");
+    throw new Error('Failed to update workflow schedule');
   }
 
   revalidatePath(`/workflows`);

@@ -1,12 +1,12 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import prisma from '@/lib/prisma';
+import { auth } from '@clerk/nextjs/server';
 
 export async function GetUserPurchaseHistory() {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
   // Get user purchase history
   return prisma.userPurchase.findMany({
@@ -14,7 +14,7 @@ export async function GetUserPurchaseHistory() {
       userId,
     },
     orderBy: {
-      date: "desc",
+      date: 'desc',
     },
   });
 }

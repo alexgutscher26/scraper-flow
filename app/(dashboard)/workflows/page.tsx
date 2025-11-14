@@ -1,14 +1,14 @@
-import { GetWorkflowsForUser } from "@/actions/workflows/getWorkflowsForUser";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, InboxIcon } from "lucide-react";
-import React, { Suspense } from "react";
-import CreateWorkflowDialog from "./_components/CreateWorkflowDialog";
-import WorkflowCard from "./_components/WorkflowCard";
+import { GetWorkflowsForUser } from '@/actions/workflows/getWorkflowsForUser';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle, InboxIcon } from 'lucide-react';
+import React, { Suspense } from 'react';
+import CreateWorkflowDialog from './_components/CreateWorkflowDialog';
+import WorkflowCard from './_components/WorkflowCard';
 
 function WorkFlowsPage() {
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex h-full flex-1 flex-col">
       <div className="flex justify-between">
         <div className="flex flex-col">
           <h1 className="text-3xl font-bold">Workflows</h1>
@@ -40,26 +40,22 @@ async function UserWorkflows() {
   const workflows = await GetWorkflowsForUser();
   if (!workflows) {
     return (
-      <Alert variant={"destructive"}>
+      <Alert variant={'destructive'}>
         <AlertCircle className="size-4" />
         <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          Something went wrong. Please try again.
-        </AlertDescription>
+        <AlertDescription>Something went wrong. Please try again.</AlertDescription>
       </Alert>
     );
   }
   if (workflows.length === 0) {
     return (
-      <div className="flex flex-col gap-4 h-full items-center justify-center">
-        <div className="rounded-full bg-accent size-20 flex items-center justify-center">
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <div className="flex size-20 items-center justify-center rounded-full bg-accent">
           <InboxIcon size={40} className="stroke-primary" />
         </div>
         <div className="flex flex-col items-center gap-1">
           <p className="font-bold"> No workflow created yet</p>
-          <p className="text-sm text-muted-foreground">
-            Click the button to create a new workflow
-          </p>
+          <p className="text-sm text-muted-foreground">Click the button to create a new workflow</p>
         </div>
         <CreateWorkflowDialog triggerText="Create your first workflow" />
       </div>

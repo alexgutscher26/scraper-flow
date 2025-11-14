@@ -1,11 +1,11 @@
-"use server";
+'use server';
 
-import { PeriodToDateRange } from "@/lib/helper/dates";
-import prisma from "@/lib/prisma";
-import { Period } from "@/types/analytics";
-import { WorkflowExecutionStatus } from "@/types/workflow";
-import { auth } from "@clerk/nextjs/server";
-import { eachDayOfInterval, format } from "date-fns";
+import { PeriodToDateRange } from '@/lib/helper/dates';
+import prisma from '@/lib/prisma';
+import { Period } from '@/types/analytics';
+import { WorkflowExecutionStatus } from '@/types/workflow';
+import { auth } from '@clerk/nextjs/server';
+import { eachDayOfInterval, format } from 'date-fns';
 
 type Stats = Record<
   string,
@@ -17,7 +17,7 @@ type Stats = Record<
 export const GetWorkflowExecutionsStats = async (period: Period) => {
   const { userId } = await auth();
   if (!userId) {
-    throw new Error("User not found");
+    throw new Error('User not found');
   }
   const dateRange = PeriodToDateRange(period);
   const executions = await prisma.workflowExecution.findMany({
@@ -29,7 +29,7 @@ export const GetWorkflowExecutionsStats = async (period: Period) => {
       },
     },
   });
-  const dateFormat = "yyyy-MM-dd";
+  const dateFormat = 'yyyy-MM-dd';
 
   const stats: Stats = eachDayOfInterval({
     start: dateRange.startDate,

@@ -1,12 +1,12 @@
-"use server";
+'use server';
 
-import prisma from "@/lib/prisma";
-import { FlowToExecutionPlan } from "@/lib/workflow/executionPlan";
-import { RetryPolicy, defaultRetryPolicy } from "@/types/workflow";
-import { CalculateWorkflowCost } from "@/lib/workflow/helpers";
-import { WorkflowStatus } from "@/types/workflow";
-import { auth } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+import prisma from '@/lib/prisma';
+import { FlowToExecutionPlan } from '@/lib/workflow/executionPlan';
+import { RetryPolicy, defaultRetryPolicy } from '@/types/workflow';
+import { CalculateWorkflowCost } from '@/lib/workflow/helpers';
+import { WorkflowStatus } from '@/types/workflow';
+import { auth } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
 
 export async function PublishWorkflow({
   id,
@@ -16,10 +16,7 @@ export async function PublishWorkflow({
   flowDefinition: string;
 }) {
   const { userId } = await auth();
-  if (!userId)
-    throw new Error(
-      "Authentication required. Please sign in to publish a workflow."
-    );
+  if (!userId) throw new Error('Authentication required. Please sign in to publish a workflow.');
 
   const workflow = await prisma.workflow.findUnique({
     where: {
@@ -34,15 +31,13 @@ export async function PublishWorkflow({
   }
 
   if (workflow.status !== WorkflowStatus.DRAFT) {
-    throw new Error(
-      "Invalid workflow status. Only draft workflows can be published."
-    );
+    throw new Error('Invalid workflow status. Only draft workflows can be published.');
   }
   const flow = JSON.parse(flowDefinition);
   const retry: RetryPolicy = {
     ...defaultRetryPolicy(),
     ...(flow?.settings?.retry || {}),
-    strategy: "EXPONENTIAL",
+    strategy: 'EXPONENTIAL',
   } as RetryPolicy;
   const result = FlowToExecutionPlan(flow.nodes, flow.edges, { retryPolicy: retry });
   if (result.error) {
@@ -50,9 +45,7 @@ export async function PublishWorkflow({
   }
 
   if (!result.executionPlan) {
-    throw new Error(
-      "Failed to generate execution plan. Please check your workflow configuration."
-    );
+    throw new Error('Failed to generate execution plan. Please check your workflow configuration.');
   }
   const creditsCost = CalculateWorkflowCost(flow.nodes);
   await prisma.workflow.update({

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import React from "react";
-import { LucideIcon } from "lucide-react";
-import { DialogHeader, DialogTitle } from "./ui/dialog";
-import { cn } from "@/lib/utils";
-import { Separator } from "./ui/separator";
+import React from 'react';
+import { LucideIcon } from 'lucide-react';
+import { DialogHeader, DialogTitle } from './ui/dialog';
+import { cn } from '@/lib/utils';
+import { Separator } from './ui/separator';
 
 interface CustomDialogHeaderProps {
   icon?: LucideIcon;
@@ -19,25 +19,15 @@ function CustomDialogHeader(props: CustomDialogHeaderProps) {
   return (
     <DialogHeader className="py-6">
       <DialogTitle asChild>
-        <div className="flex flex-col items-center gap-2 mb-2">
+        <div className="mb-2 flex flex-col items-center gap-2">
           {props.icon && (
-            <props.icon
-              size={30}
-              className={cn("stroke-primary", props.iconClassName)}
-            />
+            <props.icon size={30} className={cn('stroke-primary', props.iconClassName)} />
           )}
           {props.title && (
-            <p className={cn("text-lg text-primary", props.titleClassName)}>
-              {props.title}
-            </p>
+            <p className={cn('text-lg text-primary', props.titleClassName)}>{props.title}</p>
           )}
           {props.subtitle && (
-            <p
-              className={cn(
-                "text-sm text-muted-foreground",
-                props.subtitleClassName
-              )}
-            >
+            <p className={cn('text-sm text-muted-foreground', props.subtitleClassName)}>
               {props.subtitle}
             </p>
           )}

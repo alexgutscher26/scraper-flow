@@ -1,6 +1,6 @@
-import "server-only";
+import 'server-only';
 // import prisma from "../prisma";
-import prisma from "@/lib/prisma";
+import prisma from '@/lib/prisma';
 import {
   ExecutionPhaseStatus,
   WorkflowExecutionStatus,
@@ -8,34 +8,34 @@ import {
   ExecutionPhaseRetryState,
   defaultRetryPolicy,
   BackoffStrategy,
-} from "@/types/workflow";
-import { computeRetryBackoffMs, runWithRetry } from "./retry";
-import { ExecutionPhase } from "@prisma/client";
-import { AppNode } from "@/types/appNode";
-import { TaskRegistry } from "./task/registry";
-import { TaskParamType, TaskType } from "@/types/TaskType";
-import { ExecutorRegistry } from "./executor/registry";
-import { Environment, ExecutionEnvironment } from "@/types/executor";
-import { Browser, Page } from "puppeteer";
-import { Browser as BrowserCore, Page as PageCore } from "puppeteer-core";
-import { revalidatePath } from "next/cache";
-import { Edge } from "@xyflow/react";
-import { LogCollector } from "@/types/log";
-import { createLogCollector } from "../log";
-import { sanitizeObject } from "@/lib/logSecure/sanitizer";
-import { createLogger } from "@/lib/log";
-import { defaultPolitenessConfig, PolitenessConfig, PolitenessState } from "@/types/politeness";
-import { defaultNetworkConfig, NetworkConfig, NetworkState } from "@/types/network";
-import { ProxyManager } from "@/lib/network/proxyManager";
-import { SessionManager } from "@/lib/network/cookieJar";
-import { computeDelayMs, sleep } from "@/lib/politeness/delay";
-import { getEnv, formatEnvError } from "@/lib/env";
+} from '@/types/workflow';
+import { computeRetryBackoffMs, runWithRetry } from './retry';
+import { ExecutionPhase } from '@prisma/client';
+import { AppNode } from '@/types/appNode';
+import { TaskRegistry } from './task/registry';
+import { TaskParamType, TaskType } from '@/types/TaskType';
+import { ExecutorRegistry } from './executor/registry';
+import { Environment, ExecutionEnvironment } from '@/types/executor';
+import { Browser, Page } from 'puppeteer';
+import { Browser as BrowserCore, Page as PageCore } from 'puppeteer-core';
+import { revalidatePath } from 'next/cache';
+import { Edge } from '@xyflow/react';
+import { LogCollector } from '@/types/log';
+import { createLogCollector } from '../log';
+import { sanitizeObject } from '@/lib/logSecure/sanitizer';
+import { createLogger } from '@/lib/log';
+import { defaultPolitenessConfig, PolitenessConfig, PolitenessState } from '@/types/politeness';
+import { defaultNetworkConfig, NetworkConfig, NetworkState } from '@/types/network';
+import { ProxyManager } from '@/lib/network/proxyManager';
+import { SessionManager } from '@/lib/network/cookieJar';
+import { computeDelayMs, sleep } from '@/lib/politeness/delay';
+import { getEnv, formatEnvError } from '@/lib/env';
 
-import { checkAndReserveWorkflowCredits } from "./creditCheck";
-import { getCredentialValue } from "../credential/getCredentialValue";
+import { checkAndReserveWorkflowCredits } from './creditCheck';
+import { getCredentialValue } from '../credential/getCredentialValue';
 
 export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
-  const logger = createLogger("workflow/execution");
+  const logger = createLogger('workflow/execution');
   try {
     getEnv();
   } catch (err) {
@@ -47,15 +47,20 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
     where: { id: executionId },
     include: { phases: true, workflow: true },
   });
-  if (!execution) throw new Error("execution not found");
+  if (!execution) throw new Error('execution not found');
 
   const edges = JSON.parse(execution.workflow.definition).edges as Edge[];
   const environment: Environment = {
     phases: {},
   };
   environment.politenessConfig = resolvePolitenessConfig(execution.workflow.definition);
-  environment.politenessState = { robotsCache: new Map(), uaPerDomain: new Map() } as PolitenessState;
-  environment.network = { config: resolveNetworkConfig(execution.workflow.definition) } as NetworkState;
+  environment.politenessState = {
+    robotsCache: new Map(),
+    uaPerDomain: new Map(),
+  } as PolitenessState;
+  environment.network = {
+    config: resolveNetworkConfig(execution.workflow.definition),
+  } as NetworkState;
   const retryPolicy = resolveRetryPolicy(execution.workflow.definition);
   if (environment.network?.config?.proxy?.enabled) {
     environment.network.proxy = new ProxyManager(environment.network.config.proxy);
@@ -84,7 +89,11 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   // If we don't have enough credits, mark the execution as failed and early return
   if (!creditsCheck.success) {
     const firstPhaseId = execution.phases[0]?.id;
-    const logCollector = createLogCollector({ phaseId: firstPhaseId, taskType: "SYSTEM", metadata: { scope: "workflow", reason: "INSUFFICIENT_CREDITS" } });
+    const logCollector = createLogCollector({
+      phaseId: firstPhaseId,
+      taskType: 'SYSTEM',
+      metadata: { scope: 'workflow', reason: 'INSUFFICIENT_CREDITS' },
+    });
     logCollector.error(
       `Insufficient credits to run workflow. Required: ${totalCreditsRequired}, Available: ${
         creditsCheck.userCredits || 0
@@ -107,12 +116,12 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
               logs: {
                 create: {
                   message: `Workflow execution failed - insufficient credits (Required: ${totalCreditsRequired}, Available: ${creditsCheck.userCredits || 0})`,
-                  logLevel: "error",
+                  logLevel: 'error',
                   timestamp: new Date(),
-                  phaseId: firstPhaseId ?? execution.phases[0]?.id ?? "",
-                  taskType: "SYSTEM",
+                  phaseId: firstPhaseId ?? execution.phases[0]?.id ?? '',
+                  taskType: 'SYSTEM',
                   metadata: {
-                    scope: "workflow",
+                    scope: 'workflow',
                     required: totalCreditsRequired,
                     available: creditsCheck.userCredits || 0,
                   },
@@ -159,7 +168,7 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   );
 
   await cleanupEnvironment(environment);
-  revalidatePath("/workflows/runs");
+  revalidatePath('/workflows/runs');
 }
 
 async function initializeWorkflowExecution(
@@ -238,7 +247,11 @@ async function execitopnWorkflowPhase(
   retryPolicy: RetryPolicy
 ) {
   const node = JSON.parse(phase.node) as AppNode;
-  let logCollector = createLogCollector({ phaseId: phase.id, taskType: node.data.type, metadata: { scope: "phase", nodeId: node.id, phaseNumber: phase.number } });
+  let logCollector = createLogCollector({
+    phaseId: phase.id,
+    taskType: node.data.type,
+    metadata: { scope: 'phase', nodeId: node.id, phaseNumber: phase.number },
+  });
   const startedAt = new Date();
   await setupEnvironmentForPhase(node, environment, edges, userId, logCollector, phase.id);
   await maybePoliteDelay(node.data.type, environment, logCollector);
@@ -262,12 +275,12 @@ async function execitopnWorkflowPhase(
   const attemptFn = async () => {
     const creditsOk = await decrementCredits(userId, creditsRequired, logCollector);
     if (!creditsOk) {
-      retryState.lastFailureReason = "CREDITS_INSUFFICIENT";
+      retryState.lastFailureReason = 'CREDITS_INSUFFICIENT';
       return false;
     }
     creditsConsumed += creditsRequired;
     const ok = await executePhase(phase, node, environment, logCollector);
-    if (!ok) retryState.lastFailureReason = "EXECUTOR_FAILURE";
+    if (!ok) retryState.lastFailureReason = 'EXECUTOR_FAILURE';
     return ok;
   };
 
@@ -275,20 +288,15 @@ async function execitopnWorkflowPhase(
   attempt = result.attempts;
   success = result.success;
   retryState.attempt = attempt;
-  retryState.nextBackoffMs = success ? undefined : computeRetryBackoffMs(retryPolicy, Math.min(attempt, retryPolicy.maxAttempts));
+  retryState.nextBackoffMs = success
+    ? undefined
+    : computeRetryBackoffMs(retryPolicy, Math.min(attempt, retryPolicy.maxAttempts));
   retryState.lastFailureAt = success ? undefined : new Date().toISOString();
 
   const outputs = environment.phases[node.id].outputs;
-  outputs["_retry"] = retryState;
+  outputs['_retry'] = retryState;
 
-  await finalizePhase(
-    phase.id,
-    node.data.type,
-    success,
-    outputs,
-    logCollector,
-    creditsConsumed
-  );
+  await finalizePhase(phase.id, node.data.type, success, outputs, logCollector, creditsConsumed);
 
   return { success, creditsConsumed };
 }
@@ -304,9 +312,7 @@ async function finalizePhase(
   logCollector: LogCollector,
   creditsConsumed: number
 ) {
-  const status = success
-    ? ExecutionPhaseStatus.COMPLETED
-    : ExecutionPhaseStatus.FAILED;
+  const status = success ? ExecutionPhaseStatus.COMPLETED : ExecutionPhaseStatus.FAILED;
 
   // Filter out BROWSER_INSTANCE outputs before serialization
   const serializableOutputs = filterSerializableOutputs(outputs);
@@ -326,7 +332,7 @@ async function finalizePhase(
             timestamp: log.timestamp,
             phaseId: log.phaseId ?? phaseId,
             taskType: log.taskType ?? taskType,
-            metadata: log.metadata ?? { scope: "phase" },
+            metadata: log.metadata ?? { scope: 'phase' },
           })),
         },
       },
@@ -335,7 +341,7 @@ async function finalizePhase(
 }
 
 function filterSerializableOutputs(outputs: any): any {
-  if (!outputs || typeof outputs !== "object") {
+  if (!outputs || typeof outputs !== 'object') {
     return outputs;
   }
 
@@ -344,20 +350,20 @@ function filterSerializableOutputs(outputs: any): any {
   // Remove outputs that contain browser instances (pages, browsers, or functions)
   Object.keys(filtered).forEach((key) => {
     const value = filtered[key];
-    if (value && typeof value === "object") {
+    if (value && typeof value === 'object') {
       // Check if it looks like a browser instance (has common puppeteer methods/properties)
       if (
-        typeof value.evaluate === "function" ||
-        typeof value.goto === "function" ||
-        typeof value.close === "function" ||
-        typeof value.newPage === "function" ||
-        value.constructor?.name === "CDPPage" ||
-        value.constructor?.name === "CDPBrowser" ||
-        value.constructor?.name === "Page" ||
-        value.constructor?.name === "Browser"
+        typeof value.evaluate === 'function' ||
+        typeof value.goto === 'function' ||
+        typeof value.close === 'function' ||
+        typeof value.newPage === 'function' ||
+        value.constructor?.name === 'CDPPage' ||
+        value.constructor?.name === 'CDPBrowser' ||
+        value.constructor?.name === 'Page' ||
+        value.constructor?.name === 'Browser'
       ) {
         // Replace browser instances with a placeholder to indicate they were filtered
-        filtered[key] = "[Browser Instance - Not Serializable]";
+        filtered[key] = '[Browser Instance - Not Serializable]';
       }
     }
   });
@@ -376,8 +382,11 @@ async function executePhase(
     logCollector.error(`Executor not found for ${node.data.type}`);
     return false;
   }
-  const executionEnvironment: ExecutionEnvironment<any> =
-    createExecutionEnvironment(node, environment, logCollector);
+  const executionEnvironment: ExecutionEnvironment<any> = createExecutionEnvironment(
+    node,
+    environment,
+    logCollector
+  );
   return await runFn(executionEnvironment);
 }
 
@@ -403,7 +412,7 @@ async function setupEnvironmentForPhase(
         try {
           const credentialValue = await getCredentialValue(inputVal, userId, {
             requester: `workflow/${node.data.type}`,
-            method: "db",
+            method: 'db',
             correlationId: phaseId,
           });
           environment.phases[node.id].inputs[input.name] = credentialValue;
@@ -433,9 +442,7 @@ async function setupEnvironmentForPhase(
       continue;
     }
     const outputValue =
-      environment.phases[connectedEdge.source].outputs[
-        connectedEdge.sourceHandle!
-      ];
+      environment.phases[connectedEdge.source].outputs[connectedEdge.sourceHandle!];
     environment.phases[node.id].inputs[input.name] = outputValue;
   }
 }
@@ -453,8 +460,7 @@ function createExecutionEnvironment(
       environment.phases[node.id].outputs[name] = value;
     },
     getBrowser: () => environment.browser,
-    setBrowser: (browser: Browser | BrowserCore) =>
-      (environment.browser = browser),
+    setBrowser: (browser: Browser | BrowserCore) => (environment.browser = browser),
 
     getPage: () => environment.page,
     setPage: (page: Page | PageCore) => (environment.page = page),
@@ -468,19 +474,13 @@ function createExecutionEnvironment(
 async function cleanupEnvironment(environment: Environment) {
   if (environment.browser) {
     await environment.browser.close().catch((err) => {
-      const logger = createLogger("workflow/execution");
-      logger.error(
-        `cannot closing browser: ${err instanceof Error ? err.message : String(err)}`
-      );
+      const logger = createLogger('workflow/execution');
+      logger.error(`cannot closing browser: ${err instanceof Error ? err.message : String(err)}`);
     });
   }
 }
 
-async function decrementCredits(
-  userId: string,
-  amount: number,
-  logCollector: LogCollector
-) {
+async function decrementCredits(userId: string, amount: number, logCollector: LogCollector) {
   try {
     // Since we already checked credits upfront, we can directly decrement here
     // But we still do a safety check just in case
@@ -490,9 +490,7 @@ async function decrementCredits(
     });
 
     if (!balance) {
-      logCollector.error(
-        `User balance record not found. Credits required: ${amount}`
-      );
+      logCollector.error(`User balance record not found. Credits required: ${amount}`);
       return false;
     }
 
@@ -513,16 +511,12 @@ async function decrementCredits(
       },
     });
     logCollector.info(
-      `Successfully deducted ${amount} credits. Remaining balance: ${
-        balance.credits - amount
-      }`
+      `Successfully deducted ${amount} credits. Remaining balance: ${balance.credits - amount}`
     );
     return true;
   } catch (error) {
     logCollector.error(
-      `Failed to process credits: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
+      `Failed to process credits: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
     return false;
   }
@@ -533,7 +527,7 @@ function resolvePolitenessConfig(definitionJson: string): PolitenessConfig {
   try {
     const def = JSON.parse(definitionJson);
     const override = def?.settings?.politeness;
-    if (override && typeof override === "object") {
+    if (override && typeof override === 'object') {
       return {
         robots: {
           enabled: override.robots?.enabled ?? base.robots.enabled,
@@ -552,7 +546,9 @@ function resolvePolitenessConfig(definitionJson: string): PolitenessConfig {
           rotateStrategy: override.userAgent?.rotateStrategy ?? base.userAgent.rotateStrategy,
           pool: override.userAgent?.pool ?? base.userAgent.pool,
           headers: override.userAgent?.headers ?? base.userAgent.headers,
-          acceptLanguageRandomization: override.userAgent?.acceptLanguageRandomization ?? base.userAgent.acceptLanguageRandomization,
+          acceptLanguageRandomization:
+            override.userAgent?.acceptLanguageRandomization ??
+            base.userAgent.acceptLanguageRandomization,
         },
       } as PolitenessConfig;
     }
@@ -574,7 +570,7 @@ function resolveNetworkConfig(definitionJson: string): NetworkConfig {
   try {
     const def = JSON.parse(definitionJson);
     const override = def?.settings?.network;
-    if (override && typeof override === "object") {
+    if (override && typeof override === 'object') {
       return {
         proxy: {
           enabled: override.proxy?.enabled ?? base.proxy?.enabled ?? false,
@@ -644,13 +640,17 @@ function resolveRetryPolicy(definitionJson: string): RetryPolicy {
   try {
     const def = JSON.parse(definitionJson);
     const override = def?.settings?.retry;
-    if (override && typeof override === "object") {
+    if (override && typeof override === 'object') {
       return {
-        maxAttempts: typeof override.maxAttempts === "number" ? override.maxAttempts : base.maxAttempts,
-        initialDelayMs: typeof override.initialDelayMs === "number" ? override.initialDelayMs : base.initialDelayMs,
-        maxDelayMs: typeof override.maxDelayMs === "number" ? override.maxDelayMs : base.maxDelayMs,
-        multiplier: typeof override.multiplier === "number" ? override.multiplier : base.multiplier,
-        jitterPct: typeof override.jitterPct === "number" ? override.jitterPct : base.jitterPct,
+        maxAttempts:
+          typeof override.maxAttempts === 'number' ? override.maxAttempts : base.maxAttempts,
+        initialDelayMs:
+          typeof override.initialDelayMs === 'number'
+            ? override.initialDelayMs
+            : base.initialDelayMs,
+        maxDelayMs: typeof override.maxDelayMs === 'number' ? override.maxDelayMs : base.maxDelayMs,
+        multiplier: typeof override.multiplier === 'number' ? override.multiplier : base.multiplier,
+        jitterPct: typeof override.jitterPct === 'number' ? override.jitterPct : base.jitterPct,
         strategy: BackoffStrategy.EXPONENTIAL,
         retryOnFailure: override.retryOnFailure ?? base.retryOnFailure,
         retryOnCreditFailure: override.retryOnCreditFailure ?? base.retryOnCreditFailure,

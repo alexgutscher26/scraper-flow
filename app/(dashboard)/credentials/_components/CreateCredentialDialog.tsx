@@ -1,12 +1,12 @@
 /* eslint-disable react/no-unescaped-entities */
-"use client";
+'use client';
 
-import React, { useCallback, useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Loader2, ShieldEllipsis, Mail, Key, Settings, Info } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import CustomDialogHeader from "@/components/CustomDialogHeader";
+import React, { useCallback, useState, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Loader2, ShieldEllipsis, Mail, Key, Settings, Info } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import CustomDialogHeader from '@/components/CustomDialogHeader';
 import {
   Form,
   FormControl,
@@ -15,38 +15,29 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useMutation } from "@tanstack/react-query";
-import { CreateCredential } from "@/actions/credentials/createCredential";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useMutation } from '@tanstack/react-query';
+import { CreateCredential } from '@/actions/credentials/createCredential';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 import {
   createCredentialSchema,
   createCredentialSchemaType,
   CredentialType,
   CredentialTypeValue,
   twoFactorMethod,
-} from "@/schema/credential";
+} from '@/schema/credential';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Alert,
-  AlertDescription,
-} from "@/components/ui/alert";
+} from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Props {
   triggerText?: string;
@@ -56,13 +47,13 @@ interface Props {
 const getDefaultDataForType = (type: CredentialTypeValue) => {
   switch (type) {
     case CredentialType.SMTP_EMAIL:
-      return { email: "", password: "" };
+      return { email: '', password: '' };
     case CredentialType.API_KEY:
-      return { apiKey: "", apiSecret: "", baseUrl: "", headers: {} };
+      return { apiKey: '', apiSecret: '', baseUrl: '', headers: {} };
     case CredentialType.TWO_FACTOR:
-      return { method: twoFactorMethod.TOTP, secret: "", period: 30, digits: 6, recoveryCodes: [] };
+      return { method: twoFactorMethod.TOTP, secret: '', period: 30, digits: 6, recoveryCodes: [] };
     case CredentialType.CUSTOM:
-      return { value: "" };
+      return { value: '' };
     default:
       return {};
   }
@@ -75,8 +66,8 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
   const form = useForm<createCredentialSchemaType>({
     resolver: zodResolver(createCredentialSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: '',
+      description: '',
       credentialData: {
         type: CredentialType.SMTP_EMAIL,
         data: getDefaultDataForType(CredentialType.SMTP_EMAIL),
@@ -87,20 +78,20 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
   const { mutate, isPending } = useMutation({
     mutationFn: CreateCredential,
     onSuccess: () => {
-      toast.success("Credential created successfully", { id: "create-credential" });
+      toast.success('Credential created successfully', { id: 'create-credential' });
       handleReset();
       setOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.message || "Failed to create credential", { id: "create-credential" });
+      toast.error(error.message || 'Failed to create credential', { id: 'create-credential' });
     },
   });
 
   const handleReset = useCallback(() => {
     const defaultType = CredentialType.SMTP_EMAIL;
     form.reset({
-      name: "",
-      description: "",
+      name: '',
+      description: '',
       credentialData: {
         type: defaultType,
         data: getDefaultDataForType(defaultType),
@@ -111,46 +102,52 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
 
   const onSubmit = useCallback(
     (values: createCredentialSchemaType) => {
-      toast.loading("Creating credential...", { id: "create-credential" });
+      toast.loading('Creating credential...', { id: 'create-credential' });
       mutate(values);
     },
     [mutate]
   );
 
-  const handleTypeChange = useCallback((type: CredentialTypeValue) => {
-    setSelectedType(type);
-    form.setValue("credentialData.type", type);
-    form.setValue("credentialData.data", getDefaultDataForType(type) as any);
-  }, [form]);
+  const handleTypeChange = useCallback(
+    (type: CredentialTypeValue) => {
+      setSelectedType(type);
+      form.setValue('credentialData.type', type);
+      form.setValue('credentialData.data', getDefaultDataForType(type) as any);
+    },
+    [form]
+  );
 
-  const credentialTypes = useMemo(() => [
-    {
-      value: CredentialType.SMTP_EMAIL,
-      label: "Gmail Account",
-      description: "Connect your Gmail account for sending emails",
-      icon: Mail,
-    },
-    {
-      value: CredentialType.API_KEY,
-      label: "API Key / Captcha Provider",
-      description: "API authentication (2Captcha, AntiCaptcha, etc.)",
-      icon: Key,
-    },
-    {
-      value: CredentialType.TWO_FACTOR,
-      label: "Two-Factor Authentication",
-      description: "TOTP, SMS or Email 2FA",
-      icon: ShieldEllipsis,
-    },
-    {
-      value: CredentialType.CUSTOM,
-      label: "Custom Credential",
-      description: "Custom credential format",
-      icon: Settings,
-    },
-  ], []);
+  const credentialTypes = useMemo(
+    () => [
+      {
+        value: CredentialType.SMTP_EMAIL,
+        label: 'Gmail Account',
+        description: 'Connect your Gmail account for sending emails',
+        icon: Mail,
+      },
+      {
+        value: CredentialType.API_KEY,
+        label: 'API Key / Captcha Provider',
+        description: 'API authentication (2Captcha, AntiCaptcha, etc.)',
+        icon: Key,
+      },
+      {
+        value: CredentialType.TWO_FACTOR,
+        label: 'Two-Factor Authentication',
+        description: 'TOTP, SMS or Email 2FA',
+        icon: ShieldEllipsis,
+      },
+      {
+        value: CredentialType.CUSTOM,
+        label: 'Custom Credential',
+        description: 'Custom credential format',
+        icon: Settings,
+      },
+    ],
+    []
+  );
 
-  const currentMethod = form.watch("credentialData.data.method");
+  const currentMethod = form.watch('credentialData.data.method');
 
   const renderTypeSpecificFields = () => {
     switch (selectedType) {
@@ -160,13 +157,14 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <strong>Gmail Only:</strong> Currently only Gmail accounts (@gmail.com or @googlemail.com) are supported. 
-                You'll need to use an App Password, not your regular Gmail password.{" "}
+                <strong>Gmail Only:</strong> Currently only Gmail accounts (@gmail.com or
+                @googlemail.com) are supported. You'll need to use an App Password, not your regular
+                Gmail password.{' '}
                 <a
                   href="https://support.google.com/accounts/answer/185833"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline font-medium"
+                  className="font-medium text-blue-600 hover:underline"
                 >
                   Learn how to create one →
                 </a>
@@ -180,15 +178,9 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                 <FormItem>
                   <FormLabel>Gmail Address *</FormLabel>
                   <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="your-email@gmail.com"
-                      {...field}
-                    />
+                    <Input type="email" placeholder="your-email@gmail.com" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Only Gmail addresses are supported
-                  </FormDescription>
+                  <FormDescription>Only Gmail addresses are supported</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -204,8 +196,8 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                     <Input
                       type="password"
                       placeholder="15-16 character app password"
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value.replace(/\s+/g, ""))}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value.replace(/\s+/g, ''))}
                     />
                   </FormControl>
                   <FormDescription>
@@ -228,11 +220,7 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                 <FormItem>
                   <FormLabel>API Key *</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Your API key"
-                      {...field}
-                    />
+                    <Input type="password" placeholder="Your API key" {...field} />
                   </FormControl>
                   <FormDescription>
                     API key from your service provider (e.g., 2Captcha, AntiCaptcha)
@@ -249,11 +237,7 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                 <FormItem>
                   <FormLabel>API Secret (Optional)</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="API secret if required"
-                      {...field}
-                    />
+                    <Input type="password" placeholder="API secret if required" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -267,10 +251,7 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                 <FormItem>
                   <FormLabel>Base URL (Optional)</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="https://api.example.com" 
-                      {...field} 
-                    />
+                    <Input placeholder="https://api.example.com" {...field} />
                   </FormControl>
                   <FormDescription>
                     API endpoint URL (e.g., https://api.2captcha.com)
@@ -298,15 +279,9 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={twoFactorMethod.TOTP}>
-                        Authenticator App (TOTP)
-                      </SelectItem>
-                      <SelectItem value={twoFactorMethod.SMS}>
-                        SMS Verification
-                      </SelectItem>
-                      <SelectItem value={twoFactorMethod.EMAIL}>
-                        Email Verification
-                      </SelectItem>
+                      <SelectItem value={twoFactorMethod.TOTP}>Authenticator App (TOTP)</SelectItem>
+                      <SelectItem value={twoFactorMethod.SMS}>SMS Verification</SelectItem>
+                      <SelectItem value={twoFactorMethod.EMAIL}>Email Verification</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -378,9 +353,7 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                       <FormControl>
                         <Input placeholder="+1 555 123 4567" {...field} />
                       </FormControl>
-                      <FormDescription>
-                        Include country code (e.g., +1 for US)
-                      </FormDescription>
+                      <FormDescription>Include country code (e.g., +1 for US)</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -426,9 +399,7 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                     <FormControl>
                       <Input type="email" placeholder="user@example.com" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      Email address where 2FA codes are sent
-                    </FormDescription>
+                    <FormDescription>Email address where 2FA codes are sent</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -448,7 +419,7 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                 <FormControl>
                   <Textarea
                     placeholder='{"key": "value"} or any custom format'
-                    className="resize-none min-h-[120px] font-mono text-sm"
+                    className="min-h-[120px] resize-none font-mono text-sm"
                     {...field}
                   />
                 </FormControl>
@@ -474,18 +445,18 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>{triggerText ?? "Create Credential"}</Button>
+        <Button>{triggerText ?? 'Create Credential'}</Button>
       </DialogTrigger>
-      <DialogContent className="px-0 max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto px-0">
         <CustomDialogHeader icon={ShieldEllipsis} title="Create Credential" />
-        
+
         <div className="px-6 pb-6">
           <Form {...form}>
             <div className="space-y-6" onSubmit={handleFormSubmit}>
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-sm font-medium text-muted-foreground">Basic Information</h3>
-                
+
                 <FormField
                   control={form.control}
                   name="name"
@@ -522,29 +493,29 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
               <div className="space-y-4">
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Credential Type</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Select the type of credential you want to store
                   </p>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {credentialTypes.map((type) => {
                     const Icon = type.icon;
                     const isSelected = selectedType === type.value;
-                    
+
                     return (
                       <Card
                         key={`${type.value}-${type.label}`}
                         className={`cursor-pointer border-2 transition-all hover:shadow-md ${
                           isSelected
-                            ? "border-primary bg-primary/5 shadow-sm"
-                            : "border-muted hover:border-primary/30"
+                            ? 'border-primary bg-primary/5 shadow-sm'
+                            : 'border-muted hover:border-primary/30'
                         }`}
                         onClick={() => handleTypeChange(type.value)}
                       >
                         <CardHeader className="pb-3">
                           <CardTitle className="flex items-center gap-2 text-sm">
-                            <Icon className={`h-4 w-4 ${isSelected ? "text-primary" : ""}`} />
+                            <Icon className={`h-4 w-4 ${isSelected ? 'text-primary' : ''}`} />
                             {type.label}
                           </CardTitle>
                         </CardHeader>
@@ -567,9 +538,9 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                 {renderTypeSpecificFields()}
               </div>
 
-              <Button 
-                type="button" 
-                className="w-full" 
+              <Button
+                type="button"
+                className="w-full"
                 disabled={isPending}
                 onClick={handleFormSubmit}
               >
@@ -579,7 +550,7 @@ export default function CreateCredentialDialog({ triggerText }: Props) {
                     Creating...
                   </>
                 ) : (
-                  "Create Credential"
+                  'Create Credential'
                 )}
               </Button>
             </div>
