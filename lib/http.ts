@@ -65,6 +65,16 @@ export class HttpClient {
     const existing = this.inflight.get(key)
     if (existing) return existing as Promise<T>
 
+    /**
+     * Fetch data from a given input URL with retry logic and cookie handling.
+     *
+     * The function attempts to fetch data from the specified input URL, handling retries on failure based on the configured number of retries and delay strategy. It captures metrics for the HTTP request, processes the response based on its content type, and manages cookies if a cookie jar is provided. If the response is not successful and the status code indicates a retryable error, it will retry the request according to the specified parameters.
+     *
+     * @param input - The URL to fetch data from.
+     * @param init - An optional configuration object for the fetch request.
+     * @returns The parsed response data of type T.
+     * @throws Error If the response is not ok and the status is not retryable, or if the maximum number of retries is exceeded.
+     */
     const doFetch = async (): Promise<T> => {
       const method = String((init as any)?.method || "GET")
       let attempt = 0
