@@ -8,6 +8,17 @@ import { WorkflowStatus } from "@/types/workflow";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Publishes a workflow after validating its status and configuration.
+ *
+ * The function first authenticates the user and retrieves the workflow by its ID. It checks if the workflow exists and if its status is DRAFT.
+ * Then, it parses the flow definition, applies a retry policy, and generates an execution plan. If any step fails, appropriate errors are thrown.
+ * Finally, it updates the workflow in the database and revalidates the corresponding path.
+ *
+ * @param id - The unique identifier of the workflow to be published.
+ * @param flowDefinition - The JSON string representing the workflow's flow definition.
+ * @throws Error If authentication fails, the workflow is not found, the status is invalid, the flow configuration is invalid, or the execution plan generation fails.
+ */
 export async function PublishWorkflow({
   id,
   flowDefinition,
