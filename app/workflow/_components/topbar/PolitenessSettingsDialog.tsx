@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 /**
  * Renders a dialog for configuring politeness settings.
  *
- * This component utilizes the PolitenessSettingsContext to access and modify the configuration settings related to politeness features such as robots.txt enforcement, randomized delays, and user-agent rotation. It includes various input fields and switches to allow users to customize these settings, updating the context state accordingly.
+ * This component utilizes the PolitenessSettingsContext to access and modify the configuration settings related to politeness features such as robots.txt enforcement, randomized delays, and user-agent rotation. It includes various input fields and switches to allow users to customize these settings, updating the context state accordingly. The dialog will return null if the context is not available.
  *
  * @returns A JSX element representing the politeness settings dialog, or null if the context is not available.
  */
