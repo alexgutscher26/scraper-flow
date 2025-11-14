@@ -9,6 +9,17 @@ import { rateLimit, applyRateLimitHeaders } from '@/lib/rateLimit';
 import { getEnv } from '@/lib/env';
 import { reserveIdempotencyKey } from '@/lib/idempotency';
 
+/**
+ * Handles the GET request for executing scheduled workflows.
+ *
+ * This function checks user-specific and global rate limits, retrieves published workflows with valid cron schedules,
+ * and attempts to execute them based on credit availability. It logs the execution status and updates the next run time
+ * for each workflow. If a workflow cannot be executed due to insufficient credits, it logs the failure and skips the execution.
+ *
+ * @param req - The incoming request object containing headers and other request data.
+ * @param res - The response object used to send back the desired HTTP response.
+ * @returns A JSON response containing details about the workflows scheduled, run, and skipped.
+ */
 export async function GET(req: Request, res: Response) {
   const logger = createLogger('api/workflows/cron');
   const userId = req.headers.get('x-user-id');
@@ -155,11 +166,12 @@ async function calculateNextRun(scheduleExpression: string): Promise<Date | null
 
 /**
  * Triggers a workflow execution by making a request to the execute endpoint.
- * This function constructs the API URL using the provided workflowId and logs the process of triggering the workflow.
- * It handles both successful and failed attempts to trigger the workflow, logging appropriate messages for each case.
- * The function is called only after a credit check is successful.
+ * This function constructs the API URL using the provided workflowId and optionally an idempotencyKey.
+ * It logs the process of triggering the workflow, handling both successful and failed attempts,
+ * while ensuring that the request is made only after a credit check is successful.
  *
  * @param {string} workflowId - The ID of the workflow to be triggered.
+ * @param {string} [idempotencyKey] - An optional key to ensure idempotent requests.
  */
 async function triggerWorkflow(workflowId: string, idempotencyKey?: string) {
   const triggerApiUrl = getAppUrl(`api/workflows/execute?workflowId=${workflowId}`);
