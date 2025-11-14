@@ -601,3 +601,38 @@ See docs/form-automation.md for file upload validation and progress, captcha pro
 
 - ExecutionLog now includes `phaseId`, `taskType`, and `metadata` (`JSONB`). Existing rows are backfilled from `executionPhaseId` and default values.
 - Apply database migrations with `npx prisma migrate dev`. Verify logs render in the Execution Viewer.
+## Rate Limiting
+
+- Endpoints: `/api/workflows/cron` and `/api/workflows/execute`
+- Policy: Dual-level fixed-window limits
+  - Per-user based on authenticated `userId`
+  - Global aggregate for unauthenticated traffic
+- Responses when limits exceeded:
+  - Status: `429 Too Many Requests`
+  - Headers:
+    - `X-RateLimit-Limit`: window limit
+    - `X-RateLimit-Remaining`: remaining in current window
+    - `X-RateLimit-Reset`: Unix epoch seconds when window resets
+- Default thresholds (configurable via env):
+  - `cron`: `RATE_LIMIT_USER_CRON=10`, `RATE_LIMIT_GLOBAL_CRON=20`
+  - `execute`: `RATE_LIMIT_USER_EXECUTE=60`, `RATE_LIMIT_GLOBAL_EXECUTE=120`
+  - Window: `RATE_LIMIT_WINDOW_SECONDS=60`
+- Monitoring:
+  - Logs emit warnings on limit exceed events with scope/user context
+
+### Error Response Example
+
+```
+HTTP/1.1 429 Too Many Requests
+X-RateLimit-Limit: 10
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1731532800
+
+{"error":"Too Many Requests"}
+```
+
+### Configuration Options
+
+- `RATE_LIMIT_WINDOW_SECONDS`: Fixed window size in seconds
+- `RATE_LIMIT_GLOBAL_CRON` / `RATE_LIMIT_USER_CRON`: Cron endpoint limits
+- `RATE_LIMIT_GLOBAL_EXECUTE` / `RATE_LIMIT_USER_EXECUTE`: Execute endpoint limits

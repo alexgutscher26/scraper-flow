@@ -5,9 +5,20 @@ import { WorkflowExecutionStatus, WorkflowStatus } from "@/types/workflow";
 import { parseWorkflowSchedule } from "@/lib/cron/scheduleParser";
 import { createLogger } from "@/lib/log";
 import { http } from "@/lib/http";
+import { rateLimit, applyRateLimitHeaders } from "@/lib/rateLimit";
 
 export async function GET(req: Request, res: Response) {
   const logger = createLogger("api/workflows/cron");
+  const userId = req.headers.get("x-user-id");
+  const rl = await rateLimit("cron", userId);
+  const hdrs = new Headers();
+  // Prefer the stricter of user/global (if user present)
+  const active = userId ? rl.user.allowed && rl.global.allowed : rl.global.allowed;
+  const headerSource = userId ? rl.user : rl.global;
+  applyRateLimitHeaders(hdrs, headerSource);
+  if (!active) {
+    return new Response(null, { status: 429, headers: hdrs });
+  }
   const now = new Date();
   const workflows = await prisma.workflow.findMany({
     select: {
@@ -109,7 +120,7 @@ export async function GET(req: Request, res: Response) {
       skippedDetails: workflowsSkipped,
       timestamp: now.toISOString(),
     },
-    { status: 200 }
+    { status: 200, headers: hdrs }
   );
 }
 

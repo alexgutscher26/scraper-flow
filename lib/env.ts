@@ -14,6 +14,14 @@ const EnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z
     .string()
     .url("NEXT_PUBLIC_APP_URL must be a valid URL"),
+  RATE_LIMIT_WINDOW_SECONDS: z
+    .string()
+    .optional()
+    .default("60"),
+  RATE_LIMIT_GLOBAL_CRON: z.string().optional().default("20"),
+  RATE_LIMIT_USER_CRON: z.string().optional().default("10"),
+  RATE_LIMIT_GLOBAL_EXECUTE: z.string().optional().default("120"),
+  RATE_LIMIT_USER_EXECUTE: z.string().optional().default("60"),
 });
 
 export type Env = z.infer<typeof EnvSchema>;

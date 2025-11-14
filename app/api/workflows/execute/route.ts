@@ -11,6 +11,7 @@ import { timingSafeEqual } from "crypto";
 import { parseWorkflowSchedule } from "@/lib/cron/scheduleParser";
 import { createLogger } from "@/lib/log";
 import { getEnv, formatEnvError } from "@/lib/env";
+import { rateLimit, applyRateLimitHeaders } from "@/lib/rateLimit";
 
 function isValidSecret(secret: string): boolean {
   const { API_SECRET } = getEnv();
@@ -39,6 +40,17 @@ export async function GET(req: Request, res: Response) {
   const select = authHeader.split(" ")[1];
   if (!isValidSecret(select)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const userIdHeader = req.headers.get("x-user-id");
+  const rl = await rateLimit("execute", userIdHeader);
+  const hdrs = new Headers();
+  const active = userIdHeader
+    ? rl.user.allowed && rl.global.allowed
+    : rl.global.allowed;
+  const headerSource = userIdHeader ? rl.user : rl.global;
+  applyRateLimitHeaders(hdrs, headerSource);
+  if (!active) {
+    return new Response(null, { status: 429, headers: hdrs });
   }
   const { searchParams } = new URL(req.url);
   const workflowId = searchParams.get("workflowId") as string;
@@ -110,7 +122,7 @@ export async function GET(req: Request, res: Response) {
       },
     });
     await ExecutionWorkflow(execution.id, nextRun || undefined);
-    return new Response(null, { status: 200 });
+    return new Response(null, { status: 200, headers: hdrs });
   } catch (e) {
     logger.error(
       `Error executing workflow: ${e instanceof Error ? e.message : String(e)}`

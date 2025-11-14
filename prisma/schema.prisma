@@ -130,3 +130,15 @@ model UserPurchase {
   currency    String
   date        DateTime @default(now())
 }
+
+model RateLimitWindow {
+  id            String   @id @default(cuid())
+  key           String
+  windowStart   DateTime
+  windowSeconds Int
+  count         Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  @@unique([key, windowStart, windowSeconds])
+  @@index([key])
+}
