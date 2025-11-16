@@ -39,10 +39,16 @@ async function upstash<T = any>(cmd: (string | number | Record<string, any>)[]):
   return (await res.json()) as T;
 }
 
+/**
+ * Returns the current timestamp in milliseconds.
+ */
 function nowMs() {
   return Date.now();
 }
 
+/**
+ * Calculates the start and reset times based on a given window in seconds.
+ */
 function windowInfo(windowSeconds: number) {
   const ms = windowSeconds * 1000;
   const startMs = Math.floor(nowMs() / ms) * ms;
@@ -135,6 +141,17 @@ async function setViolations(key: string, value: number, ttlSec: number): Promis
   memoryStore.set(key, { count: value, expiresAt: now + ttlSec * 1000 });
 }
 
+/**
+ * Enforces rate limiting for a user and globally based on the specified scope.
+ *
+ * The function retrieves the rate limit configuration from the environment, calculates the current window,
+ * and updates the rate limit counts in the database. It checks if the user and global limits are exceeded
+ * and logs warnings accordingly. Finally, it returns the rate limit status for both user and global scopes.
+ *
+ * @param scope - The scope for which the rate limit is applied.
+ * @param userId - The optional user identifier for user-specific rate limiting.
+ * @returns An object containing the rate limit status for both user and global scopes.
+ */
 export async function rateLimit(
   scope: Scope,
   userId?: string | null,
