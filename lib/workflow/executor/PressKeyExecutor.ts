@@ -11,7 +11,7 @@ export async function PressKeyExecutor(
       environment.log.error('Web page and Key are required');
       return false;
     }
-    await page.keyboard.press(key);
+    await (page as any).keyboard.press(key as any);
     environment.setOutput('Web page', page);
     return true;
   } catch (e: any) {

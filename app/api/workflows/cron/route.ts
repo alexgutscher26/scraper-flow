@@ -9,7 +9,8 @@ import { rateLimit, applyRateLimitHeaders } from '@/lib/rateLimit';
 import { getEnv } from '@/lib/env';
 import { reserveIdempotencyKey } from '@/lib/idempotency';
 
-export async function GET(req: Request, res: Response) {
+import { NextRequest } from 'next/server';
+export async function GET(req: NextRequest) {
   const logger = createLogger('api/workflows/cron');
   const userId = req.headers.get('x-user-id');
   const ipHeader =

@@ -45,8 +45,8 @@ export async function ExtractXPathFromPageExecutor(
       return true;
     }
 
-    const result = await page.evaluate(
-      ({ xpath, attr, allFlag }) => {
+    const result = await (page as any).evaluate(
+      ({ xpath, attr, allFlag }: { xpath: string; attr: string; allFlag: boolean }) => {
         /**
          * Retrieve the value of a specified attribute from a given HTML element.
          *
@@ -77,11 +77,11 @@ export async function ExtractXPathFromPageExecutor(
         if (allFlag) {
           const out: any[] = [];
           for (let i = 0; i < snap.snapshotLength; i++) {
-            out.push(getVal(snap.snapshotItem(i)));
+            out.push(getVal(snap.snapshotItem(i) as Element | null));
           }
           return out.filter((v) => v !== null);
         }
-        return getVal(snap.snapshotItem(0));
+        return getVal(snap.snapshotItem(0) as Element | null);
       },
       { xpath, attr, allFlag }
     );

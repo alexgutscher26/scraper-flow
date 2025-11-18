@@ -46,8 +46,8 @@ export async function ExtractCssFromPageExecutor(
     }
 
     await page.waitForSelector(selector, { timeout: 15000 });
-    const result = await page.evaluate(
-      ({ selector, attr, allFlag }) => {
+    const result = await (page as any).evaluate(
+      ({ selector, attr, allFlag }: { selector: string; attr: string; allFlag: boolean }) => {
         const els = Array.from(document.querySelectorAll(selector));
         /**
          * Retrieve the value of a specified attribute from a given HTML element.

@@ -404,7 +404,7 @@ export async function LaunchBrowserExecutor(
       environment.log.info('Browser reused');
     }
 
-    environment.setBrowser(browser);
+    environment.setBrowser(browser!);
     let page = environment.getPage?.();
     if (!page || (page as any).isClosed?.()) {
       page = await (browser as any).newPage();
@@ -418,7 +418,7 @@ export async function LaunchBrowserExecutor(
         await (page as any).authenticate(selection.auth);
       } catch {}
     }
-    await page.setViewport({ width: 1080, height: 1024 });
+    await (page as any).setViewport({ width: 1080, height: 1024 });
     let totalRequests = 0;
     let blockedTotal = 0;
     let blockedImages = 0;
@@ -529,12 +529,12 @@ export async function LaunchBrowserExecutor(
       }
     }
     // Restore cookies from session manager if configured
-    if (net?.cookies?.enabled && net?.cookies?.persist && (net.session as any)) {
+    if (net?.config?.cookies?.enabled && net?.config?.cookies?.persist && (net.session as any)) {
       try {
         const jar = (net.session as any).jarRef?.();
         const header = jar?.cookieHeaderFor(websiteUrl);
         if (header) {
-          const pairs = header.split(/;\s*/).map((kv) => {
+          const pairs = header.split(/;\s*/).map((kv: string) => {
             const [name, value] = kv.split('=');
             return { name, value, url: websiteUrl } as any;
           });
@@ -566,7 +566,7 @@ export async function LaunchBrowserExecutor(
         environment.log.warning('EVASION_FALLBACK: mouse simulation failed');
       }
     }
-    await page.goto(websiteUrl, { waitUntil: 'domcontentloaded' });
+    await (page as any).goto(websiteUrl, { waitUntil: 'domcontentloaded' });
     if (stealth.enabled && stealth.randomizedDelays) {
       await applySmallDelay(evasion.delays);
       environment.log.info('DELAY_APPLIED: post-navigation');
@@ -584,7 +584,7 @@ export async function LaunchBrowserExecutor(
               const nextUA = pool[Math.floor(Math.random() * pool.length)];
               await (page as any).setUserAgent(nextUA);
             }
-            await page.reload({ waitUntil: 'domcontentloaded' });
+            await (page as any).reload({ waitUntil: 'domcontentloaded' });
             const probe2 = await probeBotDetection(page as any);
             if (probe2.detected) {
               detectionsFound += 1;
@@ -600,7 +600,7 @@ export async function LaunchBrowserExecutor(
         }
       }
     }
-    environment.setPage(page);
+    environment.setPage(page!);
     environment.log.info(`Opened the website successfully. URL:${websiteUrl}`);
     environment.log.info(
       `RESOURCE_BLOCKING_METRIC: total=${totalRequests} blocked=${blockedTotal} blockedImages=${blockedImages} blockedFonts=${blockedFonts} blockedAds=${blockedAds}`

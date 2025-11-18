@@ -37,7 +37,7 @@ export async function TypeInputExecutor(
 
     await page.waitForSelector(selector, { visible: true });
 
-    const actualType = await page.$eval(selector, (el: any) => el.type || '');
+    const actualType = await (page as any).$eval(selector, (el: any) => el.type || '');
     if (type && actualType && type !== actualType) {
       environment.log.warning?.(`Expected type ${type} but found ${actualType}`);
     }
@@ -59,17 +59,17 @@ export async function TypeInputExecutor(
       }
     }
 
-    const handle = await page.$(selector);
+    const handle = await (page as any).$(selector);
     if (!handle) {
       environment.log.error('Element not found');
       return false;
     }
     await handle.focus();
     if (clearBefore) {
-      await page.keyboard.down('Control');
-      await page.keyboard.press('KeyA');
-      await page.keyboard.up('Control');
-      await page.keyboard.press('Delete');
+      await (page as any).keyboard.down('Control');
+      await (page as any).keyboard.press('KeyA');
+      await (page as any).keyboard.up('Control');
+      await (page as any).keyboard.press('Delete');
     }
 
     const str = String(value);
@@ -77,17 +77,17 @@ export async function TypeInputExecutor(
       const chunk = Math.max(4, Math.ceil(str.length / 3));
       for (let i = 0; i < str.length; i += chunk) {
         const part = str.slice(i, i + chunk);
-        await page.type(selector, part, { delay: 0 });
+        await (page as any).type(selector, part, { delay: 0 });
         await sleep(debounceMs);
       }
     } else {
-      await page.type(selector, str, { delay: 0 });
+      await (page as any).type(selector, str, { delay: 0 });
     }
 
-    const finalVal = await page.$eval(selector, (el: any) => el.value ?? '');
+    const finalVal = await (page as any).$eval(selector, (el: any) => el.value ?? '');
     environment.setOutput('TypedValue', finalVal);
     if (pressEnter) {
-      await page.keyboard.press('Enter');
+      await (page as any).keyboard.press('Enter');
     }
     environment.setOutput('Web page', page);
     environment.setOutput('Success', true);

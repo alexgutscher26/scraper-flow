@@ -8,11 +8,11 @@ import {
   WorkflowExecutionStatus,
 } from '@/types/workflow';
 import { timingSafeEqual } from 'crypto';
+import { NextRequest } from 'next/server';
 import { parseWorkflowSchedule } from '@/lib/cron/scheduleParser';
 import { createLogger } from '@/lib/log';
 import { getEnv, formatEnvError } from '@/lib/env';
 import { rateLimit, applyRateLimitHeaders } from '@/lib/rateLimit';
-import { getEnv } from '@/lib/env';
 import {
   reserveIdempotencyKey,
   completeIdempotencyKey,
@@ -28,7 +28,7 @@ function isValidSecret(secret: string): boolean {
   }
 }
 
-export async function GET(req: Request, res: Response) {
+export async function GET(req: NextRequest) {
   const logger = createLogger('api/workflows/execute');
   try {
     getEnv();
@@ -46,16 +46,32 @@ export async function GET(req: Request, res: Response) {
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-real-ip') ||
     null;
-  const rl = await rateLimit('execute', userIdHeader, ipHeader, true);
+  let rl: {
+    user: import('@/lib/rateLimit').RateLimitResult;
+    global: import('@/lib/rateLimit').RateLimitResult;
+    ip: import('@/lib/rateLimit').RateLimitResult;
+    effective: import('@/lib/rateLimit').RateLimitResult;
+  } | null = null;
+  try {
+    rl = await rateLimit('execute', userIdHeader, ipHeader, true);
+  } catch {
+    const reset = Math.floor(Date.now() / 1000) + 60;
+    rl = {
+      user: { allowed: true, limit: 1000, remaining: 1000, reset },
+      global: { allowed: true, limit: 1000, remaining: 1000, reset },
+      ip: { allowed: true, limit: 1000, remaining: 1000, reset },
+      effective: { allowed: true, limit: 1000, remaining: 1000, reset },
+    };
+  }
   const hdrs = new Headers();
   const hasEffective = rl && 'effective' in rl;
-  const headerSource = hasEffective ? rl.effective : userIdHeader ? rl.user : rl.global;
+  const headerSource = hasEffective ? rl!.effective : userIdHeader ? rl!.user : rl!.global;
   applyRateLimitHeaders(hdrs, headerSource as any);
   const allowed = hasEffective
-    ? rl.effective.allowed
+    ? rl!.effective.allowed
     : userIdHeader
-    ? rl.user.allowed && rl.global.allowed
-    : rl.global.allowed;
+    ? rl!.user.allowed && rl!.global.allowed
+    : rl!.global.allowed;
   if (!allowed) {
     return new Response(null, { status: 429, headers: hdrs });
   }

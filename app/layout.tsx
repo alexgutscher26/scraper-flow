@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import { AppProviders } from '@/components/providers/AppProviders';
 import { Toaster } from 'sonner';
 
-const inter = Inter({ subsets: ['latin'] });
+// Use default system fonts to avoid build-time Google Fonts fetch
 
 export const metadata: Metadata = {
   title: 'ScrapeFlow',
@@ -28,7 +27,7 @@ export default function RootLayout({
       }}
     >
       <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
+        <body>
           <AppProviders>{children}</AppProviders>
           <Toaster richColors />
         </body>

@@ -18,9 +18,9 @@ export async function InfiniteScrollExecutor(
 
     environment.log.info(`Infinite scroll: iterations=${maxIterations}, delayMs=${delayMs}`);
 
-    let lastHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    let lastHeight = await (page as any).evaluate(() => document.documentElement.scrollHeight);
     for (let i = 0; i < maxIterations; i++) {
-      await page.evaluate(() =>
+      await (page as any).evaluate(() =>
         window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' })
       );
       // Wait for content to load
@@ -28,7 +28,7 @@ export async function InfiniteScrollExecutor(
         await new Promise((r) => setTimeout(r, delayMs));
       }
 
-      const newHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+      const newHeight = await (page as any).evaluate(() => document.documentElement.scrollHeight);
       environment.log.info(`Scroll ${i + 1}/${maxIterations}: height=${newHeight}`);
       // Break if no more content loaded
       if (newHeight <= lastHeight) {

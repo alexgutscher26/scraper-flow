@@ -10,7 +10,7 @@ export async function ExtractJsonLdExecutor(
       environment.log.error('No browser page available');
       return false;
     }
-    const data = await page.evaluate(() => {
+    const data = await (page as any).evaluate(() => {
       const scripts = Array.from(document.querySelectorAll('script[type="application/ld+json"]'));
       const arr: any[] = [];
       for (const s of scripts) {

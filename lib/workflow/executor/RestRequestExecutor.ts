@@ -46,8 +46,8 @@ export async function RestRequestExecutor(
       const cfg = environment.getPolitenessConfig();
       const state = environment.getPolitenessState();
       if (cfg && state) await applyHeaders(page as any, cfg, state, url);
-      const data = await page.evaluate(
-        async ({ url, method, headers, body }) => {
+      const data = await (page as any).evaluate(
+        async ({ url, method, headers, body }: { url: string; method: string; headers?: Record<string, string>; body: any }) => {
           const init: any = { method, headers: headers || {} };
           if (body != null) init.body = typeof body === 'string' ? body : JSON.stringify(body);
           const res = await fetch(url, init);

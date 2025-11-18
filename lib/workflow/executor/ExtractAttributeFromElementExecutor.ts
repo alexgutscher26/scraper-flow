@@ -22,8 +22,8 @@ export async function ExtractAttributeFromElementExecutor(
       environment.log.error('Web page, Selector, and Attribute name are required');
       return false;
     }
-    const value = await page.evaluate(
-      ({ selector, attr }) => {
+    const value = await (page as any).evaluate(
+      ({ selector, attr }: { selector: string; attr: string }) => {
         const el = document.querySelector(selector);
         if (!el) return null;
         return (el as any).getAttribute(attr);

@@ -11,7 +11,7 @@ export async function ExtractLinksFromPageExecutor(
       return false;
     }
 
-    const links = await page.evaluate(() => {
+    const links = await (page as any).evaluate(() => {
       const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>('a'));
       return anchors
         .map((a) => ({ href: a.href, text: a.textContent?.trim() || '' }))

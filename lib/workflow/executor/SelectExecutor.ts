@@ -39,8 +39,8 @@ export async function SelectExecutor(
       return false;
     }
 
-    await page.waitForSelector(selector, { visible: true });
-    const tagName = await page.$eval(selector, (el: any) => el.tagName?.toLowerCase());
+    await (page as any).waitForSelector(selector, { visible: true });
+    const tagName = await (page as any).$eval(selector, (el: any) => el.tagName?.toLowerCase());
 
     if (tagName === 'select') {
       const res = await page.select(selector, ...values);
@@ -51,23 +51,23 @@ export async function SelectExecutor(
     }
 
     const triggerSel = openTriggerSelector || selector;
-    await page.click(triggerSel);
+    await (page as any).click(triggerSel);
     if (searchQuery) {
-      await page.type(triggerSel, String(searchQuery));
+      await (page as any).type(triggerSel, String(searchQuery));
     }
 
     if (useKeyboard) {
       for (const v of values) {
         let found = false;
         for (let i = 0; i < 50; i++) {
-          await page.keyboard.press('ArrowDown');
-          const ok = await page.evaluate((txt) => {
+          await (page as any).keyboard.press('ArrowDown');
+          const ok = await (page as any).evaluate((txt: string) => {
             const el = document.activeElement as HTMLElement | null;
             const t = el?.innerText || el?.textContent || '';
             return t?.toLowerCase().includes(String(txt).toLowerCase());
           }, v);
           if (ok) {
-            await page.keyboard.press('Enter');
+            await (page as any).keyboard.press('Enter');
             found = true;
             break;
           }
@@ -79,8 +79,8 @@ export async function SelectExecutor(
       }
     } else {
       const filterRe = optionFilter ? new RegExp(String(optionFilter)) : null;
-      const clicked = await page.evaluate(
-        ({ containerSel, optSel, vals, filter, multi }) => {
+      const clicked = await (page as any).evaluate(
+        ({ containerSel, optSel, vals, filter, multi }: { containerSel: string; optSel?: string; vals: string[]; filter?: string; multi: boolean }) => {
           const container = document.querySelector(containerSel) as HTMLElement | null;
           const scope = container || document;
           const q = optSel

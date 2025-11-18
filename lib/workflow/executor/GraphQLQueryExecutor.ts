@@ -47,8 +47,8 @@ export async function GraphQLQueryExecutor(
         return false;
       }
       await applyHeaders(page as any, politenessConfig, politenessState, endpoint);
-      const data = await page.evaluate(
-        async ({ endpoint, query, variables }) => {
+      const data = await (page as any).evaluate(
+        async ({ endpoint, query, variables }: { endpoint: string; query: string; variables: any }) => {
           const res = await fetch(endpoint, {
             method: 'POST',
             headers: { 'content-type': 'application/json' },

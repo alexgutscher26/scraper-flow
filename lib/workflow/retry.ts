@@ -35,7 +35,7 @@ export async function runWithRetry(
       return { success: false, attempts: attempt };
     }
     const backoffMs = computeRetryBackoffMs(policy, attempt);
-    collector.warn(`Retrying. attempt=${attempt} backoffMs=${backoffMs}`);
+    collector.warning(`Retrying. attempt=${attempt} backoffMs=${backoffMs}`);
     await sleepFn(backoffMs);
     attempt++;
   }

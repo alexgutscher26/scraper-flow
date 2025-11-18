@@ -153,7 +153,7 @@ export class WorkerPool {
       if (err?.code === 'BACKPRESSURE') {
         m.backpressureRejected++;
       }
-      this.logger.warn(
+      this.logger.warning(
         `${type} worker rejected: ${err instanceof Error ? err.message : String(err)}`
       );
       throw err;

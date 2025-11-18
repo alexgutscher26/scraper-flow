@@ -25,7 +25,7 @@ export async function validateAgainstPage(
   try {
     const start = performance.now();
     const matched = await page.evaluate(
-      (c) => {
+      (c: { selector: string; type: string }) => {
         if (c.type === 'css') {
           return document.querySelectorAll(c.selector).length;
         }

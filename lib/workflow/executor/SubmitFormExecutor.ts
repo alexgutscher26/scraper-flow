@@ -14,18 +14,18 @@ export async function SubmitFormExecutor(
       environment.log.error('Web page and Form selector are required');
       return false;
     }
-    const existed = await page.$(selector);
+    const existed = await (page as any).$(selector);
     if (!existed) {
       environment.log.error('Form element not found');
       return false;
     }
-    await page.evaluate((sel) => {
+    await (page as any).evaluate((sel: string) => {
       const form = document.querySelector(sel) as HTMLFormElement | null;
       form?.requestSubmit();
     }, selector);
     if (waitNav) {
       try {
-        await page.waitForNavigation({ timeout: timeoutMs, waitUntil: 'networkidle0' });
+        await (page as any).waitForNavigation({ timeout: timeoutMs, waitUntil: 'networkidle0' });
       } catch {}
     }
     environment.setOutput('Web page', page);

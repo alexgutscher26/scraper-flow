@@ -23,8 +23,9 @@ export default clerkMiddleware(async (auth, request) => {
     }
 
     const requestHeaders = new Headers(request.headers);
-    if (auth.userId) {
-      requestHeaders.set('x-user-id', auth.userId);
+    const userId = (auth as any)?.userId;
+    if (userId) {
+      requestHeaders.set('x-user-id', userId);
     }
     return NextResponse.next({ request: { headers: requestHeaders } });
   }

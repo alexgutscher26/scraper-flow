@@ -20,7 +20,7 @@ export async function CaptchaExecutor(
     const html = await page.content();
     const rec = new ReCaptchaProvider().detect(html);
     const hc = new HCaptchaProvider().detect(html);
-    let type = 'unknown' as const;
+    let type: 'unknown' | 'recaptcha' | 'hcaptcha' = 'unknown';
     let sitekey: string | undefined;
     if (rec.type === 'recaptcha') {
       type = 'recaptcha';
@@ -40,8 +40,8 @@ export async function CaptchaExecutor(
     let token = '';
     if (type === 'recaptcha') {
       try {
-        token = await page.evaluate(
-          async ({ prefer }) => {
+        token = await (page as any).evaluate(
+          async ({ prefer }: { prefer: string }) => {
             // Try hidden textarea first
             const ta = document.querySelector(
               '#g-recaptcha-response'
@@ -70,7 +70,7 @@ export async function CaptchaExecutor(
       } catch {}
     } else if (type === 'hcaptcha') {
       try {
-        token = await page.evaluate(() => {
+        token = await (page as any).evaluate(() => {
           const inp = document.querySelector(
             "textarea[name='h-captcha-response']"
           ) as HTMLTextAreaElement | null;

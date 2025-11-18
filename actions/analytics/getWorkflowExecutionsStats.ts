@@ -20,7 +20,7 @@ export const GetWorkflowExecutionsStats = async (period: Period) => {
     throw new Error('User not found');
   }
   const dateRange = PeriodToDateRange(period);
-  let executions: Array<{ startedAt: Date; status: string }> = [];
+  let executions: Array<{ startedAt: Date | null; status: string }> = [];
   try {
     executions = await prisma.workflowExecution.findMany({
       where: {

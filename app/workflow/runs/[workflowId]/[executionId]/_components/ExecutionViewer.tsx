@@ -77,7 +77,7 @@ function ExecutionViewer({ initialData }: Props) {
 
   const def = initialData?.definition ? JSON.parse(initialData.definition) : {};
   const edges = (def?.edges || []) as any[];
-  const groups = (query.data?.phases || []).reduce<Record<number, typeof query.data.phases>>(
+  const groups = (query.data?.phases || []).reduce<Record<number, any[]>>(
     (acc, p) => {
       const arr = acc[p.number] || [];
       arr.push(p);

@@ -12,7 +12,7 @@ export async function EvaluateScriptExecutor(
       environment.log.error('Web page and Script are required');
       return false;
     }
-    const result = await page.evaluate(new Function(script) as any);
+    const result = await (page as any).evaluate(new Function(script) as any);
     let formatted: any = result;
     if (returnType === 'string') formatted = String(result);
     else if (returnType === 'boolean') formatted = Boolean(result);

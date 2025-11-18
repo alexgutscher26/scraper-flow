@@ -187,12 +187,15 @@ export class ProxyManager {
       const dispatcher = this.dispatcherFor(selection);
       const controller = new AbortController();
       const t = setTimeout(() => controller.abort(), 1000);
-      const res = await fetch(this.healthCheckUrl, {
-        method: 'HEAD',
-        cache: 'no-cache',
-        dispatcher: dispatcher as any,
-        signal: controller.signal as any,
-      });
+      const res = await fetch(
+        this.healthCheckUrl,
+        {
+          method: 'HEAD',
+          cache: 'no-cache',
+          dispatcher: dispatcher as any,
+          signal: controller.signal as any,
+        } as any
+      );
       clearTimeout(t);
       return res.ok;
     } catch {

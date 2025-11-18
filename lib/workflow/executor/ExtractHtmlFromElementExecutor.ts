@@ -11,7 +11,10 @@ export async function ExtractHtmlFromElementExecutor(
       environment.log.error('Web page and Selector are required');
       return false;
     }
-    const html = await page.$eval(selector, (el) => (el as HTMLElement).innerHTML);
+    const html = await (page as any).$eval(
+      selector,
+      (el: Element) => (el as HTMLElement).innerHTML
+    );
     environment.setOutput('Html', html);
     return true;
   } catch (e: any) {

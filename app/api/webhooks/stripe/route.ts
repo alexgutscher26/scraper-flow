@@ -1,18 +1,18 @@
 import { HandleCheckoutSessionCompleted } from '@/lib/stripe/handleCheckoutSessionCompleted';
 import { headers } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { createLogger } from '@/lib/log';
 import { getEnv, formatEnvError } from '@/lib/env';
 import Stripe from 'stripe';
 
 export const maxDuration = 60; // This function can run for a maximum of 60 seconds
 
-export async function POST(req: Request, res: Response) {
+export async function POST(req: NextRequest) {
   const logger = createLogger('api/webhooks/stripe');
   try {
     const env = getEnv();
     const body = await req.text();
-    const signature = headers().get('stripe-signature') as string;
+    const signature = (await headers()).get('stripe-signature') as string;
 
     if (!signature) {
       return new NextResponse('No signature found', { status: 400 });

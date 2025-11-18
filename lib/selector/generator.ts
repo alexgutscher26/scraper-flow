@@ -36,12 +36,12 @@ function computePerformanceCost(sel: string) {
  * @param preferred - An array of preferred attribute names to check against the element.
  * @returns The computed stability score as a numeric value.
  */
-function computeStabilityScore($: cheerio.CheerioAPI, el: cheerio.Element, preferred: string[]) {
+function computeStabilityScore($: cheerio.CheerioAPI, el: any, preferred: string[]) {
   let s = 0;
   const id = (el.attribs || {}).id;
   if (id) s += 2.5;
   const classes = ((el.attribs || {}).class || '').split(/\s+/).filter(Boolean);
-  const stableClasses = classes.filter((c) => !isLikelyDynamicClass(c));
+  const stableClasses = classes.filter((c: string) => !isLikelyDynamicClass(c));
   s += Math.min(2, stableClasses.length * 0.5);
   for (const attr of preferred) {
     if ((el.attribs || {})[attr]) s += 1.2;
@@ -55,13 +55,14 @@ function cssEscape(v: string) {
   return v.replace(/[^a-zA-Z0-9_-]/g, (c) => `\\${c}`);
 }
 
-function buildCssCandidates($: cheerio.CheerioAPI, el: cheerio.Element, opts: GenerationOptions) {
+function buildCssCandidates($: cheerio.CheerioAPI, el: any, opts: GenerationOptions) {
   const candidates: string[] = [];
   const id = (el.attribs || {}).id;
   if (id) candidates.push(`#${cssEscape(id)}`);
   const classes = ((el.attribs || {}).class || '').split(/\s+/).filter(Boolean);
-  const stable = classes.filter((c) => !isLikelyDynamicClass(c));
-  if (stable.length) candidates.push(`${el.tagName}.${stable.map((c) => cssEscape(c)).join('.')}`);
+  const stable = classes.filter((c: string) => !isLikelyDynamicClass(c));
+  if (stable.length)
+    candidates.push(`${el.tagName}.${stable.map((c: string) => cssEscape(c)).join('.')}`);
   if (el.tagName) candidates.push(el.tagName);
   for (const attr of opts.preferredAttributes || []) {
     const v = (el.attribs || {})[attr];
@@ -73,13 +74,13 @@ function buildCssCandidates($: cheerio.CheerioAPI, el: cheerio.Element, opts: Ge
   return Array.from(new Set(candidates));
 }
 
-function buildXpathCandidates($: cheerio.CheerioAPI, el: cheerio.Element, opts: GenerationOptions) {
+function buildXpathCandidates($: cheerio.CheerioAPI, el: any, opts: GenerationOptions) {
   const candidates: string[] = [];
   const tag = el.tagName || '*';
   const id = (el.attribs || {}).id;
   if (id) candidates.push(`//*[@id='${id.replace(/'/g, '&apos;')}']`);
   const classes = ((el.attribs || {}).class || '').split(/\s+/).filter(Boolean);
-  const stable = classes.filter((c) => !isLikelyDynamicClass(c));
+  const stable = classes.filter((c: string) => !isLikelyDynamicClass(c));
   if (stable.length) candidates.push(`//${tag}[contains(@class,'${stable[0]}')]`);
   for (const attr of opts.preferredAttributes || []) {
     const v = (el.attribs || {})[attr];
@@ -108,7 +109,7 @@ export function generateSelectors(
   opts: GenerationOptions
 ): CandidateSelector[] {
   const $ = cheerio.load(input.html);
-  const targets: cheerio.Element[] = [];
+  const targets: any[] = [];
   if (input.description) {
     const firstMatch = $('*')
       .filter((_, e) =>

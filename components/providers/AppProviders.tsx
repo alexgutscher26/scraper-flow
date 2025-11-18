@@ -17,7 +17,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           queries: {
             retry: 2,
             staleTime: 30_000,
-            cacheTime: 300_000,
+            gcTime: 300_000,
             refetchOnWindowFocus: false,
           },
         },

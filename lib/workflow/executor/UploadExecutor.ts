@@ -40,7 +40,7 @@ export async function UploadExecutor(
       environment.log.error('Web page is required');
       return false;
     }
-    await page.waitForSelector(selector, { visible: true });
+    await (page as any).waitForSelector(selector, { visible: true });
 
     const accepted: string[] = [];
     const errors: string[] = [];
@@ -92,8 +92,8 @@ export async function UploadExecutor(
     }
 
     if (useDnD) {
-      const done = await page.evaluate(
-        async ({ targetSel }) => {
+      const done = await (page as any).evaluate(
+        async ({ targetSel }: { targetSel: string }) => {
           const target = document.querySelector(targetSel) as HTMLElement | null;
           if (!target) return false;
           const ev1 = new DragEvent('dragenter', { bubbles: true });
@@ -111,7 +111,7 @@ export async function UploadExecutor(
       }
     }
 
-    let handle = await page.$(selector);
+    let handle = await (page as any).$(selector);
     if (!handle) {
       environment.log.error('Element not found');
       return false;
@@ -127,8 +127,8 @@ export async function UploadExecutor(
           await (handle as any).uploadFile(...accepted);
         } else {
           // re-query and retry once
-          await page.waitForSelector(selector);
-          handle = await page.$(selector);
+          await (page as any).waitForSelector(selector);
+          handle = await (page as any).$(selector);
           // @ts-ignore
           await (handle as any).setInputFiles(accepted);
         }
