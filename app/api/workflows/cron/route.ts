@@ -10,6 +10,14 @@ import { getEnv } from '@/lib/env';
 import { reserveIdempotencyKey } from '@/lib/idempotency';
 
 import { NextRequest } from 'next/server';
+/**
+ * Handles the GET request for executing scheduled workflows.
+ *
+ * This function retrieves user and IP information from the request headers, applies rate limiting, and checks for sufficient credits to execute workflows. It then triggers eligible workflows, logs the results, and updates their next run times based on their cron schedules. If any workflows cannot be executed due to insufficient credits, it logs the failures accordingly.
+ *
+ * @param req - The NextRequest object containing the request details.
+ * @returns A JSON response containing details about the scheduled, run, and skipped workflows.
+ */
 export async function GET(req: NextRequest) {
   const logger = createLogger('api/workflows/cron');
   const userId = req.headers.get('x-user-id');
