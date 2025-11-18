@@ -1,14 +1,5 @@
 Scraper Flow — TODO & Roadmap
 
-Release Plan
-
-- M1 (Foundations, P0): logging, env validation, rate limiting, cron reliability, Chrome path removal
-- M2 (Quality, P1): testing baseline, execution timeline UI, profiling hooks, Stripe hardening
-- M3 (DX + Export, P2): results export, artifacts, onboarding, code-splitting
-
-M4 (Scale, P2–P3): parallel execution, worker pool, caching, multi-region, access control
-M5 (Ecosystem, P2–P3): SDK/CLI, public API, plugin marketplace, templates
-
 High-Impact Improvements
 
 - [x] Introduce unified logger across API and executors
