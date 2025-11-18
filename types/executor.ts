@@ -2,7 +2,6 @@ import { Browser, Page } from 'puppeteer';
 import { Browser as BrowserCore, Page as PageCore } from 'puppeteer-core';
 import { WorkflowTask } from './workflow';
 import { LogCollector } from './log';
-import { PolitenessConfig, PolitenessState } from '@/types/politeness';
 
 export type Environment = {
   browser?: Browser | BrowserCore;
@@ -14,8 +13,6 @@ export type Environment = {
       outputs: Record<string, any>;
     }
   >;
-  politenessConfig?: PolitenessConfig;
-  politenessState?: PolitenessState;
   network?: import('./network').NetworkState;
 };
 
@@ -29,7 +26,5 @@ export type ExecutionEnvironment<T extends WorkflowTask> = {
   getPage(): Page | PageCore | undefined;
   setPage(page: Page | PageCore): void;
   log: LogCollector;
-  getPolitenessConfig(): PolitenessConfig | undefined;
-  getPolitenessState(): PolitenessState | undefined;
   getNetwork(): import('./network').NetworkState | undefined;
 };

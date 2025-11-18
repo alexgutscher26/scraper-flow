@@ -26,16 +26,13 @@ import { LogCollector } from '@/types/log';
 import { createLogCollector } from '../log';
 import { sanitizeObject } from '@/lib/logSecure/sanitizer';
 import { createLogger } from '@/lib/log';
-import { defaultPolitenessConfig, PolitenessConfig, PolitenessState } from '@/types/politeness';
 import { defaultNetworkConfig, NetworkConfig, NetworkState } from '@/types/network';
-import { ProxyManager } from '@/lib/network/proxyManager';
-import { SessionManager } from '@/lib/network/cookieJar';
-import { computeDelayMs, sleep } from '@/lib/politeness/delay';
 import { getEnv, formatEnvError } from '@/lib/env';
 import { fingerprint, hasOutputFingerprint, markOutputFingerprint } from '@/lib/idempotency';
 
 import { checkAndReserveWorkflowCredits } from './creditCheck';
 import { getCredentialValue } from '../credential/getCredentialValue';
+import { sleep } from 'openai/core.mjs';
 
 export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   const logger = createLogger('workflow/execution');
@@ -56,22 +53,7 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
   const environment: Environment = {
     phases: {},
   };
-  environment.politenessConfig = resolvePolitenessConfig(execution.workflow.definition);
-  environment.politenessState = {
-    robotsCache: new Map(),
-    uaPerDomain: new Map(),
-  } as PolitenessState;
-  environment.network = {
-    config: resolveNetworkConfig(execution.workflow.definition),
-  } as NetworkState;
-  const retryPolicy = resolveRetryPolicy(execution.workflow.definition);
-  if (environment.network?.config?.proxy?.enabled) {
-    environment.network.proxy = new ProxyManager(environment.network.config.proxy);
-  }
-  if (environment.network?.config?.cookies?.enabled) {
-    const ttl = environment.network.config.cookies?.sessionTtlMs || 30 * 60 * 1000;
-    environment.network.session = new SessionManager(ttl);
-  }
+
 
   await initializeWorkflowExecution(executionId, execution.workflowId, nextRun);
   await initializePhaseStatused(execution);
@@ -155,7 +137,7 @@ export async function ExecutionWorkflow(executionId: string, nextRun?: Date) {
     const results = await runConcurrentWithLimit(
       phases.map(
         (p) => async () =>
-          execitopnWorkflowPhase(p, environment, edges, execution.userId, retryPolicy, workerPool)
+          execitopnWorkflowPhase(p, environment, edges, execution.userId, workerPool)
       ),
       workerPool.getMaxTotalConcurrency()
     );
@@ -260,7 +242,6 @@ async function execitopnWorkflowPhase(
   });
   const startedAt = new Date();
   await setupEnvironmentForPhase(node, environment, edges, userId, logCollector, phase.id);
-  await maybePoliteDelay(node.data.type, environment, logCollector);
   await prisma.executionPhase.update({
     where: { id: phase.id },
     data: {
@@ -511,8 +492,6 @@ function createExecutionEnvironment(
     getPage: () => environment.page,
     setPage: (page: Page | PageCore) => (environment.page = page),
     log: logCollector,
-    getPolitenessConfig: () => environment.politenessConfig,
-    getPolitenessState: () => environment.politenessState,
     getNetwork: () => environment.network,
   };
 }
@@ -647,14 +626,6 @@ function requiresNetwork(type: TaskType) {
   return kind === ExecutorKind.BROWSER || kind === ExecutorKind.PAGE;
 }
 
-async function maybePoliteDelay(type: TaskType, environment: Environment, collector: LogCollector) {
-  const cfg = environment.politenessConfig;
-  if (!cfg || !cfg.delays.enabled) return;
-  if (!requiresNetwork(type)) return;
-  const ms = computeDelayMs(cfg);
-  collector.info(`Politeness delay: ${ms}ms`);
-  await sleep(ms);
-}
 /**
  * Computes the backoff delay for the given attempt based on a retry policy.
  */
