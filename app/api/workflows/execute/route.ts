@@ -28,6 +28,15 @@ function isValidSecret(secret: string): boolean {
   }
 }
 
+/**
+ * Handles the GET request for executing a workflow.
+ *
+ * This function validates the request headers, checks rate limits, and manages idempotency keys. It retrieves the workflow based on the provided workflowId, creates an execution record, and triggers the workflow execution. If any errors occur during these processes, appropriate error responses are returned.
+ *
+ * @param req - The NextRequest object containing the request details.
+ * @returns A JSON response indicating the status of the workflow execution or an error message.
+ * @throws Error If there are issues with the workflow execution or internal server errors.
+ */
 export async function GET(req: NextRequest) {
   const logger = createLogger('api/workflows/execute');
   try {

@@ -7,6 +7,18 @@ import Stripe from 'stripe';
 
 export const maxDuration = 60; // This function can run for a maximum of 60 seconds
 
+/**
+ * Handles incoming POST requests for Stripe webhooks.
+ *
+ * The function retrieves the request body and the Stripe signature from the headers, validates the signature,
+ * and constructs a Stripe event. It processes the event based on its type, logging relevant information and
+ * handling specific events like 'checkout.session.completed'. In case of errors, it logs the error and returns
+ * appropriate HTTP responses based on the error type.
+ *
+ * @param req - The NextRequest object representing the incoming request.
+ * @returns A NextResponse indicating the result of the webhook processing.
+ * @throws Error If there is an issue with the request processing or event handling.
+ */
 export async function POST(req: NextRequest) {
   const logger = createLogger('api/webhooks/stripe');
   try {

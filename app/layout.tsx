@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     'Next.js, TypeScript, React-Flow, Prisma, and React-Query to build a scalable SaaS platform for web scraping and automation.',
 };
 
+/**
+ * Renders the root layout with ClerkProvider and application providers.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
