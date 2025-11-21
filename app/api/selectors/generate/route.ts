@@ -26,7 +26,7 @@ function isValidSecret(secret: string): boolean {
 /**
  * Handles the POST request for generating selectors based on provided HTML and options.
  *
- * The function first validates the authorization token from the request headers. If the token is valid, it processes the request body to extract necessary parameters such as html, description, mode, specificityLevel, strategy, preferredAttributes, and override. It then generates selector candidates, validates them against the provided HTML, and logs the number of candidates generated. Finally, it returns the candidates and their validations in the response.
+ * The function validates the authorization token from the request headers. If valid, it processes the request body to extract parameters such as html, description, mode, specificityLevel, strategy, preferredAttributes, and override. It generates selector candidates, validates them against the provided HTML, logs the number of candidates generated, and returns the candidates along with their validations in the response.
  *
  * @param req - The incoming request object containing headers and body.
  * @returns A JSON response containing the generated selector candidates and their validations.
